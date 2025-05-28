@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const Certificate = new Schema({
     userId : { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    imageId: { type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true },
+    imageIds: [{ type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true }]
     certificateDate: { type: Date, required: true },
 }, { timestamps: true });
 
