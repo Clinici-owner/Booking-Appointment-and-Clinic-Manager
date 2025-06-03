@@ -1,0 +1,105 @@
+const User = require('../models/User');
+const xlsx = require('xlsx');
+const fs = require('fs');
+
+class StaffController {
+
+    async createStaff  (req, res){
+        try {
+            const { cidNumber, password, fullName, dob, role, phone, email, gender, address } = req.body;
+    
+            if (!cidNumber || !password || !email || !role) {
+                return res.status(400).json({ error: 'Thiếu thông tin bắt buộc.' });
+            } 
+    
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({ error: 'Email đã được sử dụng.' });
+            }
+    
+            const user = new User({ cidNumber, password, fullName, dob, role, phone, email, gender, address });
+            await user.save();
+            res.status(201).json({ message: 'Nhân viên đã được tạo thành công.', user });
+    
+        } catch (error) {
+            res.status(500).json({ error: err.message });
+        }
+    };
+    
+    
+    async importExcel  (req, res){
+        try {
+            const workbook = xlsx.readFile(req.file.path, { cellDates: true });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const data = xlsx.utils.sheet_to_json(sheet, {
+                defval: '',
+                raw: false,
+                dateNF: 'yyyy-mm-dd',
+            });
+    
+            if (!Array.isArray(data) || data.length === 0) {
+                return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
+            }
+    
+            const inserted = await User.insertMany(data);
+            fs.unlinkSync(req.file.path); 
+    
+            res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
+    
+        } catch (error) {
+            console.error('Error importing Excel:', error);
+            res.status(500).json({ error: 'Lỗi khi nhập dữ liệu từ Excel.' });
+        }
+    };
+    
+    
+    async lockUser (req, res){
+      try {
+        const { id } = req.params;
+        const user = await User.findByIdAndUpdate(id, { status: 'locked' }, { new: true });
+        if (!user) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        res.json({ message: 'Tài khoản đã bị khoá', user });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    };
+    
+    async listStaff  (req, res){
+      try {
+        const staff = await User.find({ role: { $ne: 'patient' } });
+        res.json(staff);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    };
+    
+    async updateStaff (req, res){
+      try {
+        const { id } = req.params;
+        const updateData = req.body;
+        const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+        if (!updatedUser) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        res.json({ message: 'Cập nhật thành công', user: updatedUser });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    };
+    
+    async getStaffById (req, res){
+      try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        if (!user || user.role === 'patient') return res.status(404).json({ error: 'Không tìm thấy nhân viên' });
+        res.json(user);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    };
+}
+module.exports = new StaffController();
+
+
+
+
+
