@@ -1,10 +1,11 @@
 const User = require('../models/User');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const path = require('path');
 
 class StaffController {
 
-    async createStaff  (req, res){
+    async createStaff (req, res){
         try {
             const { cidNumber, password, fullName, dob, role, phone, email, gender, address } = req.body;
     
@@ -27,43 +28,62 @@ class StaffController {
     };
     
     
-    async importExcel  (req, res){
-        try {
-            const workbook = xlsx.readFile(req.file.path, { cellDates: true });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const data = xlsx.utils.sheet_to_json(sheet, {
-                defval: '',
-                raw: false,
-                dateNF: 'yyyy-mm-dd',
-            });
-    
-            if (!Array.isArray(data) || data.length === 0) {
-                return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
-            }
-    
-            const inserted = await User.insertMany(data);
-            fs.unlinkSync(req.file.path); 
-    
-            res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
-    
-        } catch (error) {
-            console.error('Error importing Excel:', error);
-            res.status(500).json({ error: 'Lỗi khi nhập dữ liệu từ Excel.' });
-        }
-    };
-    
-    
-    async lockUser (req, res){
+    async importExcel(req, res) {
       try {
-        const { id } = req.params;
-        const user = await User.findByIdAndUpdate(id, { status: 'locked' }, { new: true });
-        if (!user) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
-        res.json({ message: 'Tài khoản đã bị khoá', user });
-      } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (!req.file) {
+          console.error("Không có file được gửi lên.");
+          return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
+        }
+
+        const buffer = req.file.buffer;
+        const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rawData = xlsx.utils.sheet_to_json(sheet, {
+          defval: '',
+          raw: false,
+          dateNF: 'yyyy-mm-dd',
+        });
+
+        const data = rawData.map(row => ({
+          ...row,
+          gender: row.gender === 'TRUE' || row.gender === true || row.gender === 'true' ? true : false,
+        }));
+
+        console.log("Dữ liệu sau xử lý:", data);
+
+        if (!Array.isArray(data) || data.length === 0) {
+          return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
+        }
+
+        const inserted = await User.insertMany(data);
+        res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
+      } catch (error) {
+        console.error('Lỗi khi xử lý Excel:', error);
+        res.status(500).json({ error: error.message || 'Lỗi khi nhập dữ liệu từ Excel.' });
       }
-    };
+    }
+    
+
+async lockUser(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['active', 'locked'].includes(status)) {
+      return res.status(400).json({ error: 'Trạng thái không hợp lệ.' });
+    }
+
+    const user = await User.findByIdAndUpdate(id, { status }, { new: true });
+    if (!user) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+
+    res.json({ message: `Đã cập nhật trạng thái thành: ${status}`, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+
     
     async listStaff  (req, res){
       try {
