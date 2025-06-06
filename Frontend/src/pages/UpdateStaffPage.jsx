@@ -48,7 +48,7 @@ function UpdateStaff() {
     }
   };
 
-  if (!staff) return <p className="text-center p-12 text-lg text-gray-600">Đang tải dữ liệu...</p>;
+  if (!staff) return <p className="text-center p-12 text-lg text-gray-600">Đang tải dữ liệu</p>;
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-8 bg-[#f9f9fb] rounded-xl shadow-md font-sans">

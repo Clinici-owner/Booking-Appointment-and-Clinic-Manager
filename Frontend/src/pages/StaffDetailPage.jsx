@@ -28,12 +28,12 @@ function StaffDetailPage() {
   }, [id, navigate]);
 
   if (!staff) {
-    return <div className="text-center py-12 text-lg text-gray-600">Đang tải thông tin...</div>;
+    return <div className="text-center py-12 text-lg text-gray-600">Đang tải thông tin</div>;
   }
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-8 bg-[#f9f9fb] rounded-xl shadow-md font-sans">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">📋 Thông tin chi tiết nhân viên</h2>
+      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">Thông tin chi tiết nhân viên</h2>
       <div className="flex flex-col gap-3 mb-8">
         <div className="flex justify-between bg-white px-4 py-2 border border-gray-300 rounded-md">
           <span className="font-semibold text-gray-700">Họ tên:</span><span>{staff.fullName}</span>
@@ -57,10 +57,7 @@ function StaffDetailPage() {
           <span className="font-semibold text-gray-700">Địa chỉ:</span><span>{staff.address}</span>
         </div>
         <div className="flex justify-between bg-white px-4 py-2 border border-gray-300 rounded-md">
-          <span className="font-semibold text-gray-700">Vai trò:</span><span>{staff.role}</span>
-        </div>
-        <div className="flex justify-between bg-white px-4 py-2 border border-gray-300 rounded-md">
-          <span className="font-semibold text-gray-700">Trạng thái:</span><span>{staff.status === 'locked' ? '🔒 Đã khóa' : '✅ Đang hoạt động'}</span>
+          <span className="font-semibold text-gray-700">Vai trò:</span><span>{staff.role.toUpperCase()}</span>
         </div>
       </div>
       <button onClick={() => navigate('/staff')} className="block mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold px-4 py-2 rounded-md">
