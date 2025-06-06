@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   FormControl,
@@ -10,7 +10,7 @@ import {
 import { UserService } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 
-import image from "../assets/images/phongkham.png";
+import logo from "../assets/images/Logo.jpg";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +18,8 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -31,13 +33,26 @@ const RegisterPage = () => {
     }
   };
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  if (isLoggedIn) {
+    window.location.href = "/"; // Redirect to home if already logged in
+  }
+
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-[#FFF] p-4">
       <div className="bg-white w-full max-w-5xl h-[600px] flex shadow-2xl overflow-hidden rounded-[40px]">
         <div className="flex-1">
           <img
-            src={image}
-            alt="Pet"
+            src={logo}
+            alt="Logo"
             className="w-full h-full object-cover object-center"
           />
         </div>
@@ -120,7 +135,7 @@ const RegisterPage = () => {
                   Đăng nhập
                 </a>
               </div>
-              <a className="underline" href="#">
+              <a className="underline" href="/forgot-password">
                 Quên mật khẩu?
               </a>
             </div>

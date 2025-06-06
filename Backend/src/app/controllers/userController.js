@@ -117,6 +117,90 @@ class userController {
       res.status(500).json({ message: "Lỗi server", error });
     }
   }
+
+  async forgotPassword(req, res) {
+    const { email } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: "Người dùng không tồn tại" });
+      }
+
+      // Tạo OTP và thời gian hết hạn
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpires = Date.now() + 10 * 60 * 1000; // Hết hạn sau 10 phút
+
+      user.otp = otp;
+      user.otpExpires = otpExpires;
+
+      await user.save();
+
+      // Gửi email chứa OTP
+      const transporter = req.app.get("transporter");
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Mã xác nhận OTP",
+        text: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 10 phút.`,
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json({ message: "Gửi mã OTP thành công" });
+      } catch (error) {
+        console.error("Lỗi gửi email:", error);
+        return res.status(500).json({ message: "Lỗi gửi email", error });
+      }
+    } catch (error) {
+      console.error("Lỗi quên mật khẩu:", error);
+      return res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
+  async verifyForgotPassword(req, res) {
+    const { email, otp } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: "Người dùng không tồn tại" });
+      }
+
+      if (user.otp !== otp || user.otpExpires < Date.now()) {
+        return res
+          .status(400)
+          .json({ message: "OTP không hợp lệ hoặc đã hết hạn" });
+      }
+
+      // Xóa OTP sau khi xác nhận
+      user.otp = undefined;
+      user.otpExpires = undefined;
+      await user.save();
+
+      res.status(200).json({ message: "Xác nhận OTP thành công" });
+    } catch (error) {
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
+
+  async resetPassword(req, res) {
+    const { email, newPassword } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: "Người dùng không tồn tại" });
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+
+      res.status(200).json({ message: "Đặt lại mật khẩu thành công" });
+    } catch (error) {
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
 }
 
 module.exports = new userController();
+

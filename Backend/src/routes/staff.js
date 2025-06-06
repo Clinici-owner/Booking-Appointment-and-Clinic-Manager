@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const staffController = require('../app/controllers/staffController');
-const upload = require('../middleware/uploadMiddleware');
+const upload = require('../app/middlewares/uploadMiddleware');
 
 router.post('/', staffController.createStaff);
 router.post('/import', upload.single('file'), staffController.importExcel);

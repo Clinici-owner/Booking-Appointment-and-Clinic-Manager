@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { UserService } from "../services/userService";
 import Alert from "@mui/material/Alert";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import image from "../assets/images/phongkham.png"; 
+import logo from "../assets/images/Logo.jpg"; 
 
 const OTPVerifyPage = () => {
   const [otp, setOtp] = useState(Array(6).fill(""));
@@ -14,6 +14,8 @@ const OTPVerifyPage = () => {
 
   const location = useLocation();
   const email = location.state?.email;
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (email) {
@@ -53,7 +55,9 @@ const OTPVerifyPage = () => {
           setOtpMessage(res.message);
           setErrorMsg("");
           setTimeout(() => {
-            window.location.href = "/";
+            navigate("/login", {
+              state: { successMessage: "Xác thực thành công! Vui lòng đăng nhập." },
+            });
           }, 3000);
         })
         .catch((err) => {
@@ -115,7 +119,7 @@ const OTPVerifyPage = () => {
           {/* Right Section */}
           <div className="flex-1 hidden md:block">
             <img
-              src={image}
+              src={logo}
               alt="OTP"
               className="w-full h-full object-cover object-center rounded-tr-3xl rounded-br-3xl"
             />
