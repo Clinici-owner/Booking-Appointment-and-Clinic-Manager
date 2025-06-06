@@ -1,14 +1,20 @@
 import React, { useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Alert } from "@mui/material";
 import { UserService } from "../services/userService";
+import { useLocation } from "react-router-dom";
 
-import image from "../assets/images/phongkham.png"
+import logo from "../assets/images/Logo.jpg"
+import { useEffect } from "react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const location = useLocation();
+  const successMessage = location.state?.successMessage;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +25,27 @@ const LoginPage = () => {
     }
   };
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  if (isLoggedIn) {
+    window.location.href = "/"; // Redirect to home if already logged in
+  }
+
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-[#FFF] p-4">
       <div className="bg-white w-full max-w-5xl h-[600px] flex shadow-2xl overflow-hidden overflow-hidden rounded-[40px]">
+        {successMessage && (
+          <Alert severity="success" className="absolute top-4 left-1/2 transform -translate-x-1/2">
+            {successMessage}
+          </Alert>
+        )}
         <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
           <h1 className="text-[32px] font-extrabold text-[#2a2e83] mb-6">
             Đăng nhập
@@ -84,7 +108,7 @@ const LoginPage = () => {
                   Đăng kí ngay
                 </a>
               </div>
-              <a className="underline" href="#">
+              <a className="underline" href="/forgot-password">
                 Quên mật khẩu?
               </a>
             </div>
@@ -113,8 +137,8 @@ const LoginPage = () => {
 
         <div className="flex-1">
           <img
-            src={image}
-            alt="Pet image"
+            src={logo}
+            alt="Logo"
             className="w-full h-full object-cover object-center"
             style={{
               width: '100%',
