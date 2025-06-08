@@ -14,7 +14,9 @@
   --color-custom-dark: #ff3737;
   --color-custom-orange: #e35e25;
   --color-custom-blue: #2c7be5;
-  --color-custom-bluehover: #9bc6ff66;
+  --color-custom-bluehover: #DCE8FE;
+  --color-custom-bluehover2: #006dff;
+  --color-custom-blue-bg: #f9fbff;
   --color-custom-red: #ff0707;
 
   --animate-slide-down: slide-down 1s ease-out;
