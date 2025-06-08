@@ -119,7 +119,14 @@ const RegisterPage = () => {
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (e.target.value !== password) {
+                    setErrorMsg("Mật khẩu xác nhận không khớp.");
+                  } else {
+                    setErrorMsg("");
+                  }
+                }}
                 className="w-full border border-[#51A9FF] rounded-xl py-3 px-5 pr-12 text-[#2a2e83] text-base outline-none"
               />
 
