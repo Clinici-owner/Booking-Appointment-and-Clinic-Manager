@@ -11,7 +11,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const location = useLocation();
   const successMessage = location.state?.successMessage;
@@ -26,17 +25,25 @@ const LoginPage = () => {
   };
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
+    const getSessionUser = async () => {
+      try {
+        const user = sessionStorage.getItem("user");
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          if (parsedUser && parsedUser._id) {
+            console.log("User already logged in:", parsedUser);
+            // Redirect to home or dashboard
+            window.location.href = "/";
+          }
+        } else {
+          console.log("No user session found.");
+        }
+      } catch (error) {
+        console.error("Error retrieving session user:", error);
+      }
     }
+    getSessionUser();
   }, []);
-
-  if (isLoggedIn) {
-    window.location.href = "/"; // Redirect to home if already logged in
-  }
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-[#FFF] p-4">

@@ -30,12 +30,48 @@ class userController {
       }
 
       // Lưu thông tin vào session (hoặc trả về token nếu dùng JWT)
-      req.session.user = user;
-      req.session.isLoggedIn = true;
+      req.session.user = {
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+      };
 
-      res.status(200).json({ message: "Đăng nhập thành công", user });
+      // Loại bỏ trường nhạy cảm trước khi trả về
+      const { password: _, otp, otpExpires, ...safeUser } = user.toObject();
+
+      res.status(200).json({ message: "Đăng nhập thành công", user: safeUser });
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
+
+  async logoutUser(req, res) {
+    try {
+      // Xóa thông tin người dùng khỏi session
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Lỗi đăng xuất:", err);
+          return res.status(500).json({ message: "Lỗi server", error: err });
+        }
+        res.status(200).json({ message: "Đăng xuất thành công" });
+      });
+    } catch (error) {
+      console.error("Lỗi đăng xuất:", error);
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
+
+  async getSessionUser(req, res) {
+    try {
+      // Lấy thông tin người dùng từ session
+      const user = req.session.user;
+      if (!user) {
+        return res.status(401).json({ message: "Bạn chưa đăng nhập" });
+      }
+      res.status(200).json({ message: "Lấy thông tin người dùng thành công", user });
+    } catch (error) {
+      console.error("Lỗi lấy thông tin người dùng:", error);
       res.status(500).json({ message: "Lỗi server", error });
     }
   }

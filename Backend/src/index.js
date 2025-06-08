@@ -41,7 +41,7 @@ app.use(session({
     mongoUrl: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bookingappointment',
     collectionName: 'sessions'
   }),
-  cookie: { secure: false } // Đặt secure: true nếu dùng HTTPS
+  cookie: { secure: false, maxAge: 30 * 60 * 1000 } // Đặt secure: true nếu dùng HTTPS
 }));
 app.use((req, res, next) => {
   res.locals.session = req.session;
