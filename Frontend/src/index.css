@@ -12,7 +12,11 @@
   --color-primary: #5865f2;
 
   --color-custom-dark: #ff3737;
-  --color-custom-orange: #E35E25;
+  --color-custom-orange: #e35e25;
+  --color-custom-blue: #2c7be5;
+  --color-custom-bluehover: #9bc6ff66;
+  --color-custom-red: #ff0707;
+
   --animate-slide-down: slide-down 1s ease-out;
 
   @keyframes slide-down {
@@ -24,7 +28,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-    
   }
 
   --animate-slide-up: slide-up 1s ease-out;
@@ -54,4 +57,5 @@
   --animate-fade-in: fade-in 1s ease-out;
 
   --font-weight-bold: 700;
+
 }
