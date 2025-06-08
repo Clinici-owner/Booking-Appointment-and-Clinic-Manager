@@ -38,7 +38,7 @@ function HomePage() {
             nhất.
           </p>
           <div className="flex space-x-4">
-            <button className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-[#006dff] transition duration-300">
+            <button className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-custom-bluehover2 transition duration-300 hover:cursor-pointer">
               Đặt khám ngay
             </button>
             <button className="bg-white text-custom-blue font-semibold px-6 py-2 rounded-xl shadow hover:bg-gray-100 transition duration-300">
@@ -60,7 +60,7 @@ function HomePage() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             {/* Box 1 */}
-            <div className="bg-[#f9fbff] hover:bg-[#DCE8FE] rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
+            <div className="bg-custom-blue-bg hover:bg-custom-bluehover rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
               <div className="w-14 h-14 rounded-full bg-[#cbdcff] flex items-center justify-center mx-auto mb-5">
                 <i className="fas fa-user-md text-custom-blue text-xl"></i>
               </div>
@@ -74,7 +74,7 @@ function HomePage() {
             </div>
 
             {/* Box 2 */}
-            <div className="bg-[#f9fbff] hover:bg-[#DCE8FE] rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
+            <div className="bg-custom-blue-bg hover:bg-custom-bluehover rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
               <div className="w-14 h-14 rounded-full bg-[#d9f3d9] flex items-center justify-center mx-auto mb-5">
                 <i className="fas fa-microscope text-custom-blue text-xl"></i>
               </div>
@@ -88,7 +88,7 @@ function HomePage() {
             </div>
 
             {/* Box 3 */}
-            <div className="bg-[#f9fbff] hover:bg-[#DCE8FE] rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
+            <div className="bg-custom-blue-bg hover:bg-custom-bluehover rounded-xl p-8 flex-1 max-w-sm sm:max-w-none mx-auto transition duration-300 ease-in-out hover:shadow-lg">
               <div className="w-14 h-14 rounded-full bg-[#e9d9f9] flex items-center justify-center mx-auto mb-5">
                 <i className="fas fa-calendar-check text-custom-red text-xl"></i>
               </div>
