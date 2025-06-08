@@ -9,6 +9,9 @@ const db = require('./config/db');
 const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const nodemailer = require('nodemailer');
+
+
 // Load biến môi trường
 dotenv.config({ path: './.env' });
 
@@ -44,6 +47,17 @@ app.use((req, res, next) => {
   res.locals.session = req.session;
   next();
 });
+
+// Cấu hình nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+app.set('transporter', transporter);
 
 // Khởi tạo routes
 route(app);
