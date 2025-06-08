@@ -4,22 +4,22 @@ const API_URL = "http://localhost:3000/api/user";
 
 export const UserService = {
   login: async (email, password) => {
-    try {
-      const res = await axios.post(`${API_URL}/login`, { email, password });
-      const expiresAt = Date.now() + 60 * 60 * 1000; // 60 phút
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          data: res.data.user,
-          expiresAt,
-        })
-      );
-      window.location.href = "/";
-      return res.data;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
+  try {
+    const res = await axios.post(`${API_URL}/login`, { email, password });
+    console.log("Đăng nhập thành công:", res.data);
+    if (res.data && res.data.user) {
+      const userData = {
+        ...res.data.user,
+        expiresAt: Date.now() + 3600000, // hết hạn sau 1h
+      };
+      sessionStorage.setItem("user", JSON.stringify(userData));
     }
-  },
+    window.location.href = "/";
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
+  }
+},
 
   register: async (email, password) => {
     try {
