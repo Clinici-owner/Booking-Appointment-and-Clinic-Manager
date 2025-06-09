@@ -24,6 +24,10 @@ const LoginPage = () => {
     }
   };
 
+   const handleGoogleLogin = () => {
+        window.location.href = 'http://localhost:3000/auth/google';
+  };
+
   useEffect(() => {
     const getSessionUser = async () => {
       try {
@@ -32,7 +36,7 @@ const LoginPage = () => {
           const parsedUser = JSON.parse(user);
           if (parsedUser && parsedUser._id) {
             console.log("User already logged in:", parsedUser);
-            // Redirect to home or dashboard
+
             window.location.href = "/";
           }
         } else {
@@ -41,7 +45,7 @@ const LoginPage = () => {
       } catch (error) {
         console.error("Error retrieving session user:", error);
       }
-    }
+    };
     getSessionUser();
   }, []);
 
@@ -59,7 +63,7 @@ const LoginPage = () => {
           </h1>
 
           <div className="flex space-x-6 mb-6">
-            <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
+            <button onClick={handleGoogleLogin} className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
               <i className="fab fa-google"></i>
             </button>
             <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">

@@ -18,6 +18,7 @@ import ServicesPage from './pages/ServicesPage';
 import SpecialtiesPage from './pages/SpecialtiesPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import GoogleAuthCallback from './components/GoogleAuthCallback';
 function App() {
 
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-forgot-password" element={<VerifyForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/google-auth-success" element={<GoogleAuthCallback />} />
       </Routes>
     </BrowserRouter>
   );
