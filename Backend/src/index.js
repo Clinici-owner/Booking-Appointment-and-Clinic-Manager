@@ -10,6 +10,7 @@ const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const nodemailer = require('nodemailer');
+const passport = require('./config/passport/passport-config');
 
 
 // Load biến môi trường
@@ -61,3 +62,13 @@ app.set('transporter', transporter);
 
 // Khởi tạo routes
 route(app);
+
+// Khởi tạo Passport và session
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Cấu hình CORS
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
