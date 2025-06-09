@@ -2,7 +2,6 @@ import React from "react";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
 import Banner from "../assets/images/Banner.png";
 
 import {
@@ -20,11 +19,11 @@ function HomePage() {
     <div>
       <Header />
       <div
-        className="relative w-full h-[400px] bg-cover bg-center"
+        className="relative w-full rounded-xl h-[400px] bg-cover bg-center"
         style={{ backgroundImage: `url(${Banner})` }}
       >
         {/* Overlay mờ */}
-        <div className="absolute inset-0 bg-[#1e293b]/70"></div>
+        <div className="absolute inset-0 bg-[#1e293b]/70 rounded-xl "></div>
 
         {/* Nội dung */}
         <div className="relative z-10 max-w-6xl mx-auto h-full flex flex-col justify-center px-6 text-white">
@@ -179,9 +178,9 @@ function HomePage() {
                     <Phone className="text-green-600" />
                   </span>
                   <div>
-                    <p className="font-medium">Điện thoại</p>
+                    <p className="font-medium">Cấp cứu</p>
                     <p className="text-gray-700">
-                      028 1234 5678 - Hotline: 090 123 4567
+                      0255 3 713 555 - Hotline: 1900 099 915
                     </p>
                   </div>
                 </li>
