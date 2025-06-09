@@ -16,6 +16,8 @@ import AboutUsPage from './pages/AboutUsPage';
 import NewsPage from './pages/NewsPage';
 import ServicesPage from './pages/ServicesPage';
 import SpecialtiesPage from './pages/SpecialtiesPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 function App() {
 
   return (
@@ -31,6 +33,8 @@ function App() {
         <Route path="/news" element={<NewsPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/specialties" element={<SpecialtiesPage />} />
+        <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
+        <Route path="/termsofservice" element={<TermsOfServicePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify" element={<VerifyPage />} />

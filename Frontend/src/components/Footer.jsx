@@ -126,10 +126,10 @@ function Footer() {
           <span>© 2025 Phòng Khám Đa khoa Phúc Hưng. All rights reserved.</span>
         </div>
         <div className="flex space-x-6">
-          <a href="#" className="hover:underline">
+          <a href="/privacypolicy" className="hover:underline">
             Chính sách bảo mật
           </a>
-          <a href="#" className="hover:underline">
+          <a href="/termsofservice" className="hover:underline">
             Điều khoản sử dụng
           </a>
         </div>
