@@ -2,8 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 import StaffList from './pages/StaffListPage';
-import AddStaff from './pages/AddStaffPage';
-import UpdateStaff from './pages/UpdateStaffPage';
+import AddStaff from './pages/StaffAddPage';
+import UpdateStaff from './pages/StaffUpdatePage';
 import StaffDetailPage from './pages/StaffDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';

@@ -52,6 +52,11 @@ function AddStaff() {
           return 'CMND/CCCD không hợp lệ. Tối đa 12 chữ số.';
         }
         break;
+      case 'password':
+        if (value.length > 0 && value.length < 6) {
+          return 'Mật khẩu phải có ít nhất 6 ký tự.';
+        }
+        break;
       default:
         return '';
     }
@@ -128,33 +133,40 @@ function AddStaff() {
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-5">Tạo nhân viên mới</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Họ và tên:</label>
         <div>
           <input name="fullName" placeholder="Họ và tên" onChange={handleChange} value={formData.fullName} required className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           {errors.fullName && <p className="text-sm text-red-600">{errors.fullName}</p>}
         </div>
 
+          <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Email:</label>
         <div>
           <input name="email" placeholder="Email" onChange={handleChange} value={formData.email} required className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
         </div>
 
+          <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Số điện thoại:</label>
         <div>
           <input name="phone" placeholder="Số điện thoại" onChange={handleChange} value={formData.phone} className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           {errors.phone && <p className="text-sm text-red-600">{errors.phone}</p>}
         </div>
 
+          <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">CMND/CCCD:</label>
         <div>
           <input name="cidNumber" placeholder="CMND/CCCD" onChange={handleChange} value={formData.cidNumber} required className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           {errors.cidNumber && <p className="text-sm text-red-600">{errors.cidNumber}</p>}
         </div>
 
+          <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
         <div className="relative flex items-center">
           <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Mật khẩu" onChange={handleChange} value={formData.password} required className="w-full pr-10 px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 text-gray-600 cursor-pointer text-lg">
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
+        {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
 
+        <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Nhập lại mật khẩu</label>
         <div className="relative flex items-center">
           <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Nhập lại mật khẩu" onChange={handleChange} value={formData.confirmPassword} required className="w-full pr-10 px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
           <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 text-gray-600 cursor-pointer text-lg">
@@ -163,17 +175,19 @@ function AddStaff() {
         </div>
 
         {passwordMismatch && <p className="text-sm font-semibold text-red-600">Mật khẩu không khớp.</p>}
-
+        <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Ngày sinh:</label>
         <input name="dob" type="date" onChange={handleChange} value={formData.dob} className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+        <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Địa chỉ:</label>
         <input name="address" placeholder="Địa chỉ" onChange={handleChange} value={formData.address} className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
 
+        <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Vai trò:</label>
         <select name="role" onChange={handleChange} value={formData.role} className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
           <option value="receptionist">Lễ tân</option>
           <option value="doctor">Bác sĩ</option>
           <option value="technician">Kỹ thuật viên</option>
           <option value="admin">Quản trị viên</option>
         </select>
-
+        <label htmlFor="" className="flex flex-1/2 text-sm font-medium text-gray-700 mb-1">Giới tính:</label>
         <select name="gender" value={formData.gender} onChange={handleChange} required className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
           <option value="">Chọn giới tính</option>
           <option value="true">Nam</option>

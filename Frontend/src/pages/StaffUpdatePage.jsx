@@ -54,11 +54,16 @@ function UpdateStaff() {
     <div className="max-w-xl mx-auto mt-10 p-8 bg-[#f9f9fb] rounded-xl shadow-md font-sans">
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-5">Cập nhật thông tin nhân viên</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <label htmlFor="" className='flex flex-1/2'>Họ và tên:</label>
         <input name="fullName" value={staff.fullName} onChange={handleChange} placeholder="Họ và tên" required className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+        <label htmlFor="" className='flex flex-1/2'>Email:</label>
         <input name="email" value={staff.email} onChange={handleChange} placeholder="Email" required className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+        <label htmlFor="" className='flex flex-1/2'>Số điện thoại:</label>
         <input name="phone" value={staff.phone || ''} onChange={handleChange} placeholder="Số điện thoại" className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
+        <label htmlFor="" className='flex flex-1/2'>Địa chỉ:</label>
         <input name="address" value={staff.address || ''} onChange={handleChange} placeholder="Địa chỉ" className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" />
 
+        <label htmlFor="" className='flex flex-1/2'>Vai trò:</label>
         <select name="role" value={staff.role} onChange={handleChange} required className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
           <option value="receptionist">Lễ tân</option>
           <option value="doctor">Bác sĩ</option>
@@ -66,6 +71,7 @@ function UpdateStaff() {
           <option value="admin">Quản trị viên</option>
         </select>
 
+        <label htmlFor="" className='flex flex-1/2'>Giới tính:</label>
         <select name="gender" value={staff.gender ? 'true' : 'false'} onChange={handleChange} required className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
           <option value="true">Nam</option>
           <option value="false">Nữ</option>
