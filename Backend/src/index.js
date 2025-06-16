@@ -10,6 +10,7 @@ const cors = require('cors');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const nodemailer = require('nodemailer');
+const passport = require('./config/passport/passport-config');
 
 
 // Load biến môi trường
@@ -41,7 +42,7 @@ app.use(session({
     mongoUrl: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bookingappointment',
     collectionName: 'sessions'
   }),
-  cookie: { secure: false } // Đặt secure: true nếu dùng HTTPS
+  cookie: { secure: false, maxAge: 30 * 60 * 1000 } // Đặt secure: true nếu dùng HTTPS
 }));
 app.use((req, res, next) => {
   res.locals.session = req.session;
@@ -61,3 +62,13 @@ app.set('transporter', transporter);
 
 // Khởi tạo routes
 route(app);
+
+// Khởi tạo Passport và session
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Cấu hình CORS
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));

@@ -11,7 +11,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const location = useLocation();
   const successMessage = location.state?.successMessage;
@@ -25,18 +24,30 @@ const LoginPage = () => {
     }
   };
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, []);
+   const handleGoogleLogin = () => {
+        window.location.href = 'http://localhost:3000/auth/google';
+  };
 
-  if (isLoggedIn) {
-    window.location.href = "/"; // Redirect to home if already logged in
-  }
+  useEffect(() => {
+    const getSessionUser = async () => {
+      try {
+        const user = sessionStorage.getItem("user");
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          if (parsedUser && parsedUser._id) {
+            console.log("User already logged in:", parsedUser);
+
+            window.location.href = "/";
+          }
+        } else {
+          console.log("No user session found.");
+        }
+      } catch (error) {
+        console.error("Error retrieving session user:", error);
+      }
+    };
+    getSessionUser();
+  }, []);
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-[#FFF] p-4">
@@ -52,7 +63,7 @@ const LoginPage = () => {
           </h1>
 
           <div className="flex space-x-6 mb-6">
-            <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
+            <button onClick={handleGoogleLogin} className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
               <i className="fab fa-google"></i>
             </button>
             <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
