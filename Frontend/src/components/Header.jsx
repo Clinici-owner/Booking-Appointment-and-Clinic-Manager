@@ -1,8 +1,6 @@
 import React from "react";
-
 import { Button } from "@mui/material";
-
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom"; // Thêm useNavigate
 import { Link } from "react-router-dom";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -12,9 +10,9 @@ import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
+
 function Header() {
   const location = useLocation();
 
