@@ -19,6 +19,43 @@
   --color-custom-blue-bg: #f9fbff;
   --color-custom-red: #ff0707;
 
+
+  --animate-slide-shake: slide-shake 1s ease-out;
+
+  @keyframes slide-shake {
+      0%,
+      100% {
+          transform: rotate(0deg) translateX(0);
+      }
+      25% {
+          transform: rotate(10deg) translateX(-3px);
+      }
+      50% {
+          transform: rotate(0deg) translateX(3px);
+      }
+      75% {
+          transform: rotate(-10deg) translateX(-3px);
+      }
+    }
+
+    --animate-slide-profile: slide-profile 1s ease-out;
+
+     @keyframes slide-profile {
+      0%,
+      100% {
+          transform: rotate(0deg) ;
+      }
+      25% {
+          transform: rotate(10deg) ;
+      }
+      50% {
+          transform: rotate(-10deg);
+      }
+      75% {
+          transform: rotate(0deg);
+      }
+    }
+
   --animate-slide-down: slide-down 1s ease-out;
 
   @keyframes slide-down {
