@@ -1,7 +1,5 @@
 import React from "react";
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import Banner from "../assets/images/Banner.png";
 
 import {
@@ -17,7 +15,6 @@ import {
 function HomePage() {
   return (
     <div>
-      <Header />
       <div
         className="relative w-full rounded-xl h-[400px] bg-cover bg-center"
         style={{ backgroundImage: `url(${Banner})` }}
@@ -225,7 +222,6 @@ function HomePage() {
           </div>
         </section>
       </div>
-      <Footer />
     </div>
   );
 }

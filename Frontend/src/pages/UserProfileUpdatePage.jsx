@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { UserService } from "../services/userService"
 
-function UpdateUserProfilePage() {
+function UserProfileUpdatePage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -419,4 +419,4 @@ function UpdateUserProfilePage() {
   )
 }
 
-export default UpdateUserProfilePage
+export default UserProfileUpdatePage
