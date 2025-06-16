@@ -77,4 +77,82 @@ export const UserService = {
       );
     }
   },
+getUserProfileByUserID: async (user) => {
+try {
+      // Kiểm tra user object
+      if (!user || !user._id) {
+        throw new Error("User object hoặc user ID không hợp lệ")
+      }
+
+      console.log("Calling API with user:", user) // Debug log
+
+      // Tạo URL với đường dẫn đúng
+      const url = new URL(`${API_URL}/profile`)
+      url.searchParams.append("userId", user._id)
+
+      console.log("Request URL:", url.toString()) // Debug log
+
+      // Sử dụng GET method
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      console.log("Response status:", response.status) // Debug log
+      console.log("Response ok:", response.ok) // Debug log
+
+      // Kiểm tra response status
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Error response:", errorText) // Debug log
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log("API Response:", result) // Debug log - Kiểm tra structure của response
+
+      return result
+    } catch (error) {
+      console.error("Error in getUserProfileByUserID:", error)
+      throw error
+    }
+  },
+  updateUserProfile: async (userId, profileData) => {
+    try {
+      if (!userId) {
+        throw new Error("User ID là bắt buộc")
+      }
+
+      console.log("Updating profile for user:", userId, profileData)
+
+      const response = await fetch(`${API_URL}/updateprofile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          ...profileData,
+        }),
+      })
+
+      console.log("Update response status:", response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("Update error response:", errorData)
+        throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`)
+      }
+
+      const result = await response.json()
+      console.log("Update API Response:", result)
+
+      return result
+    } catch (error) {
+      console.error("Error in updateUserProfile:", error)
+      throw error
+    }
+  },
 };

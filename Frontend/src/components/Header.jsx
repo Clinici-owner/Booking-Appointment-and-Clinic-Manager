@@ -1,15 +1,18 @@
 import React from "react";
-
 import { Button } from "@mui/material";
-
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Thêm useNavigate
 import { Link } from "react-router-dom";
-
 import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
+
 function Header() {
   const location = useLocation();
+  const navigate = useNavigate(); // Hook để điều hướng
 
   const isActive = (path) => location.pathname === path;
+
+  const handleProfileClick = () => {
+    navigate("/user-profile"); // Điều hướng đến /user-profile khi nhấn
+  };
 
   return (
     <div>
@@ -106,6 +109,7 @@ function Header() {
                   backgroundColor: "#eff6ff",
                 },
               }}
+              onClick={handleProfileClick} // Thêm onClick để điều hướng
             >
               Hồ sơ
             </Button>
