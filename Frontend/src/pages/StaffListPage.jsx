@@ -1,153 +1,180 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listStaff, toggleLockStatus } from '../services/staffService';
+import AdminHeader from '../components/AdminHeader';
 import AdminNavSidebar from '../components/AdminNavSidebar';
+import { listStaff } from '../services/staffService';
 
 function StaffList() {
-  const [staffList, setStaffList] = useState([]);
-  const [searchName, setSearchName] = useState('');
-  const [filterRole, setFilterRole] = useState('');
-  const navigate = useNavigate();
+    const [staffList, setStaffList] = useState([]);
+    const [searchName, setSearchName] = useState('');
+    const [filterRole, setFilterRole] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [staffPerPage] = useState(10);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchStaff();
-  }, []);
+    useEffect(() => {
+        fetchStaff();
+    }, []);
 
-  const fetchStaff = async () => {
-    try {
-      const data = await listStaff();
-      setStaffList(data);
-    } catch (error) {
-      console.error('Lỗi khi tải danh sách nhân viên:', error);
-    }
-  };
+    const fetchStaff = async () => {
+        try {
+            const data = await listStaff();
+            setStaffList(data);
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách nhân viên:', error);
+        }
+    };
 
-  const handleLock = async (id, currentStatus) => {
-    try {
-      const res = await toggleLockStatus(id, currentStatus);
-      if (res?.user?.status) {
-        setStaffList(prev =>
-          prev.map(staff =>
-            staff._id === id ? { ...staff, status: res.user.status } : staff
-          )
+    const handleSearchChange = (e) => {
+        setSearchName(e.target.value);
+        setCurrentPage(1);
+    };
+
+    const handleFilterChange = (e) => {
+        setFilterRole(e.target.value);
+        setCurrentPage(1);
+    };
+
+    const handleRowClick = (staffId) => {
+        navigate('/staff/detail', { state: { id: staffId } });
+    };
+
+    const filteredStaff = staffList.filter((staff) => {
+        return (
+            staff.fullName.toLowerCase().includes(searchName.toLowerCase()) &&
+            (filterRole === '' || staff.role === filterRole)
         );
-      }
-    } catch (error) {
-      console.error('Lỗi khi thay đổi trạng thái tài khoản:', error);
-    }
-  };
+    });
 
-  const handleSearchChange = (e) => {
-    setSearchName(e.target.value);
-  };
+    const indexOfLastStaff = currentPage * staffPerPage;
+    const indexOfFirstStaff = indexOfLastStaff - staffPerPage;
+    const currentStaff = filteredStaff.slice(indexOfFirstStaff, indexOfLastStaff);
+    const totalPages = Math.ceil(filteredStaff.length / staffPerPage);
 
-  const handleFilterChange = (e) => {
-    setFilterRole(e.target.value);
-  };
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const filteredStaff = staffList.filter((staff) => {
     return (
-      staff.fullName.toLowerCase().includes(searchName.toLowerCase()) &&
-      (filterRole === '' || staff.role === filterRole)
+        <div className="flex bg-[#F3F6F9] min-h-screen">
+            <AdminNavSidebar />
+
+            <div className="flex-1 flex flex-col">
+                <AdminHeader />
+
+                <div className="w-full max-w-6xl mx-auto p-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                        <h2 className="text-[#212B36] font-semibold text-3xl leading-8">
+                            Staff Lists
+                        </h2>
+                        <button
+                            className="bg-[#00BFA6] text-white text-lg font-semibold rounded-lg py-4 px-8 hover:bg-[#00a88f] transition-colors"
+                            type="button"
+                            onClick={() => navigate('/staff/add')}
+                        >
+                            Thêm nhân viên mới
+                        </button>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                        <div className="flex items-center bg-white rounded-lg border border-[#D9D9D9] w-full md:w-[520px] px-6 py-4 text-[#637381] text-base leading-6">
+                            <i className="fas fa-search text-[#637381] mr-3 text-lg"></i>
+                            <input
+                                className="w-full text-base placeholder:text-[#637381] focus:outline-none bg-transparent"
+                                placeholder="Search by name..."
+                                type="text"
+                                value={searchName}
+                                onChange={handleSearchChange}
+                            />
+                        </div>
+                        <select
+                            aria-label="Filter roles"
+                            className="bg-white border border-[#D9D9D9] rounded-lg text-base font-semibold text-[#212B36] py-4 px-6 w-full md:w-[200px] cursor-pointer"
+                            value={filterRole}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="">Tất cả vai trò</option>
+                            <option value="doctor">Bác sĩ</option>
+                            <option value="technician">Kỹ thuật viên</option>
+                            <option value="receptionist">Lễ tân</option>
+                            <option value="admin">Quản trị viên</option>
+                        </select>
+                    </div>
+                    <div className="overflow-x-auto rounded-lg border border-[#D9D9D9] bg-white">
+                        <table className="w-full text-base text-[#212B36] border-collapse rounded-lg table-fixed">
+                            <thead>
+                                <tr className="border-b border-[#D9D9D9]">
+                                    <th className="text-left font-semibold py-5 px-6 w-[10%]">STT</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[25%]">Họ Và Tên</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[20%]">Số Điện Thoại</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[15%]">Vai Trò</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[30%]">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentStaff.length > 0 ? (
+                                    currentStaff.map((staff, index) => (
+                                        <tr
+                                            key={staff._id}
+                                            className="border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50"
+                                            onClick={() => handleRowClick(staff._id)}
+                                        >
+                                            <td className="py-6 px-6 font-normal w-[10%]">
+                                                {indexOfFirstStaff + index + 1}
+                                            </td>
+                                            <td className="py-6 px-6 flex items-center gap-4 w-[35%] whitespace-nowrap">
+                                                <img
+                                                    alt="Avatar of a staff member"
+                                                    className="w-12 h-12 object-cover rounded-full"
+                                                    height="56"
+                                                    src={staff.avatar || "https://storage.googleapis.com/a1aa/image/3c98d529-c1f0-4af6-6e7b-f4c0a724759b.jpg"}
+                                                    width="56"
+                                                />
+                                                {staff.fullName}
+                                            </td>
+                                            <td className="py-6 px-6 w-[20%]">{staff.phone || '-'}</td>
+                                            <td className="py-6 px-6 w-[15%] capitalize">{staff.role}</td>
+                                            <td className="py-6 px-6 w-[30%]">{staff.email}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="p-6 text-center text-lg text-gray-500">
+                                            Không tìm thấy nhân viên phù hợp.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="flex justify-end items-center gap-4 mt-7 text-[#637381] text-base font-semibold">
+                        <button
+                            aria-label="Previous page"
+                            className="w-11 h-9 border border-[#D9D9D9] rounded-md flex items-center justify-center hover:bg-[#E6F4F1] transition-colors"
+                            onClick={() => paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            <i className="fas fa-chevron-left"></i>
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => paginate(i + 1)}
+                                className={`w-11 h-9 border border-[#D9D9D9] rounded-md flex items-center justify-center hover:bg-[#E6F4F1] transition-colors ${currentPage === i + 1 ? 'bg-[#E6F4F1] text-[#00BFA6]' : ''}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            aria-label="Next page"
+                            className="w-11 h-9 border border-[#D9D9D9] rounded-md flex items-center justify-center hover:bg-[#E6F4F1] transition-colors"
+                            onClick={() => paginate(currentPage + 1)}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                        >
+                            <i className="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
-  });
-
-  return (
-    <div className="flex">
-      <AdminNavSidebar />
-
-      <div className="max-w-[1200px] mx-auto p-8 font-sans w-full">
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">Quản lý nhân viên</h2>
-
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-          <input
-            type="text"
-            placeholder="Tìm theo tên..."
-            value={searchName}
-            onChange={handleSearchChange}
-            className="flex-[1.5] min-w-[220px] px-3 py-2 text-sm border border-gray-300 rounded-md"
-          />
-
-          <select
-            value={filterRole}
-            onChange={handleFilterChange}
-            className="flex-1 min-w-[180px] px-3 py-2 text-sm border border-gray-300 rounded-md"
-          >
-            <option value="">Tất cả vai trò</option>
-            <option value="doctor">Bác sĩ</option>
-            <option value="technician">Kỹ thuật viên</option>
-            <option value="receptionist">Lễ tân</option>
-            <option value="admin">Quản trị viên</option>
-          </select>
-
-          <button
-            onClick={() => navigate('/staff/add')}
-            className="whitespace-nowrap px-4 py-2 text-sm font-bold text-white rounded-md bg-green-600 hover:bg-green-700"
-          >
-            Tạo nhân viên mới
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse table-fixed shadow-sm">
-            <thead>
-              <tr className="bg-gray-100 text-gray-600 text-sm">
-                <th className="p-3 text-center font-semibold whitespace-nowrap">STT</th>
-                <th className="p-3 text-center font-semibold w-[220px] whitespace-nowrap">Họ và tên</th>
-                <th className="p-3 text-center font-semibold w-[220px] whitespace-nowrap">Email</th>
-                <th className="p-3 text-center font-semibold whitespace-nowrap">Số điện thoại</th>
-                <th className="p-3 text-center font-semibold whitespace-nowrap">Vai trò</th>
-                <th className="p-3 text-center font-semibold whitespace-nowrap">Hành động</th>
-                <th className="p-3 text-center font-semibold whitespace-nowrap">Chi tiết</th>
-                <th className="p-3 text-center font-semibold whitespace-nowrap">Chỉnh sửa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStaff.length > 0 ? (
-                filteredStaff.map((staff, index) => (
-                  <tr key={staff._id} className="text-sm text-gray-700 border-b">
-                    <td className="p-3 text-center whitespace-nowrap">{index + 1}</td>
-                    <td className="p-3 text-center whitespace-nowrap overflow-hidden text-ellipsis">{staff.fullName}</td>
-                    <td className="p-3 text-center whitespace-nowrap overflow-hidden text-ellipsis">{staff.email}</td>
-                    <td className="p-3 text-center whitespace-nowrap">{staff.phone || '-'}</td>
-                    <td className="p-3 text-center uppercase whitespace-nowrap">{staff.role}</td>
-                    <td className="p-3 text-center whitespace-nowrap">
-                      <button
-                        className={`px-3 py-1 text-sm font-bold text-white rounded-md ${staff.status === 'locked' ? 'bg-gray-500 hover:bg-gray-600' : 'bg-red-500 hover:bg-red-600'}`}
-                        onClick={() => handleLock(staff._id, staff.status)}
-                      >
-                        {staff.status === 'locked' ? 'Mở khóa' : 'Khóa'}
-                      </button>
-                    </td>
-                    <td className="p-3 text-center whitespace-nowrap">
-                      <button
-                        className="px-3 py-1 text-sm font-bold text-white rounded-md bg-blue-500 hover:bg-blue-600"
-                        onClick={() => navigate('/staff/detail', { state: { id: staff._id } })}
-                      >
-                        Xem
-                      </button>
-                    </td>
-                    <td className="p-3 text-center whitespace-nowrap">
-                      <button
-                        className="px-3 py-1 text-sm font-bold text-white rounded-md bg-orange-500 hover:bg-orange-600"
-                        onClick={() => navigate('/staff/update', { state: { id: staff._id } })}
-                      >
-                        Sửa
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8" className="p-4 text-center text-sm text-gray-500">Không tìm thấy nhân viên phù hợp.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default StaffList;

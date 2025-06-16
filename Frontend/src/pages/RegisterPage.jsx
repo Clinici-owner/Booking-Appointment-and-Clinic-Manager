@@ -167,7 +167,7 @@ const RegisterPage = () => {
                 textTransform: "none",
                 width: "100%",
                 fontWeight: 700,
-                "&:hover": { backgroundColor: "#2a2e83" },
+                "&:hover": { backgroundColor: "#006dff" },
               }}
             >
               Đăng ký

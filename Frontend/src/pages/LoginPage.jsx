@@ -138,7 +138,7 @@ const LoginPage = () => {
                 fontSize: "1rem",
                 textTransform: "none",
                 width: "100%",
-                "&:hover": { backgroundColor: "#2a2e83" },
+                "&:hover": { backgroundColor: "#006dff" },
               }}
             >
               Đăng nhập
