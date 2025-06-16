@@ -25,6 +25,9 @@ export const ROUTE_PATH = {
   // OAuth callback
   GOOGLE_AUTH_CALLBACK: '/auth/google/callback',
 
+  // User-profile
+  USER_PROFILE: '/user-profile',
+  USER_PROFILE_UPDATE: '/user-profile/update',
   // 404
   NOT_FOUND: '*',
 };

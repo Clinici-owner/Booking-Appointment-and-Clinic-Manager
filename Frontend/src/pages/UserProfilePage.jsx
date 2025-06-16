@@ -53,8 +53,7 @@ function UserProfilePage() {
   }
 
   const handleEditProfile = () => {
-    // Navigate to edit profile page
-    window.location.href = "/update-profile"
+    window.location.href = "/user-profile/update"
   }
 
   useEffect(() => {

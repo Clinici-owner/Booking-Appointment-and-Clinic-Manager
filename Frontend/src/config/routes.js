@@ -25,6 +25,9 @@ const StaffDetailPage = React.lazy(() => import("../pages/StaffDetailPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
 
+const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
+const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
 // Cấu hình route
@@ -54,6 +57,10 @@ const AppRoute = [
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
+
+  // User Profile
+  { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },
+  { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
