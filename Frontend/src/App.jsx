@@ -19,6 +19,8 @@ import SpecialtiesPage from './pages/SpecialtiesPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
+import UserProfile from './pages/UserProfilePage';
+import UpdateUserProfile from './pages/UpdateUserProfilePage';
 function App() {
 
   return (
@@ -43,6 +45,9 @@ function App() {
         <Route path="/verify-forgot-password" element={<VerifyForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/google-auth-success" element={<GoogleAuthCallback />} />
+        <Route path="/user-profile" element={<UserProfile />} />
+        <Route path="/update-profile" element={<UpdateUserProfile />} />
+        {/* Thêm các route khác nếu cần */}
       </Routes>
     </BrowserRouter>
   );
