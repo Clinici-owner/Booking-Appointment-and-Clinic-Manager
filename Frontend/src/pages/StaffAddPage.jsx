@@ -1,11 +1,12 @@
+import { saveAs } from 'file-saver';
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import AdminHeader from '../components/AdminHeader';
+import Header from '../components/Header';
 import AdminNavSidebar from '../components/AdminNavSidebar';
 import { createStaff, importStaffExcel } from '../services/staffService';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 function AddStaff() {
     const [formData, setFormData] = useState({
@@ -142,17 +143,18 @@ function AddStaff() {
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
         const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(blob, 'import_staff_template.xlsx');
+        saveAs(blob, 'MAU_EXCEL.xlsx');
     };
 
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen text-[18px] leading-[1.75]">
-            <AdminNavSidebar />
             <div className="flex-1 flex flex-col">
-                <AdminHeader />
-                <div className="w-full max-w-[1600px] mx-auto p-10">
+                <Header />
+                <div className="flex">
+                    <AdminNavSidebar />
+                    <div className="w-full max-w-[1600px] mx-auto p-10">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                        <h2 className="text-[#212B36] font-semibold text-2xl leading-6">
+                        <h2 className="text-[#212B36] font-bold text-4xl leading-6">
                             Tạo nhân viên mới
                         </h2>
                     </div>
@@ -368,6 +370,7 @@ function AddStaff() {
                         <button onClick={handleExcelSubmit} className="flex-1 min-w-[180px] px-15 py-4 text-lg font-bold text-white rounded-md bg-blue-600 hover:bg-blue-700 text-center"> Nhập từ Excel</button>
                         {excelFile && <p className="w-full mt-2 text-sm text-center text-gray-600">Tệp đã chọn: {excelFile.name}</p>}
                     </div>
+                </div>
                 </div>
             </div>
         </div>
