@@ -29,6 +29,8 @@ const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCall
 const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
 
+const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
 // Cấu hình route
@@ -62,6 +64,9 @@ const AppRoute = [
   // User Profile
   { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },
   { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
+
+  //Service Manager
+  {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
