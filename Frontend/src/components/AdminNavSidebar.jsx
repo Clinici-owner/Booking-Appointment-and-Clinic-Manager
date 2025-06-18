@@ -1,43 +1,75 @@
-import { NavLink } from 'react-router-dom';
-import React from 'react';
-import Logo from '../assets/images/LogoMini.png'; 
+import React from "react";
+import {
+  Box,
+  Drawer,
+  Toolbar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  CssBaseline,
+} from "@mui/material";
+import { Link } from "react-router-dom";
 
-function AdminNavSidebar() {
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import EventIcon from "@mui/icons-material/Event";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import SettingsIcon from "@mui/icons-material/Settings";
+
+const drawerWidth = 240;
+
+const navItems = [
+  { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/dashboard" },
+  { label: "Quản lý nhân viên", icon: <PeopleIcon />, path: "/admin/staffs" },
+  { label: "Quản lý bệnh nhân", icon: <PeopleIcon />, path: "/admin/patients" },
+  { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedule" },
+  { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointments" },
+  { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/admin/services" },
+  { label: "Hồ sơ bệnh án", icon: <AssignmentIcon />, path: "/admin/records" },
+  { label: "Tài chính & thanh toán", icon: <MonetizationOnIcon />, path: "/admin/billing" },
+  { label: "Cài đặt hệ thống", icon: <SettingsIcon />, path: "/admin/settings" },
+];
+
+export default function AdminNavSidebar({ children }) {
   return (
-    <div className="w-64 min-h-screen border-r border-gray-200 flex flex-col">
-      <div className="px-5 py-8">
-        <button
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white text-base font-medium rounded-md py-3.5 flex items-center justify-center gap-2"
-          type="button"
-        >
-          <i className="far fa-clock text-white text-sm"></i>
-          <span>Dashboard</span>
-        </button>
-      </div>
-      <nav className="mt-6 flex flex-col gap-5 px-5">
-        <NavLink to="/staff" className="flex items-center gap-3 text-gray-900 text-base font-medium" activeClassName="text-blue-600">
-          <i className="fas fa-user-friends text-lg"></i>
-          Manage Staffs
-        </NavLink>
-        <NavLink to="/medical-service" className="flex items-center gap-3 text-gray-900 text-base font-medium" activeClassName="text-blue-600">
-          <i className="fas fa-th-large text-lg"></i>
-          Manage Medical Service
-        </NavLink>
-        <NavLink to="/schedule" className="flex items-center gap-3 text-gray-900 text-base font-medium" activeClassName="text-blue-600">
-          <i className="fas fa-list-ul text-lg"></i>
-          Manage Schedule Staff
-        </NavLink>
-        <NavLink to="/service-package" className="flex items-center gap-3 text-gray-900 text-base font-medium" activeClassName="text-blue-600">
-          <i className="fas fa-th-large text-lg"></i>
-          Manage Service Package
-        </NavLink>
-        <NavLink to="/logout" className="flex items-center gap-3 text-gray-900 text-base font-medium" activeClassName="text-blue-600">
-          <i className="fas fa-power-off text-lg"></i>
-          Logout
-        </NavLink>
-      </nav>
-    </div>
-  );
-};
+    <Box sx={{ display: "flex"}}>
+      <CssBaseline />
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          marginTop: "64px", // Adjust for AppBar height
 
-export default AdminNavSidebar;
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: "border-box",
+          },
+        }}
+      >
+        <List>
+          {navItems.map((item, index) => (
+            <ListItem
+              button
+              key={index}
+              component={Link}
+              to={item.path}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+
+      {/* Content bên phải */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
