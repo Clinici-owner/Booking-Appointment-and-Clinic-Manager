@@ -40,14 +40,12 @@ function MainLayout({ children }) {
   return (
     <div>
       <AdminHeader />
-      <div className="flex">
         <AdminNavSidebar >
-        <div className="flex-1 p-6 pt-20">
+        <div className="p-6 pt-20">
           {children}
         </div>
         </AdminNavSidebar>
 
-      </div>
       <ScrollToTopButton />
     </div>
   );
