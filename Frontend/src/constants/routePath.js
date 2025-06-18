@@ -28,6 +28,10 @@ export const ROUTE_PATH = {
   // User-profile
   USER_PROFILE: '/user-profile',
   USER_PROFILE_UPDATE: '/user-profile/update',
+
+  //Service manager
+  SERVICES_LIST: '/createMedical',  
+
   // 404
   NOT_FOUND: '*',
 };
