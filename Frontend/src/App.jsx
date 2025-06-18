@@ -19,6 +19,7 @@ import SpecialtiesPage from './pages/SpecialtiesPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import GoogleAuthCallback from './components/GoogleAuthCallback';
+import CreateMedical from './pages/MedicalCreate';
 function App() {
 
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/verify-forgot-password" element={<VerifyForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/google-auth-success" element={<GoogleAuthCallback />} />
+        <Route path="/createMedical" element={<CreateMedical />} />
       </Routes>
     </BrowserRouter>
   );
