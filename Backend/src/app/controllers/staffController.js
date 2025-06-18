@@ -118,13 +118,13 @@ class StaffController {
 
 
     async listStaff(req, res) {
-        try {
-            const staff = await User.find({ role: { $ne: 'patient' } });
-            res.json(staff);
-        } catch (error) { // Đổi err thành error
-            res.status(500).json({ error: error.message });
-        }
+    try {
+        const staff = await User.find({ role: { $nin: ['patient', 'admin'] } });
+        res.json(staff);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
+}
 
     async updateStaff(req, res) {
         try {

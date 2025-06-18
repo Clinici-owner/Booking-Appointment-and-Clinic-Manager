@@ -56,18 +56,11 @@ function StaffList() {
         <div className="flex min-h-screen">
             <div className="flex-1 flex flex-col">
                 <div className="flex">
-                    <div className="w-full max-w-6xl mx-auto p-6">
+                    <div className="w-full max-w-6xl mx-auto p-6 relative">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                             <h2 className="text-[#212B36] font-bold text-4xl leading-8">
                                 Danh Sách Nhân Viên
                             </h2>
-                            <button
-                                className="bg-[#00BFA6] text-white text-lg font-semibold rounded-lg py-4 px-8 hover:bg-[#00a88f] transition-colors"
-                                type="button"
-                                onClick={() => navigate('/admin/staffs/add')}
-                            >
-                                Thêm nhân viên mới
-                            </button>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                             <div className="flex items-center bg-white rounded-lg border border-[#D9D9D9] w-full md:w-[520px] px-6 py-4 text-[#637381] text-base leading-6">
@@ -170,6 +163,13 @@ function StaffList() {
                                 <i className="fas fa-chevron-right"></i>
                             </button>
                         </div>
+                        <button
+                            className="fixed bottom-10 right-10 bg-custom-blue text-white text-base font-semibold rounded-lg py-3 px-6 hover:bg-custom-bluehover2 transition-colors z-50"
+                            type="button"
+                            onClick={() => navigate('/admin/staffs/add')}
+                        >
+                            Thêm nhân viên mới
+                        </button>
                     </div>
                 </div>
             </div>
