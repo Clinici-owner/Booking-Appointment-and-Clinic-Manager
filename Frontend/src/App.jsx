@@ -2,7 +2,24 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import AppRoute from "./config/routes";
 import React from "react";
-
+import StaffList from './pages/StaffListPage';
+import AddStaff from './pages/StaffAddPage';
+import UpdateStaff from './pages/StaffUpdatePage';
+import StaffDetailPage from './pages/StaffDetailPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import VerifyPage from './pages/VerifyPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import VerifyForgotPasswordPage from './pages/VerifyForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import HomePage from './pages/HomePage';
+import AboutUsPage from './pages/AboutUsPage';
+import NewsPage from './pages/NewsPage';
+import ServicesPage from './pages/ServicesPage';
+import SpecialtiesPage from './pages/SpecialtiesPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import GoogleAuthCallback from './components/GoogleAuthCallback';
 import CreateMedical from './pages/MedicalCreate';
 function App() {
   return (
@@ -28,6 +45,7 @@ function App() {
         <Route path="/verify-forgot-password" element={<VerifyForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/google-auth-success" element={<GoogleAuthCallback />} />
+        <Route path="/createMedical" element={<CreateMedical />} />
       </Routes>
     </BrowserRouter>
   );
