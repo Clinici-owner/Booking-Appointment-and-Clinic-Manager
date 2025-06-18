@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AdminHeader from '../components/AdminHeader';
 import AdminNavSidebar from '../components/AdminNavSidebar';
+import Header from '../components/Header';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { getStaffById, toggleLockStatus } from '../services/staffService';
 
@@ -79,7 +79,7 @@ function StaffDetailPage() {
             <div className="flex bg-[#F3F6F9] min-h-screen">
                 <AdminNavSidebar />
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <AdminHeader />
+                    <Header />
                     <div className="text-center py-15 text-xl text-gray-600">Đang tải thông tin...</div>
                 </div>
             </div>
@@ -92,7 +92,7 @@ function StaffDetailPage() {
             <div className="flex bg-[#F3F6F9] min-h-screen">
                 <AdminNavSidebar />
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <AdminHeader />
+                    <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
                         onClick={() => navigate('/staff')}
@@ -114,14 +114,13 @@ function StaffDetailPage() {
 
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen">
-            <AdminNavSidebar />
-
             <div className="flex-1 flex flex-col">
-                <AdminHeader />
-
-                <div className="w-full max-w-6xl mx-auto p-8">
+                <Header />
+            <div className="flex">
+                <AdminNavSidebar />
+                <div className="w-full max-w-6xl mx-auto p-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-5">
-                        <h2 className="text-[#212B36] font-semibold text-2xl leading-7">
+                        <h2 className="text-[#212B36] font-bold text-4xl leading-7">
                             Thông tin chi tiết nhân viên
                         </h2>
                     </div>
@@ -252,6 +251,7 @@ function StaffDetailPage() {
                         </form>
                     </div>
                 </div>
+            </div>
             </div>
 
             {/* Confirmation Modal */}

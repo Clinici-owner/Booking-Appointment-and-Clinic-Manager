@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AdminHeader from '../components/AdminHeader'; // Import AdminHeader
-import AdminNavSidebar from '../components/AdminNavSidebar'; // Import AdminNavSidebar
+import Header from '../components/Header'; 
+import AdminNavSidebar from '../components/AdminNavSidebar'; 
 import { getStaffById, updateStaff } from '../services/staffService';
 
 function UpdateStaff() {
@@ -9,9 +9,9 @@ function UpdateStaff() {
     const navigate = useNavigate();
     const staffId = location.state?.id;
     const [staff, setStaff] = useState(null);
-    const [loading, setLoading] = useState(true); // Thêm state loading
-    const [error, setError] = useState(null);     // Thêm state error
-    const [notification, setNotification] = useState(null); // State for success notification
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null);     
+    const [notification, setNotification] = useState(null); 
 
     useEffect(() => {
         if (!staffId) {
@@ -76,7 +76,7 @@ function UpdateStaff() {
             <div className="flex bg-[#F3F6F9] min-h-screen">
                 <AdminNavSidebar />
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <AdminHeader />
+                    <Header />
                     <div className="text-center py-15 text-xl text-gray-600">Đang tải thông tin...</div>
                 </div>
             </div>
@@ -89,7 +89,7 @@ function UpdateStaff() {
             <div className="flex bg-[#F3F6F9] min-h-screen">
                 <AdminNavSidebar />
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <AdminHeader />
+                    <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
                         onClick={() => navigate('/staff')}
@@ -109,14 +109,13 @@ function UpdateStaff() {
 
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen">
-            <AdminNavSidebar />
-
             <div className="flex-1 flex flex-col">
-                <AdminHeader />
-
+                <Header />
+                <div className="flex">
+                    <AdminNavSidebar />
                 <div className="w-full max-w-6xl mx-auto p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-5">
-                        <h2 className="text-[#212B36] font-semibold text-2xl leading-7">
+                        <h2 className="text-[#212B36] font-bold text-4xl leading-7">
                             Cập nhật thông tin nhân viên
                         </h2>
                     </div>
@@ -252,6 +251,7 @@ function UpdateStaff() {
                             </div>
                         </form>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
