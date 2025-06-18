@@ -1,6 +1,7 @@
 import React from "react";
 import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
+import AdminLayout from "../layouts/admin-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -50,10 +51,10 @@ const AppRoute = [
   { path: ROUTE_PATH.RESET_PASSWORD, page: ResetPasswordPage },
 
   // Staff
-  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: MainLayout },
-  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: MainLayout },
-  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: MainLayout },
-  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: MainLayout },
+  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout },
+  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout },
+  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },

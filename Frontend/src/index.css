@@ -97,4 +97,8 @@
 
   --font-weight-bold: 700;
 
+
 }
+  .MuiPaper-root{
+    margin-top: 120px;
+  }

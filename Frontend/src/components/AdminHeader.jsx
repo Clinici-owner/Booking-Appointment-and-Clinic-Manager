@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
-import { useLocation } from "react-router-dom"; // Thêm useNavigate
+
 import { Link } from "react-router-dom";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -13,16 +13,11 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
 
-function Header() {
-  const location = useLocation();
-
+function AdminHeader() {
   const userData = JSON.parse(sessionStorage.getItem("user"));
-  console.log("userData in Header:", userData);
-
-  const isActive = (path) => location.pathname === path;
 
   return (
-    <div>
+    <div className="fixed top-0 left-0 w-full z-50">
       <nav className=" px-18 bg-white shadow-lg rounded-b-xl px-4 py-3 flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <img
@@ -40,66 +35,6 @@ function Header() {
 
         {/* Menu */}
         <ul className="hidden md:flex items-center space-x-12 font-semibold text-base">
-          <li>
-            <Link
-              to="/"
-              className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
-                isActive("/")
-                  ? "text-white bg-custom-blue shadow-md"
-                  : "text-black hover:bg-custom-bluehover"
-              }`}
-            >
-              Trang chủ
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/aboutus"
-              className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
-                isActive("/aboutus")
-                  ? "text-white bg-custom-blue shadow-md"
-                  : "text-black hover:bg-custom-bluehover"
-              }`}
-            >
-              Về chúng tôi
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/specialties"
-              className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
-                isActive("/specialties")
-                  ? "text-white bg-custom-blue shadow-md"
-                  : "text-black hover:bg-custom-bluehover"
-              }`}
-            >
-              Chuyên khoa
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/services"
-              className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
-                isActive("/services")
-                  ? "text-white bg-custom-blue shadow-md"
-                  : "text-black hover:bg-custom-bluehover"
-              }`}
-            >
-              Dịch vụ
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/news"
-              className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
-                isActive("/news")
-                  ? "text-white bg-custom-blue shadow-md"
-                  : "text-black hover:bg-custom-bluehover"
-              }`}
-            >
-              Tin tức
-            </Link>
-          </li>
           <li>
             {userData ? (
               <Menu as="div" className="relative inline-block text-left">
@@ -137,37 +72,11 @@ function Header() {
                   <div className="py-1">
                     <MenuItem>
                       <a
-                        href="user-profile"
-                        className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
-                      >
-                        <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
-                          <AssignmentIndOutlinedIcon />
-                        </div>
-                        Hồ sơ cá nhân
-                      </a>
-                    </MenuItem>
-                  </div>
-                  <div className="py-1">
-                    <MenuItem>
-                      <a
-                        href="#"
-                        className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
-                      >
-                        <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
-                          <ReceiptOutlinedIcon />
-                        </div>
-                        Phiếu khám bệnh
-                      </a>
-                    </MenuItem>
-                  </div>
-                  <div className="py-1">
-                    <MenuItem>
-                      <a
                         href="#"
                         className="group block px-4 py-2 text-sm text-custom-red data-focus:bg-gray-100  data-focus:outline-hidden"
                         onClick={() => {
                           sessionStorage.removeItem("user");
-                          window.location.href = "/";
+                          window.location.href = "/login";
                         }}
                       >
                         <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-shake">
@@ -206,4 +115,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default AdminHeader;
