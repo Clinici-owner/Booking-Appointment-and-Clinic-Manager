@@ -103,7 +103,7 @@ function HomePage() {
         <section className="py-16 bg-gray-50" id="services">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-blue-800 mb-4">
+              <h2 className="text-3xl font-bold text-custom-blue mb-4">
                 Dịch vụ y tế
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
@@ -144,6 +144,232 @@ function HomePage() {
                 Xem tất cả dịch vụ{" "}
                 <i className="fas fa-chevron-right ml-2 text-sm"></i>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Đội ngũ bác sĩ */}
+        <section className="py-16 bg-white" id="doctors">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-custom-blue mb-4">
+                Đội ngũ bác sĩ
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Đội ngũ bác sĩ giàu kinh nghiệm, tận tâm với bệnh nhân, luôn sẵn
+                sàng lắng nghe và tư vấn tận tình.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Bác sĩ 1 */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                  <img
+                    src="https://img4.thuthuatphanmem.vn/uploads/2021/01/10/hinh-anh-bac-si-ao-trang-rat-dep_021521356.jpg"
+                    alt="Bác sĩ Nguyễn Văn A"
+                    className="rounded-xl w-full h-80 object-cover mb-4"
+                  />
+                  <div>
+                    <h3 className="text-xl font-semibold text-custom-blue">
+                      Bác sĩ Nguyễn Văn A
+                    </h3>
+
+                    <p className="text-green-600 text-sm">Chuyên khoa Nội tổng quát</p>
+                </div>
+                <p className="text-gray-600 mb-4 mt-2">
+                  Hơn 10 năm kinh nghiệm trong lĩnh vực nội khoa, chuyên khám và
+                  điều trị các bệnh lý nội khoa phổ biến.
+                </p>
+                <a
+                  href="#"
+                  className="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết{" "}
+                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <a
+              href="#"
+              className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
+            >
+              Xem tất cả bác sĩ{" "}
+              <i className="fas fa-chevron-right ml-2 text-sm"></i>
+            </a>
+          </div>
+        </section>
+
+        {/* Đặt lịch khám */}
+        <section className="py-16 bg-gray-50" id="appointment">
+          <div className="relative bg-custom-blue rounded-xl p-10 max-w-7xl mx-auto overflow-hidden">
+            <h2 className="text-white font-extrabold text-2xl mb-3 max-w-lg">
+              Đặt lịch khám ngay hôm nay
+            </h2>
+            <p className="text-[#dbe1ff] max-w-xl text-base leading-relaxed">
+              Đặt lịch trực tuyến dễ dàng và nhanh chóng. Chỉ cần điền thông tin
+              cơ bản, chúng tôi sẽ liên hệ xác nhận lịch hẹn trong thời gian sớm
+              nhất.
+            </p>
+            <img
+              src="https://storage.googleapis.com/a1aa/image/2037a6bb-bcb9-4f4d-21b0-915ae5082e3b.jpg"
+              alt="Medical icon with a cross and hospital building in blue tone"
+              aria-hidden="true"
+              className="absolute right-10 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none"
+              width={120}
+              height={120}
+              style={{ width: "120px", height: "120px" }} // React cần viết dưới dạng object
+            />
+            <button
+              type="button"
+              className="absolute right-10 top-1/2 -translate-y-1/2 bg-white text-[#3b4ac1] font-semibold rounded-lg px-6 py-3 hover:bg-[#e6e9ff] transition"
+            >
+              Đặt lịch ngay
+            </button>
+          </div>
+        </section>
+
+        {/* Đánh giá của khách hàng */}
+        <section className="py-16 bg-white" id="reviews">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-custom-blue mb-6 text-center">
+              Đánh giá của khách hàng
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Đánh giá 1 */}
+              <div className="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <p className="text-gray-700 mb-4">
+                  "Dịch vụ tuyệt vời, bác sĩ rất tận tâm và chuyên nghiệp. Tôi
+                  đã cảm thấy thoải mái khi đến khám tại đây."
+                </p>
+                <div className="flex items-center space-x-3">
+                  <img
+                    src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
+                    alt="Nguyễn Văn A"
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <p className="font-semibold">Nguyễn Văn A</p>
+                    <p className="text-sm text-gray-500">Khách hàng</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Đánh giá 2 */}
+              <div className="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <p className="text-gray-700 mb-4">
+                  "Tôi rất hài lòng với dịch vụ khám bệnh tại Phúc Hưng Clinic.
+                  Không gian sạch sẽ, nhân viên thân thiện."
+                </p>
+                <div className="flex items-center space-x-3">
+                  <img
+                    src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
+                    alt="Trần Thị B"
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <p className="font-semibold">Trần Thị B</p>
+                    <p className="text-sm text-gray-500">Khách hàng</p>
+                  </div>
+                </div>
+              </div>
+              {/* Đánh giá 3 */}
+              <div className="bg-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <p className="text-gray-700 mb-4">
+                  "Phòng khám rất chuyên nghiệp, tôi đã được tư vấn và điều trị
+                  tận tình. Tôi sẽ giới thiệu cho bạn bè và người thân."
+                </p>
+                <div className="flex items-center space-x-3">
+                  <img
+                    src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
+                    alt="Lê Văn C"
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <p className="font-semibold">Lê Văn C</p>
+                    <p className="text-sm text-gray-500">Khách hàng</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tin tức & sự kiện */}
+        <section className="py-16 bg-gray-50" id="news">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-custom-blue mb-6 text-center">
+              Tin tức & sự kiện
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Bài viết 1 */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <img
+                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a460786576427-update-21-10-2024.jpg"
+                  alt="Tin tức 1"
+                  className="w-full h-40 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-xl font-semibold text-custom-blue mb-2">
+                  Tiêu đề bài viết 1
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Tóm tắt nội dung bài viết 1. Đây là một bài viết rất hữu ích về
+                  sức khỏe.
+                </p>
+                <a
+                  href="#"
+                  className="text-green-600 font-medium flex items-center"
+                >
+                  Đọc thêm{" "}
+                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              {/* Bài viết 2 */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <img
+                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a437126934236-update-19-12-2022.png"
+                  alt="Tin tức 2"
+                  className="w-full h-40 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-xl font-semibold text-custom-blue mb-2">
+                  Tiêu đề bài viết 2
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Tóm tắt nội dung bài viết 2. Đây là một bài viết rất hữu ích về
+                  sức khỏe.
+                </p>
+                <a
+                  href="#"
+                  className="text-green-600 font-medium flex items-center"
+                >
+                  Đọc thêm{" "}
+                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              {/* Bài viết 3 */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                <img
+                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a1031028614179-update-28-04-2023.jpg"
+                  alt="Tin tức 3"
+                  className="w-full h-40 object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-xl font-semibold text-custom-blue mb-2">
+                  Tiêu đề bài viết 3
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Tóm tắt nội dung bài viết 3. Đây là một bài viết rất hữu ích về
+                  sức khỏe.
+                </p>
+                <a
+                  href="#"
+                  className="text-green-600 font-medium flex items-center"
+                >
+                  Đọc thêm{" "}
+                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
             </div>
           </div>
         </section>
