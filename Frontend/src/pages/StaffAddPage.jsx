@@ -146,11 +146,9 @@ function AddStaff() {
     };
 
     return (
-        <div className="flex bg-[#F3F6F9] min-h-screen text-[18px] leading-[1.75]">
+        <div className="flex text-[18px] leading-[1.75]">
             <div className="flex-1 flex flex-col">
-                {/* <Header /> */}
                 <div className="flex">
-                    <AdminNavSidebar />
                     <div className="w-full max-w-[1600px] mx-auto p-10">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                         <h2 className="text-[#212B36] font-bold text-4xl leading-6">

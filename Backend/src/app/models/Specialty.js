@@ -6,7 +6,7 @@ const Specialty = new Schema({
     descspeciality: { type: String, default: '' },
     medicalFee: { type: Number, required: true },
     documentId: [{ type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true }],
-    logo: { type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true },
+    logo: { type: String, required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Specialty', Specialty);
