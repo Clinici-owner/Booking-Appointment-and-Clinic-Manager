@@ -7,7 +7,7 @@ function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
     app.use('/auth/google', authRouter);
-    app.use('/service', serviceRouter);
+    app.use('/api/service', serviceRouter);
 }
 
 module.exports = route
