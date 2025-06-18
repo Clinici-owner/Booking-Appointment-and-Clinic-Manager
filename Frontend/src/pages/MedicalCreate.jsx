@@ -80,7 +80,7 @@ const MedicCreatePage = () => {
       setEditingId(null);
       fetchServices();
     } catch (err) {
-      setErrorMsg("Lỗi khi cập nhật dịch vụ.");
+      setErrorMsg("Lỗi khi cập nhật dịch vụ.", err);
     }
   };
 
@@ -103,18 +103,10 @@ const MedicCreatePage = () => {
   }, []);
 
   return (
-    <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
-      <Box sx={{ width: "256px", flexShrink: 0 }}>
-        <AdminNavSidebar />
-      </Box>
-
+    <div className="">
       {/* Main content */}
-      <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-        <Container maxWidth="sm" sx={{ mt: 4 }}>
-          <Grid container spacing={4}>
             {/* Form tạo dịch vụ */}
-            <Grid item xs={12}>
+            <section className="w-full">
               <Paper elevation={3} sx={{ padding: 3 }}>
                 <Typography variant="h5" gutterBottom>
                   Tạo dịch vụ cận lâm sàng
@@ -155,10 +147,10 @@ const MedicCreatePage = () => {
                   </Alert>
                 )}
               </Paper>
-            </Grid>
+            </section>
 
             {/* Danh sách dịch vụ */}
-            <Grid item xs={12}>
+            <section >
               <Paper elevation={3} sx={{ padding: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Danh sách dịch vụ
@@ -245,11 +237,8 @@ const MedicCreatePage = () => {
                   </List>
                 )}
               </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    </Box>
+            </section>
+    </div>
   );
 };
 
