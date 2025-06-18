@@ -57,7 +57,7 @@ const RegisterPage = () => {
           />
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-          <h1 className="text-[32px] font-extrabold text-[#2a2e83] mb-6">
+          <h1 className="text-[32px] font-extrabold text-custom-blue mb-6">
             Đăng ký
           </h1>
 
@@ -65,7 +65,7 @@ const RegisterPage = () => {
 
             {/* Email */}
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="email"
             >
               EMAIL
@@ -80,7 +80,7 @@ const RegisterPage = () => {
 
             {/* Mật khẩu */}
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="password"
             >
               Mật khẩu
@@ -109,7 +109,7 @@ const RegisterPage = () => {
 
             {/* Xác nhận mật khẩu */}
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="confirmPassword"
             >
               Xác nhận mật khẩu
@@ -167,7 +167,7 @@ const RegisterPage = () => {
                 textTransform: "none",
                 width: "100%",
                 fontWeight: 700,
-                "&:hover": { backgroundColor: "#2a2e83" },
+                "&:hover": { backgroundColor: "#006dff" },
               }}
             >
               Đăng ký

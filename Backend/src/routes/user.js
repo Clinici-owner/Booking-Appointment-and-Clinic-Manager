@@ -11,5 +11,7 @@ router.post('/verify-forgot-password', userController.verifyForgotPassword);
 router.post('/reset-password', userController.resetPassword);
 router.post('/logout', userController.logoutUser);
 router.get('/session', userController.getSessionUser);
+router.get('/profile', userController.getUserProfileByUserID);
+router.put('/updateprofile', userController.updateUserProfile);
 
 module.exports = router;

@@ -58,18 +58,18 @@ const LoginPage = () => {
           </Alert>
         )}
         <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-          <h1 className="text-[32px] font-extrabold text-[#2a2e83] mb-6">
+          <h1 className="text-[32px] font-extrabold text-custom-blue mb-6">
             Đăng nhập
           </h1>
 
           <div className="flex space-x-6 mb-6">
-            <button onClick={handleGoogleLogin} className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
+            <button onClick={handleGoogleLogin} className="bg-[#51A9FF] hover:bg-custom-bluehover2 hover:cursor-pointer w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
               <i className="fab fa-google"></i>
             </button>
-            <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
+            <button className="bg-[#51A9FF] hover:bg-custom-bluehover2 hover:cursor-pointer w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
               <i className="fab fa-facebook-f"></i>
             </button>
-            <button className="bg-[#51A9FF] w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
+            <button className="bg-[#51A9FF] hover:bg-custom-bluehover2 hover:cursor-pointer w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">
               <i className="fab fa-instagram"></i>
             </button>
           </div>
@@ -78,7 +78,7 @@ const LoginPage = () => {
 
           <form className="w-full max-w-md" onSubmit={handleSubmit}>
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="email"
             >
               EMAIL
@@ -92,7 +92,7 @@ const LoginPage = () => {
             />
 
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="password"
             >
               Mật khẩu
@@ -112,7 +112,7 @@ const LoginPage = () => {
               ></i>
             </div>
 
-            <div className="mb-4 flex items-center justify-between text-sm text-[#2a2e83]">
+            <div className="mb-4 flex items-center justify-between text-sm text-custom-blue">
               <div>
                 Bạn đã có tài khoản chưa?{" "}
                 <a className="font-semibold text-[#51A9FF]" href="/register">
@@ -138,7 +138,7 @@ const LoginPage = () => {
                 fontSize: "1rem",
                 textTransform: "none",
                 width: "100%",
-                "&:hover": { backgroundColor: "#2a2e83" },
+                "&:hover": { backgroundColor: "#006dff" },
               }}
             >
               Đăng nhập
