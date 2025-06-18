@@ -20,7 +20,7 @@ function StaffDetailPage() {
     useEffect(() => {
         if (!id) {
             console.warn('Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách.');
-            navigate('/staff');
+            navigate('/staffs');
             return;
         }
 
@@ -95,7 +95,7 @@ function StaffDetailPage() {
                     <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
-                        onClick={() => navigate('/staff')}
+                        onClick={() => navigate('/staffs')}
                         className="mt-5 bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
                     >
                         Quay về danh sách
@@ -221,7 +221,7 @@ function StaffDetailPage() {
                                 <button
                                     type="button"
                                     className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                                    onClick={() => navigate(`/staff/update`, { state: { id: staff._id } })}
+                                    onClick={() => navigate(`/staffs/update`, { state: { id: staff._id } })}
                                 >
                                     Chỉnh sửa
                                 </button>
@@ -243,7 +243,7 @@ function StaffDetailPage() {
                                 <button
                                     type="button"
                                     className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
-                                    onClick={() => navigate('/staff')}
+                                    onClick={() => navigate('/staffs')}
                                 >
                                     Quay về danh sách
                                 </button>

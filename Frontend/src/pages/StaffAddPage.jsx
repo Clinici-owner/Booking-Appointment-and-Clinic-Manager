@@ -4,8 +4,8 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import AdminNavSidebar from '../components/AdminNavSidebar';
-import Header from '../components/Header';
 import { createStaff, importStaffExcel } from '../services/staffService';
+
 
 function AddStaff() {
     const [formData, setFormData] = useState({
@@ -118,7 +118,7 @@ function AddStaff() {
             await importStaffExcel(excelFile);
             setNotification('Import thành công!');
             setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/staff'), 2000);
+            setTimeout(() => navigate('/staffs'), 2000);
         } catch (error) {
             console.error('Lỗi import Excel:', error);
             if (error.response) {
@@ -148,7 +148,7 @@ function AddStaff() {
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen text-[18px] leading-[1.75]">
             <div className="flex-1 flex flex-col">
-                <Header />
+                {/* <Header /> */}
                 <div className="flex">
                     <AdminNavSidebar />
                     <div className="w-full max-w-[1600px] mx-auto p-10">
@@ -329,22 +329,23 @@ function AddStaff() {
                                 <div className="flex space-x-4">
                                     <button
                                         type="submit"
-                                        className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                        className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
                                     >
                                         Tạo mới
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => navigate('/staff')}
-                                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                        onClick={() => navigate('/staffs')}
+                                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
                                     >
                                         Quay về danh sách
                                     </button>
+
                                 </div>
                                 <button
                                     type="button"
                                     onClick={handleDownloadTemplate}
-                                    className="bg-green-400 hover:bg-green-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                    className="bg-green-400 hover:bg-green-500 text-white font-semibold text-sm rounded-lg w-36 h-12"
                                 >
                                     Tải mẫu file Excel
                                 </button>
@@ -357,8 +358,13 @@ function AddStaff() {
                         <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gray-300 z-0"></div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
-                        <label htmlFor="excelInput" className="flex-1 min-w-[180px] px-15 py-4 text-lg font-bold text-white text-center rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer">Chọn tệp Excel</label>
+                    <div className="flex items-center justify-center gap-4 mt-4">
+                        <label
+                            htmlFor="excelInput"
+                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12 cursor-pointer flex items-center justify-center text-center"
+                        >
+                            Chọn tệp Excel
+                        </label>
                         <input
                             id="excelInput"
                             type="file"
@@ -366,9 +372,15 @@ function AddStaff() {
                             onChange={(e) => setExcelFile(e.target.files[0])}
                             style={{ display: 'none' }}
                         />
-                        <button onClick={handleExcelSubmit} className="flex-1 min-w-[180px] px-15 py-4 text-lg font-bold text-white rounded-md bg-blue-600 hover:bg-blue-700 text-center"> Nhập từ Excel</button>
+                        <button
+                            onClick={handleExcelSubmit}
+                            className="font-semibold text-sm rounded-lg w-36 h-12 text-white bg-custom-blue hover:bg-custom-bluehover2 text-center cursor-pointer"
+                        >
+                            Nhập từ Excel
+                        </button>
                         {excelFile && <p className="w-full mt-2 text-sm text-center text-gray-600">Tệp đã chọn: {excelFile.name}</p>}
                     </div>
+
                 </div>
                 </div>
             </div>

@@ -16,7 +16,7 @@ function UpdateStaff() {
     useEffect(() => {
         if (!staffId) {
             console.warn('Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách.');
-            navigate('/staff');
+            navigate('/staffs');
             return;
         }
 
@@ -60,7 +60,7 @@ function UpdateStaff() {
             // Clear notification after 3 seconds
             setTimeout(() => setNotification(null), 2000);
             // Sau khi cập nhật thành công, có thể quay lại trang chi tiết hoặc danh sách
-            setTimeout(() => navigate('/staff'), 2000); // Chuyển hướng sau 3 giây
+            setTimeout(() => navigate('/staffs'), 2000); // Chuyển hướng sau 3 giây
         } catch (error) {
             console.error('Lỗi khi cập nhật:', error);
             // Cố gắng lấy thông báo lỗi từ server nếu có
@@ -92,7 +92,7 @@ function UpdateStaff() {
                     <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
-                        onClick={() => navigate('/staff')}
+                        onClick={() => navigate('/staffs')}
                         className="mt-5 bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
                     >
                         Quay về danh sách
@@ -244,7 +244,7 @@ function UpdateStaff() {
                                 <button
                                     type="button"
                                     className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                                    onClick={() => navigate('/staff')}
+                                    onClick={() => navigate('/staffs')}
                                 >
                                     Quay về danh sách
                                 </button>

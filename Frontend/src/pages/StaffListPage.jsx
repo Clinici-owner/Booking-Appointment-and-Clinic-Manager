@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
 import AdminNavSidebar from '../components/AdminNavSidebar';
 import { listStaff } from '../services/staffService';
 
@@ -56,7 +55,7 @@ function StaffList() {
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen">
             <div className="flex-1 flex flex-col">
-                <Header />
+                {/* <Header /> */}
                 <div className="flex">
                     <AdminNavSidebar />
                     <div className="w-full max-w-6xl mx-auto p-6">
@@ -67,7 +66,7 @@ function StaffList() {
                             <button
                                 className="bg-[#00BFA6] text-white text-lg font-semibold rounded-lg py-4 px-8 hover:bg-[#00a88f] transition-colors"
                                 type="button"
-                                onClick={() => navigate('/staff/add')}
+                                onClick={() => navigate('/staffs/add')}
                             >
                                 Thêm nhân viên mới
                             </button>
