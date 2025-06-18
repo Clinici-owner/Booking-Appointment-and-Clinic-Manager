@@ -20,7 +20,7 @@ function StaffDetailPage() {
     useEffect(() => {
         if (!id) {
             console.warn('Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách.');
-            navigate('/staffs');
+            navigate('/admin/staffs');
             return;
         }
 
@@ -95,7 +95,7 @@ function StaffDetailPage() {
                     <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
-                        onClick={() => navigate('/staffs')}
+                        onClick={() => navigate('/admin/staffs')}
                         className="mt-5 bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
                     >
                         Quay về danh sách
@@ -113,9 +113,8 @@ function StaffDetailPage() {
     const isLocked = staff.status === 'locked';
 
     return (
-        <div className="flex bg-[#F3F6F9] min-h-screen">
+        <div className="flex min-h-screen">
             <div className="flex-1 flex flex-col">
-                <Header />
             <div className="flex">
                 <AdminNavSidebar />
                 <div className="w-full max-w-6xl mx-auto p-6">
@@ -200,7 +199,9 @@ function StaffDetailPage() {
                                 <input
                                     id="role"
                                     type="text"
-                                    value={staff.role ? staff.role.charAt(0).toUpperCase() + staff.role.slice(1) : ''}
+                                    value={staff.role === 'doctor' ? 'Bác sĩ' :
+                                           staff.role === 'technician' ? 'Kỹ thuật viên' :
+                                           staff.role === 'receptionist' ? 'Lễ tân' : staff.role}
                                     readOnly
                                     className="w-48 bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
                                 />
@@ -221,7 +222,7 @@ function StaffDetailPage() {
                                 <button
                                     type="button"
                                     className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                                    onClick={() => navigate(`/staffs/update`, { state: { id: staff._id } })}
+                                    onClick={() => navigate(`/admin/staffs/update`, { state: { id: staff._id } })}
                                 >
                                     Chỉnh sửa
                                 </button>
@@ -243,7 +244,7 @@ function StaffDetailPage() {
                                 <button
                                     type="button"
                                     className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
-                                    onClick={() => navigate('/staffs')}
+                                    onClick={() => navigate('/admin/staffs')}
                                 >
                                     Quay về danh sách
                                 </button>

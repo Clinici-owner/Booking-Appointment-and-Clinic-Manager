@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; 
-import AdminNavSidebar from '../components/AdminNavSidebar'; 
+import AdminNavSidebar from '../components/AdminNavSidebar';
+import Header from '../components/Header';
 import { getStaffById, updateStaff } from '../services/staffService';
 
 function UpdateStaff() {
@@ -12,11 +12,11 @@ function UpdateStaff() {
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);     
     const [notification, setNotification] = useState(null); 
-
+    
     useEffect(() => {
         if (!staffId) {
             console.warn('Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách.');
-            navigate('/staffs');
+            navigate('/admin/staffs');
             return;
         }
 
@@ -60,7 +60,7 @@ function UpdateStaff() {
             // Clear notification after 3 seconds
             setTimeout(() => setNotification(null), 2000);
             // Sau khi cập nhật thành công, có thể quay lại trang chi tiết hoặc danh sách
-            setTimeout(() => navigate('/staffs'), 2000); // Chuyển hướng sau 3 giây
+            setTimeout(() => navigate('/admin/staffs'), 2000); // Chuyển hướng sau 3 giây
         } catch (error) {
             console.error('Lỗi khi cập nhật:', error);
             // Cố gắng lấy thông báo lỗi từ server nếu có
@@ -92,7 +92,7 @@ function UpdateStaff() {
                     <Header />
                     <div className="text-center py-15 text-xl text-red-500">{error}</div>
                     <button
-                        onClick={() => navigate('/staffs')}
+                        onClick={() => navigate('/admin/staffs')}
                         className="mt-5 bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
                     >
                         Quay về danh sách
@@ -110,7 +110,6 @@ function UpdateStaff() {
     return (
         <div className="flex bg-[#F3F6F9] min-h-screen">
             <div className="flex-1 flex flex-col">
-                <Header />
                 <div className="flex">
                     <AdminNavSidebar />
                 <div className="w-full max-w-6xl mx-auto p-8">
@@ -215,7 +214,6 @@ function UpdateStaff() {
                                     <option value="receptionist">Lễ tân</option>
                                     <option value="doctor">Bác sĩ</option>
                                     <option value="technician">Kỹ thuật viên</option>
-                                    <option value="admin">Quản trị viên</option>
                                 </select>
                             </div>
                             {/* Giới tính */}
@@ -244,7 +242,7 @@ function UpdateStaff() {
                                 <button
                                     type="button"
                                     className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                                    onClick={() => navigate('/staffs')}
+                                    onClick={() => navigate('/admin/staffs')}
                                 >
                                     Quay về danh sách
                                 </button>

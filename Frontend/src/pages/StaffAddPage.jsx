@@ -99,7 +99,7 @@ function AddStaff() {
             await createStaff(formData);
             setNotification('Tạo nhân viên thành công!');
             setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/staff'), 3000);
+            setTimeout(() => navigate('/admin/staffs'), 3000);
         } catch (error) {
             console.error('Lỗi tạo nhân viên:', error);
             setNotification('Tạo nhân viên thất bại!');
@@ -118,7 +118,7 @@ function AddStaff() {
             await importStaffExcel(excelFile);
             setNotification('Import thành công!');
             setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/staffs'), 2000);
+            setTimeout(() => navigate('/admin/staffs'), 2000);
         } catch (error) {
             console.error('Lỗi import Excel:', error);
             if (error.response) {
@@ -304,7 +304,6 @@ function AddStaff() {
                                     <option value="receptionist">Lễ tân</option>
                                     <option value="doctor">Bác sĩ</option>
                                     <option value="technician">Kỹ thuật viên</option>
-                                    <option value="admin">Quản trị viên</option>
                                 </select>
                             </div>
                             {/* Giới tính */}
@@ -335,7 +334,7 @@ function AddStaff() {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => navigate('/staffs')}
+                                        onClick={() => navigate('/admin/staffs')}
                                         className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
                                     >
                                         Quay về danh sách

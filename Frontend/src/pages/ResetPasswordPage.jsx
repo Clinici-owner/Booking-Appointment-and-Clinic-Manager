@@ -45,14 +45,14 @@ const ResetPasswordPage = () => {
                     />
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-                    <h1 className="text-[32px] font-extrabold text-[#2a2e83] mb-6">
+                    <h1 className="text-[32px] font-extrabold text-custom-blue mb-6">
                         Xác nhận đặt lại mật khẩu
                     </h1>
 
                     <form className="w-full max-w-md" onSubmit={handleSubmit}>
                         {/* Mật khẩu */}
                         <label
-                            className="block text-[#2a2e83] text-sm font-medium mb-1"
+                            className="block text-custom-blue text-sm font-medium mb-1"
                             htmlFor="password"
                         >
                             Mật khẩu mới
@@ -81,7 +81,7 @@ const ResetPasswordPage = () => {
 
                         {/* Xác nhận mật khẩu */}
                         <label
-                            className="block text-[#2a2e83] text-sm font-medium mb-1"
+                            className="block text-custom-blue text-sm font-medium mb-1"
                             htmlFor="confirmPassword"
                         >
                             Xác nhận mật khẩu mới
@@ -91,8 +91,14 @@ const ResetPasswordPage = () => {
                                 id="confirmPassword"
                                 type={showPassword ? "text" : "password"}
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full border border-[#51A9FF] rounded-xl py-3 px-5 pr-12 text-[#2a2e83] text-base outline-none"
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value);
+                                    if (e.target.value !== password) {
+                                        setErrorMsg("Mật khẩu xác nhận không khớp.");
+                                    } else {
+                                        setErrorMsg("");
+                                    }
+                                }} className="w-full border border-[#51A9FF] rounded-xl py-3 px-5 pr-12 text-[#2a2e83] text-base outline-none"
                             />
 
                             <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"} absolute right-4 top-1/2 -translate-y-1/2 text-[#51A9FF] text-lg cursor-pointer`}
@@ -120,7 +126,7 @@ const ResetPasswordPage = () => {
                                 textTransform: "none",
                                 width: "100%",
                                 fontWeight: 700,
-                                "&:hover": { backgroundColor: "#2a2e83" },
+                                "&:hover": { backgroundColor: "#006dff" },
                             }}
                         >
                             Xác nhận

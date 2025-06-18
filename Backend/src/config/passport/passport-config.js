@@ -17,8 +17,8 @@ passport.use(
         let user = await User.findOne({ email: profile.emails[0].value });
         if (user) {
           // Cập nhật thông tin nếu người dùng đã tồn tại
-          user.fullName = profile.displayName || user.fullName;
-          user.avatar = profile.photos[0].value || user.avatar;
+          user.fullName = user.fullName || profile.displayName;
+          user.avatar = user.avatar || profile.photos[0].value;
           user.status = "active"; // Cập nhật trạng thái khi đăng nhập thành công
           await user.save();
         } else {

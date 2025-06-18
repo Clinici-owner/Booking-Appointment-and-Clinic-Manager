@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminNavSidebar from '../components/AdminNavSidebar';
+
 import { listStaff } from '../services/staffService';
 
 function StaffList() {
@@ -35,7 +35,7 @@ function StaffList() {
     };
 
     const handleRowClick = (staffId) => {
-        navigate('/staff/detail', { state: { id: staffId } });
+        navigate('/admin/staffs/detail', { state: { id: staffId } });
     };
 
     const filteredStaff = staffList.filter((staff) => {
@@ -53,11 +53,9 @@ function StaffList() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <div className="flex bg-[#F3F6F9] min-h-screen">
+        <div className="flex min-h-screen">
             <div className="flex-1 flex flex-col">
-                {/* <Header /> */}
                 <div className="flex">
-                    <AdminNavSidebar />
                     <div className="w-full max-w-6xl mx-auto p-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                             <h2 className="text-[#212B36] font-bold text-4xl leading-8">
@@ -66,7 +64,7 @@ function StaffList() {
                             <button
                                 className="bg-[#00BFA6] text-white text-lg font-semibold rounded-lg py-4 px-8 hover:bg-[#00a88f] transition-colors"
                                 type="button"
-                                onClick={() => navigate('/staffs/add')}
+                                onClick={() => navigate('/admin/staffs/add')}
                             >
                                 Thêm nhân viên mới
                             </button>
@@ -92,7 +90,6 @@ function StaffList() {
                                 <option value="doctor">Bác sĩ</option>
                                 <option value="technician">Kỹ thuật viên</option>
                                 <option value="receptionist">Lễ tân</option>
-                                <option value="admin">Quản trị viên</option>
                             </select>
                         </div>
                         <div className="overflow-x-auto rounded-lg border border-[#D9D9D9] bg-white">
@@ -131,8 +128,7 @@ function StaffList() {
                                                 <td className="py-6 px-6 w-[15%] capitalize">
                                                     {staff.role === 'doctor' ? 'Bác sĩ' :
                                                     staff.role === 'technician' ? 'Kỹ thuật viên' :
-                                                    staff.role === 'receptionist' ? 'Lễ tân' :
-                                                    staff.role === 'admin' ? 'Quản trị viên' : staff.role}
+                                                    staff.role === 'receptionist' ? 'Lễ tân' : staff.role}
                                                 </td>
                                                 <td className="py-6 px-6 w-[30%]">{staff.email}</td>
                                             </tr>
