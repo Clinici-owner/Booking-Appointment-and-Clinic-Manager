@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 
 import PersonIcon from "@mui/icons-material/Person";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import AssignmentIndOutlinedIcon from "@mui/icons-material/AssignmentIndOutlined";
-import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";

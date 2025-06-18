@@ -17,8 +17,6 @@ function Header() {
   const location = useLocation();
 
   const userData = JSON.parse(sessionStorage.getItem("user"));
-  console.log("userData in Header:", userData);
-
   const isActive = (path) => location.pathname === path;
 
   return (
