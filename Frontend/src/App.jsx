@@ -25,7 +25,23 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      
       <Routes>
+        {AppRoute.map((route, index) => {
+          const Layout = route.layout || React.Fragment;
+          const Page = route.page;
+          return (
+            <Route
+              key={index}
+              path={route.path}
+              element={
+                <Layout>
+                  <Page />
+                </Layout>
+              }
+            />
+          );
+        })}
         <Route path="/staff" element={<StaffList />} />
         <Route path="/staff/add" element={<AddStaff />} />
         <Route path="/staff/update" element={<UpdateStaff />} />
