@@ -1,6 +1,4 @@
 import React from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import BannerName from "../components/BannerName";
 import { Container } from "@mui/material";
 
@@ -12,7 +10,6 @@ import GiaTriCotLoi from "../assets/images/GiaTriCotLoi.jpg";
 function AboutUsPage() {
   return (
     <div>
-      <Header />
       <BannerName Text="Về chúng tôi" />
       <section className="bg-white py-16 px-4 sm:px-6 lg:px-8">
         <Container maxWidth="lg">
@@ -214,7 +211,6 @@ function AboutUsPage() {
           </div>
         </Container>
       </section>
-      <Footer />
     </div>
   );
 }

@@ -3,9 +3,8 @@ import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import AdminHeader from '../components/AdminHeader';
-import Header from '../components/Header';
 import AdminNavSidebar from '../components/AdminNavSidebar';
+import Header from '../components/Header';
 import { createStaff, importStaffExcel } from '../services/staffService';
 
 function AddStaff() {

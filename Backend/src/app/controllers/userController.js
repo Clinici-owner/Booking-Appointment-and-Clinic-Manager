@@ -236,6 +236,64 @@ class userController {
       res.status(500).json({ message: "Lỗi server", error });
     }
   }
+async  getUserProfileByUserID(req, res, next) {
+  try {
+    // Đọc userId từ query params thay vì req.body.user
+    const userId = req.query.userId
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "userId là bắt buộc" })
+    }
+
+    const user = await User.findById(userId).select("-password -otp -otpExpires")
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Người dùng không tồn tại" })
+    }
+
+    res.status(200).json({ success: true, data: { user } })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+async  updateUserProfile(req, res, next) {
+  try {
+    const { userId, fullName, phone, address, dob, gender, avatar } = req.body
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "userId là bắt buộc" })
+    }
+
+    // Tạo object chứa các field cần update
+    const updateData = {}
+    if (fullName !== undefined) updateData.fullName = fullName
+    if (phone !== undefined) updateData.phone = phone
+    if (address !== undefined) updateData.address = address
+    if (dob !== undefined) updateData.dob = dob
+    if (gender !== undefined) updateData.gender = gender
+    if (avatar !== undefined) updateData.avatar = avatar
+
+    // Update user với các field mới
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      new: true, // Trả về document sau khi update
+      runValidators: true, // Chạy validation
+    }).select("-password -otp -otpExpires")
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Người dùng không tồn tại" })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Cập nhật thông tin thành công",
+      data: { user },
+    })
+  } catch (error) {
+    console.error("Error in updateUserProfile:", error)
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
 }
 
 module.exports = new userController();
