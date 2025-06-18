@@ -24,13 +24,13 @@ const ForgotPasswordPage = () => {
     <div className="w-screen h-screen flex items-center justify-center bg-[#FFF] p-4">
       <div className="bg-white w-full max-w-5xl h-[600px] flex shadow-2xl overflow-hidden overflow-hidden rounded-[40px]">
         <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-          <h1 className="text-[32px] font-extrabold text-[#2a2e83] mb-6">
+          <h1 className="text-[32px] font-extrabold text-custom-blue mb-6">
             Quên Mật Khẩu
           </h1>
 
           <form className="w-full max-w-md" onSubmit={handleSubmit}>
             <label
-              className="block text-[#2a2e83] text-sm font-medium mb-1"
+              className="block text-custom-blue text-sm font-medium mb-1"
               htmlFor="email"
             >
               EMAIL
@@ -57,7 +57,7 @@ const ForgotPasswordPage = () => {
                 fontSize: "1rem",
                 textTransform: "none",
                 width: "100%",
-                "&:hover": { backgroundColor: "#2a2e83" },
+                "&:hover": { backgroundColor: "#006dff" },
               }}
             >
               Tiếp Tục

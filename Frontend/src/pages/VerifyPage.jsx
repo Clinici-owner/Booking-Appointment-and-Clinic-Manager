@@ -78,13 +78,13 @@ const OTPVerifyPage = () => {
         <div className="bg-white w-full max-w-5xl h-[500px] flex shadow-2xl rounded-3xl overflow-hidden">
           {/* Left Section */}
           <div className="flex-1 flex flex-col items-center justify-center px-12 py-8">
-            <h1 className="text-[28px] font-extrabold text-[#2a2e83] mb-6">
+            <h1 className="text-[28px] font-extrabold text-custom-blue mb-6">
               Xác nhận OTP
             </h1>
 
             <div className="mb-4 flex flex-col items-center">
-              <i className="fas fa-mobile-alt text-3xl text-[##2a2e83] mb-2"></i>
-              <span className="text-sm text-[#2a2e83]">Nhập mã</span>
+              <i className="fas fa-mobile-alt text-3xl text-custom-blue mb-2"></i>
+              <span className="text-sm text-custom-blue">Nhập mã</span>
             </div>
 
             <form onSubmit={handleSubmit} className="mb-6 flex space-x-2">
@@ -105,12 +105,12 @@ const OTPVerifyPage = () => {
             <button
               type="submit"
               onClick={handleSubmit}
-              className="bg-[#2a2e83] text-white px-6 py-2 rounded-full hover:bg-[#1f2230] transition-all"
+              className="bg-custom-blue text-white px-6 py-2 rounded-full hover:bg-custom-bluehover2 hover:cursor-pointer transition-all"
             >
               Xác nhận
             </button>
 
-            <a href="/register" className="text-[#2a2e83] mt-4">
+            <a href="/register" className="text-custom-blue mt-4">
               <ArrowBackIcon className="mr-1" />
               Quay lại
             </a>
