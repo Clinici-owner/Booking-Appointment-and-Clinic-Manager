@@ -35,12 +35,8 @@ const LoginPage = () => {
         if (user) {
           const parsedUser = JSON.parse(user);
           if (parsedUser && parsedUser._id) {
-            console.log("User already logged in:", parsedUser);
-
             window.location.href = "/";
           }
-        } else {
-          console.log("No user session found.");
         }
       } catch (error) {
         console.error("Error retrieving session user:", error);
