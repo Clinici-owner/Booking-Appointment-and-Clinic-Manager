@@ -67,7 +67,7 @@ function StaffList() {
                                 <i className="fas fa-search text-[#637381] mr-3 text-lg"></i>
                                 <input
                                     className="w-full text-base placeholder:text-[#637381] focus:outline-none bg-transparent"
-                                    placeholder="Search by name..."
+                                    placeholder="Tìm kiếm theo tên..."
                                     type="text"
                                     value={searchName}
                                     onChange={handleSearchChange}
@@ -101,7 +101,7 @@ function StaffList() {
                                         currentStaff.map((staff, index) => (
                                             <tr
                                                 key={staff._id}
-                                                className="border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50"
+                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white' : ''}`}
                                                 onClick={() => handleRowClick(staff._id)}
                                             >
                                                 <td className="py-6 px-6 font-normal w-[10%]">
