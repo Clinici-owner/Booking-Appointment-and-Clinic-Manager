@@ -12,6 +12,7 @@ function UpdateStaff() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -19,85 +20,102 @@ function UpdateStaff() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
 
-
   useEffect(() => {
     fetch('https://provinces.open-api.vn/api/p/')
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch provinces');
+        return response.json();
+      })
       .then((data) => setProvinces(data))
-      .catch((error) => console.error('Error fetching provinces:', error));
+      .catch((error) => {
+        console.error('Error fetching provinces:', error);
+        setError('Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại sau.');
+      });
   }, []);
-
 
   useEffect(() => {
     if (selectedProvince) {
-      fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`)
-        .then((response) => response.json())
-        .then((data) => setDistricts(data.districts || []))
-        .catch((error) => console.error('Error fetching districts:', error));
       setDistricts([]);
       setWards([]);
       setSelectedDistrict('');
       setSelectedWard('');
+      fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`)
+        .then((response) => {
+          if (!response.ok) throw new Error('Failed to fetch districts');
+          return response.json();
+        })
+        .then((data) => setDistricts(data.districts || []))
+        .catch((error) => {
+          console.error('Error fetching districts:', error);
+          setError('Không thể tải danh sách quận/huyện. Vui lòng kiểm tra kết nối.');
+        });
     }
   }, [selectedProvince]);
 
   useEffect(() => {
     if (selectedDistrict) {
-      fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`)
-        .then((response) => response.json())
-        .then((data) => setWards(data.wards || []))
-        .catch((error) => console.error('Error fetching wards:', error));
       setWards([]);
       setSelectedWard('');
+      fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`)
+        .then((response) => {
+          if (!response.ok) throw new Error('Failed to fetch wards');
+          return response.json();
+        })
+        .then((data) => setWards(data.wards || []))
+        .catch((error) => {
+          console.error('Error fetching wards:', error);
+          setError('Không thể tải danh sách phường/xã. Vui lòng kiểm tra kết nối.');
+        });
     }
   }, [selectedDistrict]);
 
-  
   useEffect(() => {
     if (staff?.address && provinces.length > 0) {
       const addressParts = staff.address.split(', ').map(part => part.trim());
-      if (addressParts.length === 3) {
-        const [wardName, districtName, provinceName] = addressParts;
+      if (addressParts.length >= 3) {
+        const provinceName = addressParts[addressParts.length - 1];
+        const districtName = addressParts[addressParts.length - 2];
+        const wardName = addressParts[addressParts.length - 3];
+        const specificAddress = addressParts.slice(0, addressParts.length - 3).join(', ') || '';
+        setSelectedProvince('');
+        setSelectedDistrict('');
+        setSelectedWard('');
+        setStaff((prev) => ({ ...prev, specificAddress }));
         const province = provinces.find((p) => p.name === provinceName);
         if (province) {
           setSelectedProvince(province.code);
           fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`)
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) throw new Error('Failed to fetch districts for address');
+              return response.json();
+            })
             .then((data) => {
               const district = data.districts.find((d) => d.name === districtName);
               if (district) {
                 setSelectedDistrict(district.code);
                 fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`)
-                  .then((response) => response.json())
+                  .then((response) => {
+                    if (!response.ok) throw new Error('Failed to fetch wards for address');
+                    return response.json();
+                  })
                   .then((data) => {
                     const ward = data.wards.find((w) => w.name === wardName);
                     if (ward) {
                       setSelectedWard(ward.code);
                     }
-                  });
+                  })
+                  .catch((error) => console.error('Error fetching wards for address:', error));
               }
-            });
+            })
+            .catch((error) => console.error('Error fetching districts for address:', error));
         }
       }
     }
-  }, [staff, provinces]);
-
-  
-  useEffect(() => {
-    const provinceName = provinces.find((p) => p.code === parseInt(selectedProvince))?.name || '';
-    const districtName = districts.find((d) => d.code === parseInt(selectedDistrict))?.name || '';
-    const wardName = wards.find((w) => w.code === parseInt(selectedWard))?.name || '';
-    const address = [wardName, districtName, provinceName].filter(Boolean).join(', ');
-    if (address) {
-      setStaff((prev) => ({ ...prev, address }));
-    }
-  }, [selectedProvince, selectedDistrict, selectedWard, provinces, districts, wards]);
+  }, [staff?.address, provinces]);
 
   useEffect(() => {
     if (!staffId) {
-      console.warn(
-        "Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách."
-      );
+      console.warn("Không tìm thấy ID nhân viên trong location state. Điều hướng về trang danh sách.");
       navigate("/admin/staffs");
       return;
     }
@@ -117,33 +135,95 @@ function UpdateStaff() {
     fetchStaff();
   }, [staffId, navigate]);
 
+  const validateField = (name, value) => {
+    const nameRegex = /^[\p{L}\s]+$/u;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{0,11}$/;
+    const cidRegex = /^\d{0,12}$/;
+    const specificAddressRegex = /^[\p{L}\d\s,.-]+$/u;
+
+    switch (name) {
+      case 'fullName':
+        if (value.length > 50 || !nameRegex.test(value)) {
+          return 'Họ tên không hợp lệ. Chỉ được chứa chữ cái, không quá 50 ký tự.';
+        }
+        break;
+      case 'email':
+        if (!emailRegex.test(value)) {
+          return 'Email không hợp lệ.';
+        }
+        break;
+      case 'phone':
+        if (!phoneRegex.test(value)) {
+          return 'Số điện thoại không hợp lệ. Tối đa 11 chữ số.';
+        }
+        break;
+      case 'cidNumber':
+        if (!cidRegex.test(value)) {
+          return 'CMND/CCCD không hợp lệ. Tối đa 12 chữ số.';
+        }
+        break;
+      case 'specificAddress':
+        if (value && !specificAddressRegex.test(value)) {
+          return 'Địa chỉ cụ thể không hợp lệ. Chỉ được chứa chữ cái, số, dấu phẩy, dấu chấm và dấu gạch ngang.';
+        }
+        if (value.length > 100) {
+          return 'Địa chỉ cụ thể không được vượt quá 100 ký tự.';
+        }
+        break;
+      default:
+        return '';
+    }
+    return '';
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (name === "gender") {
-      setStaff({
-        ...staff,
-        [name]: value === "true",
-      });
-    } else {
-      setStaff({
-        ...staff,
-        [name]: type === "checkbox" ? checked : value,
-      });
-    }
+    setStaff((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : name === "gender" ? value === "true" : value,
+      };
+      const errorMessage = validateField(name, updated[name]);
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: errorMessage }));
+      return updated;
+    });
+  };
+
+  const buildAddress = () => {
+    const provinceName = provinces.find((p) => p.code === parseInt(selectedProvince))?.name || '';
+    const districtName = districts.find((d) => d.code === parseInt(selectedDistrict))?.name || '';
+    const wardName = wards.find((w) => w.code === parseInt(selectedWard))?.name || '';
+    const addressParts = [staff?.specificAddress, wardName, districtName, provinceName].filter(Boolean);
+    return addressParts.join(', ');
+  };
+
+  const isValidForm = () => {
+    const newErrors = {};
+    Object.keys(staff).forEach((key) => {
+      const error = validateField(key, staff[key]);
+      if (error) newErrors[key] = error;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setNotification(null);
+    const fullAddress = buildAddress();
+    setStaff((prev) => ({ ...prev, address: fullAddress }));
+    if (!isValidForm()) {
+      return;
+    }
     try {
-      await updateStaff(staffId, staff);
+      await updateStaff(staffId, { ...staff, address: fullAddress });
       setNotification("Đã cập nhật thông tin cá nhân thành công!");
       setTimeout(() => setNotification(null), 2000);
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      const errorMessage =
-        error.response?.data?.message || "Cập nhật thất bại!";
+      const errorMessage = error.response?.data?.message || "Cập nhật thất bại!";
       setNotification(errorMessage);
       setTimeout(() => setNotification(null), 3000);
     }
@@ -182,33 +262,31 @@ function UpdateStaff() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex text-[18px] leading-[1.75]">
       <div className="flex-1 flex flex-col">
         <div className="flex">
-          <div className="w-full max-w-6xl mx-auto p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-5">
-              <h2 className="text-[#212B36] font-bold text-4xl leading-7">
+          <div className="w-full max-w-[1600px] mx-auto p-10">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+              <h2 className="text-[#212B36] font-bold text-4xl leading-6">
                 Cập nhật thông tin nhân viên
               </h2>
             </div>
 
-            {/* Success Notification */}
             {notification && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-5 py-4 rounded-lg mb-8 text-center">
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 text-center">
                 {notification}
               </div>
             )}
 
-            <div className="bg-white rounded-lg border border-[#D9D9D9] p-8">
+            <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
               <form
                 onSubmit={handleSubmit}
-                className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-15 gap-y-8"
+                className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6"
               >
-                {/* Họ và tên */}
                 <div>
                   <label
                     htmlFor="fullName"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     Họ và tên
                   </label>
@@ -220,12 +298,12 @@ function UpdateStaff() {
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
+                  {errors.fullName && <p className="text-sm text-red-600">{errors.fullName}</p>}
                 </div>
-                {/* Email */}
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     Email
                   </label>
@@ -237,12 +315,12 @@ function UpdateStaff() {
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
+                  {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
                 </div>
-                {/* Số điện thoại */}
                 <div>
                   <label
                     htmlFor="phone"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     Số điện thoại
                   </label>
@@ -254,12 +332,12 @@ function UpdateStaff() {
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
+                  {errors.phone && <p className="text-sm text-red-600">{errors.phone}</p>}
                 </div>
-                {/* CMND/CCCD */}
                 <div>
                   <label
                     htmlFor="cidNumber"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     CMND/CCCD
                   </label>
@@ -271,12 +349,31 @@ function UpdateStaff() {
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
+                  {errors.cidNumber && <p className="text-sm text-red-600">{errors.cidNumber}</p>}
                 </div>
-                {/* Ngày sinh */}
+                <div>
+                  <label
+                    htmlFor="role"
+                    className="block text-sm text-gray-700 mb-1"
+                  >
+                    Vai trò
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={staff.role || ""}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  >
+                    <option value="receptionist">Lễ tân</option>
+                    <option value="doctor">Bác sĩ</option>
+                    <option value="technician">Kỹ thuật viên</option>
+                  </select>
+                </div>
                 <div>
                   <label
                     htmlFor="dob"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     Ngày sinh
                   </label>
@@ -293,77 +390,67 @@ function UpdateStaff() {
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
                 </div>
-                {/* Địa chỉ */}
                 <div>
-                  <label className="block text-sm text-gray-700 mb-2">
+                  <label className="block text-sm text-gray-700 mb-1">
                     Địa chỉ
                   </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    <select
-                      value={selectedProvince}
-                      onChange={(e) => setSelectedProvince(e.target.value)}
+                  <div className="grid grid-cols-1 gap-4">
+                    {errors.specificAddress && <p className="text-sm text-red-600">{errors.specificAddress}</p>}
+                    <div className="grid grid-cols-3 gap-4">
+                      <select
+                        value={selectedProvince}
+                        onChange={(e) => setSelectedProvince(e.target.value)}
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      >
+                        <option value="">Tỉnh/Thành phố</option>
+                        {provinces.map((province) => (
+                          <option key={province.code} value={province.code}>
+                            {province.name}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={selectedDistrict}
+                        onChange={(e) => setSelectedDistrict(e.target.value)}
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        disabled={!selectedProvince}
+                      >
+                        <option value="">Quận/Huyện</option>
+                        {districts.map((district) => (
+                          <option key={district.code} value={district.code}>
+                            {district.name}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={selectedWard}
+                        onChange={(e) => setSelectedWard(e.target.value)}
+                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        disabled={!selectedDistrict}
+                      >
+                        <option value="">Phường/Xã</option>
+                        {wards.map((ward) => (
+                          <option key={ward.code} value={ward.code}>
+                            {ward.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      id="specificAddress"
+                      name="specificAddress"
+                      type="text"
+                      placeholder="Địa chỉ cụ thể (số nhà, đường)"
+                      value={staff.specificAddress || ""}
+                      onChange={handleChange}
                       className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                    >
-                      <option value="">Tỉnh/Thành phố</option>
-                      {provinces.map((province) => (
-                        <option key={province.code} value={province.code}>
-                          {province.name}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                      disabled={!selectedProvince}
-                    >
-                      <option value="">Quận/Huyện</option>
-                      {districts.map((district) => (
-                        <option key={district.code} value={district.code}>
-                          {district.name}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={selectedWard}
-                      onChange={(e) => setSelectedWard(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                      disabled={!selectedDistrict}
-                    >
-                      <option value="">Phường/Xã</option>
-                      {wards.map((ward) => (
-                        <option key={ward.code} value={ward.code}>
-                          {ward.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
-                {/* Vai trò */}
-                <div>
-                  <label
-                    htmlFor="role"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Vai trò
-                  </label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={staff.role || ""}
-                    onChange={handleChange}
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                  >
-                    <option value="receptionist">Lễ tân</option>
-                    <option value="doctor">Bác sĩ</option>
-                    <option value="technician">Kỹ thuật viên</option>
-                  </select>
-                </div>
-                {/* Giới tính */}
                 <div>
                   <label
                     htmlFor="gender"
-                    className="block text-sm text-gray-700 mb-2"
+                    className="block text-sm text-gray-700 mb-1"
                   >
                     Giới tính
                   </label>
@@ -378,22 +465,22 @@ function UpdateStaff() {
                     <option value="false">Nữ</option>
                   </select>
                 </div>
-
-                {/* Các nút */}
-                <div className="col-span-full flex justify-center space-x-4 mt-10">
-                  <button
-                    type="submit"
-                    className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                  >
-                    Cập nhật
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                    onClick={() => navigate("/admin/staffs")}
-                  >
-                    Quay về danh sách
-                  </button>
+                <div className="col-span-full flex justify-between items-center mt-8">
+                  <div className="flex space-x-4">
+                    <button
+                      type="submit"
+                      className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
+                    >
+                      Cập nhật
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
+                      onClick={() => navigate("/admin/staffs")}
+                    >
+                      Quay về danh sách
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
