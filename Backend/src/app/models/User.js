@@ -7,7 +7,7 @@ const User = new Schema({
     fullName: { type: String, default: 'Người dùng mới' },
     dob: { type: Date },
     role: { type: String, enum: ['patient', 'doctor', 'admin', 'technician', 'receptionist'], default: 'patient' },
-    avatar: { type: String, default: '/img/dafaultAvatar.jpg' },
+    avatar: { type: String, default: 'https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg' },
     address: { type: String, default: '' },
     phone: { type: String },
     email: { type: String, required: true },

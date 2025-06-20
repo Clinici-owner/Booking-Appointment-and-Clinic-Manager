@@ -7,6 +7,7 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      
       <Routes>
         {AppRoute.map((route, index) => {
           const Layout = route.layout || React.Fragment;

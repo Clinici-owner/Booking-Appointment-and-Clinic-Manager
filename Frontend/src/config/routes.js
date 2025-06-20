@@ -1,6 +1,7 @@
 import React from "react";
 import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
+import AdminLayout from "../layouts/admin-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -28,6 +29,8 @@ const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCall
 const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
 
+const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
 // Cấu hình route
@@ -50,10 +53,10 @@ const AppRoute = [
   { path: ROUTE_PATH.RESET_PASSWORD, page: ResetPasswordPage },
 
   // Staff
-  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: MainLayout },
-  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: MainLayout },
-  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: MainLayout },
-  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: MainLayout },
+  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout },
+  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout },
+  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
@@ -61,6 +64,9 @@ const AppRoute = [
   // User Profile
   { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },
   { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
+
+  //Service Manager
+  {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

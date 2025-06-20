@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { saveAs } from 'file-saver';
+import { useState, useEffect } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import AdminHeader from '../components/AdminHeader';
+import * as XLSX from 'xlsx';
 import AdminNavSidebar from '../components/AdminNavSidebar';
 import { createStaff, importStaffExcel } from '../services/staffService';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 function AddStaff() {
     const [formData, setFormData] = useState({
@@ -19,7 +18,56 @@ function AddStaff() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [passwordMismatch, setPasswordMismatch] = useState(false);
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+    const [selectedProvince, setSelectedProvince] = useState('');
+    const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [selectedWard, setSelectedWard] = useState('');
     const navigate = useNavigate();
+
+   
+    useEffect(() => {
+        fetch('https://provinces.open-api.vn/api/p/')
+            .then((response) => response.json())
+            .then((data) => setProvinces(data))
+            .catch((error) => console.error('Error fetching provinces:', error));
+    }, []);
+
+  
+    useEffect(() => {
+        if (selectedProvince) {
+            fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`)
+                .then((response) => response.json())
+                .then((data) => setDistricts(data.districts || []))
+                .catch((error) => console.error('Error fetching districts:', error));
+            setDistricts([]);
+            setWards([]);
+            setSelectedDistrict('');
+            setSelectedWard('');
+        }
+    }, [selectedProvince]);
+
+   
+    useEffect(() => {
+        if (selectedDistrict) {
+            fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`)
+                .then((response) => response.json())
+                .then((data) => setWards(data.wards || []))
+                .catch((error) => console.error('Error fetching wards:', error));
+            setWards([]);
+            setSelectedWard('');
+        }
+    }, [selectedDistrict]);
+
+    
+    useEffect(() => {
+        const provinceName = provinces.find((p) => p.code === parseInt(selectedProvince))?.name || '';
+        const districtName = districts.find((d) => d.code === parseInt(selectedDistrict))?.name || '';
+        const wardName = wards.find((w) => w.code === parseInt(selectedWard))?.name || '';
+        const address = [wardName, districtName, provinceName].filter(Boolean).join(', ');
+        setFormData((prev) => ({ ...prev, address }));
+    }, [selectedProvince, selectedDistrict, selectedWard, provinces, districts, wards]);
 
     const validateField = (name, value) => {
         const nameRegex = /^[\p{L}\s]+$/u;
@@ -99,7 +147,7 @@ function AddStaff() {
             await createStaff(formData);
             setNotification('Tạo nhân viên thành công!');
             setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/staff'), 3000);
+            setTimeout(() => navigate('/admin/staffs'), 3000);
         } catch (error) {
             console.error('Lỗi tạo nhân viên:', error);
             setNotification('Tạo nhân viên thất bại!');
@@ -118,7 +166,7 @@ function AddStaff() {
             await importStaffExcel(excelFile);
             setNotification('Import thành công!');
             setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/staff'), 2000);
+            setTimeout(() => navigate('/admin/staffs'), 2000);
         } catch (error) {
             console.error('Lỗi import Excel:', error);
             if (error.response) {
@@ -133,8 +181,8 @@ function AddStaff() {
     const handleDownloadTemplate = () => {
         const data = [
             ['cidNumber', 'password', 'fullName', 'dob', 'role', 'phone', 'email', 'gender', 'address'],
-            ['123456789', 'password123', 'Nguyễn Văn A', '1990-01-01', 'receptionist', '0901234567', 'nguyenvana@example.com', 'TRUE', '123 Đường ABC, TP.HCM'],
-            ['987654321', 'abc123456', 'Trần Thị B', '1992-06-15', 'doctor', '0912345678', 'tranthib@example.com', 'FALSE', '456 Đường XYZ, Hà Nội']
+            ['123456789', 'password123', 'Nguyễn Văn A', '1990-01-01', 'receptionist', '0901234567', 'nguyenvana@example.com', 'TRUE', 'Phường 1, Quận 1, TP.HCM'],
+            ['987654321', 'abc123456', 'Trần Thị B', '1992-06-15', 'doctor', '0912345678', 'tranthib@example.com', 'FALSE', 'Phường 2, Quận Hoàn Kiếm, Hà Nội']
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(data);
@@ -142,17 +190,16 @@ function AddStaff() {
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
         const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(blob, 'import_staff_template.xlsx');
+        saveAs(blob, 'MAU_EXCEL.xlsx');
     };
 
     return (
-        <div className="flex bg-[#F3F6F9] min-h-screen text-[18px] leading-[1.75]">
-            <AdminNavSidebar />
+        <div className="flex text-[18px] leading-[1.75]">
             <div className="flex-1 flex flex-col">
-                <AdminHeader />
-                <div className="w-full max-w-[1600px] mx-auto p-10">
+                <div className="flex">
+                    <div className="w-full max-w-[1600px] mx-auto p-10">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                        <h2 className="text-[#212B36] font-semibold text-2xl leading-6">
+                        <h2 className="text-[#212B36] font-bold text-4xl leading-6">
                             Tạo nhân viên mới
                         </h2>
                     </div>
@@ -245,7 +292,18 @@ function AddStaff() {
                                 </div>
                                 {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
                             </div>
-                            {/* Nhập lại mật khẩu */}
+                            {/* Ngày sinh */}
+                            <div>
+                                <label htmlFor="dob" className="block text-sm text-gray-700 mb-1">Ngày sinh</label>
+                                <input
+                                    id="dob"
+                                    name="dob"
+                                    type="date"
+                                    onChange={handleChange}
+                                    value={formData.dob}
+                                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                />
+                            </div>
                             <div>
                                 <label htmlFor="confirmPassword" className="block text-sm text-gray-700 mb-1">Nhập lại mật khẩu</label>
                                 <div className="relative flex items-center">
@@ -265,30 +323,49 @@ function AddStaff() {
                                 </div>
                                 {passwordMismatch && <p className="text-sm font-semibold text-red-600">Mật khẩu không khớp.</p>}
                             </div>
-                            {/* Ngày sinh */}
-                            <div>
-                                <label htmlFor="dob" className="block text-sm text-gray-700 mb-1">Ngày sinh</label>
-                                <input
-                                    id="dob"
-                                    name="dob"
-                                    type="date"
-                                    onChange={handleChange}
-                                    value={formData.dob}
-                                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                />
-                            </div>
                             {/* Địa chỉ */}
                             <div>
-                                <label htmlFor="address" className="block text-sm text-gray-700 mb-1">Địa chỉ</label>
-                                <input
-                                    id="address"
-                                    name="address"
-                                    type="text"
-                                    placeholder="Địa chỉ"
-                                    onChange={handleChange}
-                                    value={formData.address}
-                                    className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                />
+                                <label className="block text-sm text-gray-700 mb-1">Địa chỉ</label>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <select
+                                        value={selectedProvince}
+                                        onChange={(e) => setSelectedProvince(e.target.value)}
+                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                    >
+                                        <option value="">Tỉnh/Thành phố</option>
+                                        {provinces.map((province) => (
+                                            <option key={province.code} value={province.code}>
+                                                {province.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={selectedDistrict}
+                                        onChange={(e) => setSelectedDistrict(e.target.value)}
+                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        disabled={!selectedProvince}
+                                    >
+                                        <option value="">Quận/Huyện</option>
+                                        {districts.map((district) => (
+                                            <option key={district.code} value={district.code}>
+                                                {district.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={selectedWard}
+                                        onChange={(e) => setSelectedWard(e.target.value)}
+                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        disabled={!selectedDistrict}
+                                    >
+                                        <option value="">Phường/Xã</option>
+                                        {wards.map((ward) => (
+                                            <option key={ward.code} value={ward.code}>
+                                                {ward.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                             {/* Vai trò */}
                             <div>
@@ -303,7 +380,6 @@ function AddStaff() {
                                     <option value="receptionist">Lễ tân</option>
                                     <option value="doctor">Bác sĩ</option>
                                     <option value="technician">Kỹ thuật viên</option>
-                                    <option value="admin">Quản trị viên</option>
                                 </select>
                             </div>
                             {/* Giới tính */}
@@ -328,14 +404,14 @@ function AddStaff() {
                                 <div className="flex space-x-4">
                                     <button
                                         type="submit"
-                                        className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                        className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
                                     >
                                         Tạo mới
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => navigate('/staff')}
-                                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                        onClick={() => navigate('/admin/staffs')}
+                                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
                                     >
                                         Quay về danh sách
                                     </button>
@@ -343,7 +419,7 @@ function AddStaff() {
                                 <button
                                     type="button"
                                     onClick={handleDownloadTemplate}
-                                    className="bg-green-400 hover:bg-green-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                                    className="bg-green-400 hover:bg-green-500 text-white font-semibold text-sm rounded-lg w-36 h-12"
                                 >
                                     Tải mẫu file Excel
                                 </button>
@@ -356,8 +432,13 @@ function AddStaff() {
                         <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gray-300 z-0"></div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
-                        <label htmlFor="excelInput" className="flex-1 min-w-[180px] px-15 py-4 text-lg font-bold text-white text-center rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer">Chọn tệp Excel</label>
+                    <div className="flex items-center justify-center gap-4 mt-4">
+                        <label
+                            htmlFor="excelInput"
+                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12 cursor-pointer flex items-center justify-center text-center"
+                        >
+                            Chọn tệp Excel
+                        </label>
                         <input
                             id="excelInput"
                             type="file"
@@ -365,9 +446,15 @@ function AddStaff() {
                             onChange={(e) => setExcelFile(e.target.files[0])}
                             style={{ display: 'none' }}
                         />
-                        <button onClick={handleExcelSubmit} className="flex-1 min-w-[180px] px-15 py-4 text-lg font-bold text-white rounded-md bg-blue-600 hover:bg-blue-700 text-center"> Nhập từ Excel</button>
+                        <button
+                            onClick={handleExcelSubmit}
+                            className="font-semibold text-sm rounded-lg w-36 h-12 text-white bg-custom-blue hover:bg-custom-bluehover2 text-center cursor-pointer"
+                        >
+                            Nhập từ Excel
+                        </button>
                         {excelFile && <p className="w-full mt-2 text-sm text-center text-gray-600">Tệp đã chọn: {excelFile.name}</p>}
                     </div>
+                </div>
                 </div>
             </div>
         </div>
