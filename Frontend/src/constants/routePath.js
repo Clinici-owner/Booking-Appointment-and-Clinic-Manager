@@ -22,6 +22,8 @@ export const ROUTE_PATH = {
   UPDATE_STAFF: '/admin/staffs/update',
   STAFF_DETAIL: '/admin/staffs/detail',
 
+  LIST_PATIENTS: '/admin/patients',
+
   // OAuth callback
   GOOGLE_AUTH_CALLBACK: '/google-auth-success',
 

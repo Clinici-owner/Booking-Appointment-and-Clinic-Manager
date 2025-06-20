@@ -257,31 +257,101 @@ async  getUserProfileByUserID(req, res, next) {
   }
 }
 
-async  updateUserProfile(req, res, next) {
+async updateUserProfile(req, res, next) {
   try {
-    const { userId, fullName, phone, address, dob, gender, avatar } = req.body
+    const { userId, ...profileData } = req.body
 
     if (!userId) {
-      return res.status(400).json({ success: false, message: "userId là bắt buộc" })
+      return res.status(400).json({
+        success: false,
+        message: "userId là bắt buộc",
+      })
     }
 
-    // Tạo object chứa các field cần update
+    const allowedFields = ["fullName", "phone", "address", "dob", "gender", "avatar", "cidNumber"]
     const updateData = {}
-    if (fullName !== undefined) updateData.fullName = fullName
-    if (phone !== undefined) updateData.phone = phone
-    if (address !== undefined) updateData.address = address
-    if (dob !== undefined) updateData.dob = dob
-    if (gender !== undefined) updateData.gender = gender
-    if (avatar !== undefined) updateData.avatar = avatar
 
-    // Update user với các field mới
+    allowedFields.forEach((field) => {
+      if (profileData.hasOwnProperty(field)) {
+        if (field === "avatar") {
+          if (profileData[field] && profileData[field] !== "" && profileData[field] !== "/img/dafaultAvatar.jpg") {
+            updateData[field] = profileData[field]
+          } else if (profileData[field] === "") {
+            updateData[field] = "/img/dafaultAvatar.jpg"
+          }
+        } else if (field === "gender") {
+          updateData[field] = profileData[field] === "true" || profileData[field] === true
+        } else if (profileData[field] !== undefined && profileData[field] !== null) {
+          updateData[field] = profileData[field]
+        }
+      }
+    })
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Không có trường hợp lệ để cập nhật",
+      })
+    }
+
+    // Validation cho phone
+    if (updateData.phone) {
+      const phoneRegex = /^[0-9]{10}$/
+      if (!phoneRegex.test(updateData.phone.replace(/\D/g, ""))) {
+        return res.status(400).json({
+          success: false,
+          message: "Số điện thoại phải có đúng 10 số",
+        })
+      }
+    }
+
+    // Validation cho CMND/CCCD
+    if (updateData.cidNumber) {
+      const cidRegex = /^[0-9]{9}$|^[0-9]{12}$/
+      if (!cidRegex.test(updateData.cidNumber)) {
+        return res.status(400).json({
+          success: false,
+          message: "Số CMND phải có 9 số hoặc CCCD phải có 12 số",
+        })
+      }
+
+      const existingUser = await User.findOne({
+        cidNumber: updateData.cidNumber,
+        _id: { $ne: userId },
+      })
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Số CMND/CCCD đã được sử dụng",
+        })
+      }
+    }
+
+    // Validation cho ngày sinh
+    if (updateData.dob) {
+      const birthDate = new Date(updateData.dob)
+      const today = new Date()
+
+      if (birthDate > today) {
+        return res.status(400).json({
+          success: false,
+          message: "Ngày sinh không thể là ngày trong tương lai",
+        })
+      }
+    }
+
+    // Cập nhật user
     const user = await User.findByIdAndUpdate(userId, updateData, {
-      new: true, // Trả về document sau khi update
-      runValidators: true, // Chạy validation
+      new: true,
+      runValidators: true,
     }).select("-password -otp -otpExpires")
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "Người dùng không tồn tại" })
+      return res.status(404).json({
+        success: false,
+        message: "Người dùng không tồn tại",
+      })
     }
 
     res.status(200).json({
@@ -291,9 +361,27 @@ async  updateUserProfile(req, res, next) {
     })
   } catch (error) {
     console.error("Error in updateUserProfile:", error)
-    res.status(500).json({ success: false, message: error.message })
+
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message)
+      return res.status(400).json({
+        success: false,
+        message: messages.join(", "),
+      })
+    }
+
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "ID người dùng không hợp lệ",
+      })
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server: " + error.message,
+    })
   }
 }
 }
-
 module.exports = new userController();

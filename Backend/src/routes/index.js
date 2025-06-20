@@ -4,6 +4,7 @@ const authRouter = require('./auth')
 const serviceRouter = require('./service')
 const documentUploadRouter = require('./documentUpload')
 const specialtiesRouter = require('./specialty')
+const patientRouter = require('./patient')
 
 function route(app) {
     app.use('/api/user', userRouter);
@@ -12,6 +13,7 @@ function route(app) {
     app.use('/api/service', serviceRouter);
     app.use('/api/documents', documentUploadRouter);
     app.use('/api/specialty', specialtiesRouter);
+    app.use('/api/patient', patientRouter);
 }
 
 module.exports = route
