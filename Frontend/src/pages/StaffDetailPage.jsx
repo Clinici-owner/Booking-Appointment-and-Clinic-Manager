@@ -122,7 +122,7 @@ function StaffDetailPage() {
         <div className="flex">
           <div className="w-full max-w-6xl mx-auto p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-5">
-              <h2 className="text-[#212B36] font-bold text-4xl leading-7">
+              <h2 className="text-[#212B36] font-bold text-4xl leading-7 text-center w-full">
                 Thông tin chi tiết nhân viên
               </h2>
             </div>
@@ -135,6 +135,13 @@ function StaffDetailPage() {
             )}
 
             <div className="bg-white rounded-lg border border-[#D9D9D9] p-8">
+              <div className="flex justify-center mb-8">
+                <img
+                  src={staff.avatar || "https://via.placeholder.com/150"}
+                  alt="Avatar nhân viên"
+                  className="w-32 h-32 rounded-full object-cover border border-gray-200"
+                />
+              </div>
               <form className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-15 gap-y-8">
                 {/* Thông tin nhân viên */}
                 <div>
