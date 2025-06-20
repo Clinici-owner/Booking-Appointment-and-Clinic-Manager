@@ -2,12 +2,16 @@ const userRouter = require('./user')
 const staffRouter = require('./staff')
 const authRouter = require('./auth')
 const serviceRouter = require('./service')
+const documentUploadRouter = require('./documentUpload')
+const specialtiesRouter = require('./specialty')
 
 function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
     app.use('/auth/google', authRouter);
     app.use('/api/service', serviceRouter);
+    app.use('/api/documents', documentUploadRouter);
+    app.use('/api/specialty', specialtiesRouter);
 }
 
 module.exports = route
