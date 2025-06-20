@@ -2,48 +2,85 @@ import { useState, useEffect, useRef } from "react"
 import { UserService } from "../services/userService"
 
 function UserProfileUpdatePage() {
-  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [updateLoading, setUpdateLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
-  const [redirectCountdown, setRedirectCountdown] = useState(0)
   const hasInitialized = useRef(false)
 
-  const fetchUserProfile = async () => {
-    console.log("fetchUserProfile called")
+  const [provinces, setProvinces] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [wards, setWards] = useState([])
+  const [selectedProvince, setSelectedProvince] = useState("0")
+  const [selectedDistrict, setSelectedDistrict] = useState("0")
+  const [selectedWard, setSelectedWard] = useState("0")
+  const [detailAddress, setDetailAddress] = useState("")
 
+  const [imageUploading, setImageUploading] = useState(false)
+  const [uploadError, setUploadError] = useState("")
+
+  const CLOUDINARY_CLOUD_NAME = "dqncabikk"
+
+  useEffect(() => {
+    fetch("https://esgoo.net/api-tinhthanh/1/0.htm")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error === 0) setProvinces(data.data)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (selectedProvince === "0") {
+      setDistricts([])
+      setWards([])
+      setSelectedDistrict("0")
+      setSelectedWard("0")
+      return
+    }
+
+    fetch(`https://esgoo.net/api-tinhthanh/2/${selectedProvince}.htm`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error === 0) {
+          setDistricts(data.data)
+          setWards([])
+          setSelectedDistrict("0")
+          setSelectedWard("0")
+        }
+      })
+  }, [selectedProvince])
+
+  useEffect(() => {
+    if (selectedDistrict === "0") {
+      setWards([])
+      setSelectedWard("0")
+      return
+    }
+
+    fetch(`https://esgoo.net/api-tinhthanh/3/${selectedDistrict}.htm`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error === 0) {
+          setWards(data.data)
+          setSelectedWard("0")
+        }
+      })
+  }, [selectedDistrict])
+
+  const fetchUserProfile = async () => {
     try {
       setLoading(true)
-      setError(null)
-
       const storedUser = sessionStorage.getItem("user")
-      let currentUser = null
-
-      if (storedUser) {
-        try {
-          currentUser = JSON.parse(storedUser)
-        } catch (parseError) {
-          console.error("Dữ liệu session không hợp lệ:", storedUser, parseError)
-          setError("Dữ liệu session không hợp lệ")
-          setLoading(false)
-          return
-        }
-      }
-
-      if (!currentUser || !currentUser._id) {
-        console.log("currentUser:", currentUser)
-        setError("Không tìm thấy thông tin người dùng trong session hoặc thiếu id")
-        setLoading(false)
+      if (!storedUser) {
+        setError("Không tìm thấy thông tin người dùng")
         return
       }
 
+      const currentUser = JSON.parse(storedUser)
       const result = await UserService.getUserProfileByUserID(currentUser)
 
       if (result.success) {
-        setUser(result.data.user)
-        // Initialize edit form with current user data
         setEditForm({
           fullName: result.data.user.fullName || "",
           phone: result.data.user.phone || "",
@@ -51,12 +88,13 @@ function UserProfileUpdatePage() {
           dob: result.data.user.dob ? result.data.user.dob.split("T")[0] : "",
           gender: result.data.user.gender,
           avatar: result.data.user.avatar || "",
+          cidNumber: result.data.user.cidNumber || "",
         })
+        setDetailAddress(result.data.user.address || "")
       } else {
-        setError(result.message || "Không thể lấy thông tin người dùng")
+        setError(result.message)
       }
     } catch (err) {
-      console.error("Error in fetchUserProfile:", err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -71,59 +109,124 @@ function UserProfileUpdatePage() {
     }))
   }
 
+  const getFullAddress = () => {
+    const provinceName = provinces.find((p) => p.id === selectedProvince)?.full_name || ""
+    const districtName = districts.find((d) => d.id === selectedDistrict)?.full_name || ""
+    const wardName = wards.find((w) => w.id === selectedWard)?.full_name || ""
+
+    const locationParts = [wardName, districtName, provinceName].filter(Boolean)
+    const locationAddress = locationParts.join(", ")
+
+    if (detailAddress && locationAddress) {
+      return `${detailAddress}, ${locationAddress}`
+    }
+    return locationAddress || detailAddress
+  }
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Vui lòng chọn file hình ảnh")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File không được vượt quá 5MB")
+      return
+    }
+
+    setImageUploading(true)
+    setUploadError("")
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("upload_preset", "ml_default")
+      formData.append("folder", "user_avatars")
+
+      console.log("🔍 Uploading to Cloudinary...")
+      console.log("Cloud name:", CLOUDINARY_CLOUD_NAME)
+
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: "POST",
+        body: formData,
+      })
+
+      console.log("🔍 Cloudinary response status:", response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("❌ Cloudinary error:", errorData)
+        throw new Error(`Upload failed: ${errorData.error?.message || "Unknown error"}`)
+      }
+
+      const data = await response.json()
+      console.log("Cloudinary success:", data)
+      console.log("Secure URL:", data.secure_url)
+
+      setEditForm((prev) => {
+        const newForm = { ...prev, avatar: data.secure_url }
+        console.log("🔍 Updated editForm with avatar:", newForm)
+        return newForm
+      })
+
+      setUploadError("")
+    } catch (error) {
+      console.error("❌ Upload error:", error)
+      setUploadError(`Có lỗi xảy ra khi tải ảnh: ${error.message}`)
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault()
     setUpdateLoading(true)
-    setError(null)
-    setSuccessMessage("")
 
     try {
       const storedUser = sessionStorage.getItem("user")
       const currentUser = JSON.parse(storedUser)
 
-      const result = await UserService.updateUserProfile(currentUser._id, editForm)
+      console.log("🔍 editForm before update:", editForm)
+      console.log("🔍 editForm.avatar:", editForm.avatar)
+
+      const updatedForm = {
+        ...editForm,
+        address: getFullAddress(),
+      }
+
+      console.log("=== FRONTEND DEBUG ===")
+      console.log("User ID:", currentUser._id)
+      console.log("Avatar in updatedForm:", updatedForm.avatar)
+
+      if (!updatedForm.avatar || updatedForm.avatar === "") {
+        console.log("Avatar is empty or undefined!")
+      } else {
+        console.log("Avatar has value:", updatedForm.avatar)
+      }
+
+      const result = await UserService.updateUserProfile(currentUser._id, updatedForm)
+
+      console.log("API Response:", result)
 
       if (result.success) {
-        setUser(result.data.user)
-        setSuccessMessage("Cập nhật thông tin thành công! Đang chuyển về trang profile...")
-        // Update session storage with new data
-        const updatedSessionUser = { ...currentUser, ...result.data.user }
-        sessionStorage.setItem("user", JSON.stringify(updatedSessionUser))
-
-        // Start countdown and redirect
-        setRedirectCountdown(3)
-        const countdownInterval = setInterval(() => {
-          setRedirectCountdown((prev) => {
-            if (prev <= 1) {
-              clearInterval(countdownInterval)
-              window.location.href = "/user-profile"
-              return 0
-            }
-            return prev - 1
-          })
-        }, 1000)
+        setSuccessMessage("Cập nhật thành công!")
+        setTimeout(() => (window.location.href = "/user-profile"), 2000)
       } else {
-        setError(result.message || "Không thể cập nhật thông tin")
+        setError(result.message)
       }
     } catch (err) {
-      console.error("Error updating profile:", err)
+      console.error("Update error:", err)
       setError(err.message)
     } finally {
       setUpdateLoading(false)
     }
   }
 
-  const handleCancel = () => {
-    window.location.href = "/user-profile"
-  }
-
-  const handleBackToProfile = () => {
-    window.location.href = "/user-profile"
-  }
-
   useEffect(() => {
     if (!hasInitialized.current) {
-      console.log("useEffect triggered - First time only")
       hasInitialized.current = true
       fetchUserProfile()
     }
@@ -132,132 +235,42 @@ function UserProfileUpdatePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tải thông tin...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error && !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <div className="text-red-500 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Có lỗi xảy ra</h3>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={fetchUserProfile}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              Thử lại
-            </button>
-            <button
-              onClick={handleBackToProfile}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              Về trang Profile
-            </button>
-          </div>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Chỉnh sửa thông tin cá nhân</h1>
-                <p className="text-gray-600">Cập nhật thông tin của bạn</p>
-              </div>
-            </div>
-            {user && (
-              <img
-                src={user.avatar || "/img/defaultAvatar.jpg"}
-                alt="Avatar"
-                className="w-16 h-16 rounded-full border-2 border-gray-200 object-cover"
-              />
-            )}
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Chỉnh sửa thông tin cá nhân</h1>
         </div>
 
-        {/* Success Message with Countdown */}
         {successMessage && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <p className="text-green-800">{successMessage}</p>
-              </div>
-              {redirectCountdown > 0 && (
-                <div className="flex items-center space-x-2">
-                  <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
-                    {redirectCountdown}s
-                  </div>
-                  <button
-                    onClick={handleBackToProfile}
-                    className="text-green-600 hover:text-green-800 text-sm font-medium underline"
-                  >
-                    Chuyển ngay
-                  </button>
-                </div>
-              )}
-            </div>
+            <p className="text-green-800">{successMessage}</p>
           </div>
         )}
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-              <p className="text-red-800">{error}</p>
-            </div>
+            <p className="text-red-800">{error}</p>
           </div>
         )}
 
-        {/* Edit Form */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <form onSubmit={handleUpdateProfile} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Họ và tên <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên *</label>
                 <input
                   type="text"
                   name="fullName"
                   value={editForm.fullName}
                   onChange={handleInputChange}
                   required
-                  disabled={updateLoading || redirectCountdown > 0}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Nhập họ và tên"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -268,22 +281,18 @@ function UserProfileUpdatePage() {
                   name="phone"
                   value={editForm.phone}
                   onChange={handleInputChange}
-                  disabled={updateLoading || redirectCountdown > 0}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Nhập số điện thoại"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
-                <textarea
-                  name="address"
-                  value={editForm.address}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Số CMND/CCCD</label>
+                <input
+                  type="text"
+                  name="cidNumber"
+                  value={editForm.cidNumber}
                   onChange={handleInputChange}
-                  rows={3}
-                  disabled={updateLoading || redirectCountdown > 0}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Nhập địa chỉ"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -294,9 +303,70 @@ function UserProfileUpdatePage() {
                   name="dob"
                   value={editForm.dob}
                   onChange={handleInputChange}
-                  disabled={updateLoading || redirectCountdown > 0}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <select
+                    value={selectedProvince}
+                    onChange={(e) => setSelectedProvince(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="0">Tỉnh Thành</option>
+                    {provinces.map((province) => (
+                      <option key={province.id} value={province.id}>
+                        {province.full_name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    disabled={selectedProvince === "0"}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="0">Quận Huyện</option>
+                    {districts.map((district) => (
+                      <option key={district.id} value={district.id}>
+                        {district.full_name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedWard}
+                    onChange={(e) => setSelectedWard(e.target.value)}
+                    disabled={selectedDistrict === "0"}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="0">Phường Xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.id} value={ward.id}>
+                        {ward.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <input
+                  type="text"
+                  value={detailAddress}
+                  onChange={(e) => setDetailAddress(e.target.value)}
+                  placeholder="Địa chỉ chi tiết"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4"
+                />
+
+                {getFullAddress() && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Địa chỉ:</strong> {getFullAddress()}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -309,12 +379,9 @@ function UserProfileUpdatePage() {
                       value="true"
                       checked={editForm.gender === true}
                       onChange={handleInputChange}
-                      disabled={updateLoading || redirectCountdown > 0}
-                      className="mr-2 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
+                      className="mr-2"
                     />
-                    <span className={`text-gray-700 ${updateLoading || redirectCountdown > 0 ? "text-gray-400" : ""}`}>
-                      Nam
-                    </span>
+                    Nam
                   </label>
                   <label className="flex items-center">
                     <input
@@ -323,93 +390,78 @@ function UserProfileUpdatePage() {
                       value="false"
                       checked={editForm.gender === false}
                       onChange={handleInputChange}
-                      disabled={updateLoading || redirectCountdown > 0}
-                      className="mr-2 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
+                      className="mr-2"
                     />
-                    <span className={`text-gray-700 ${updateLoading || redirectCountdown > 0 ? "text-gray-400" : ""}`}>
-                      Nữ
-                    </span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value=""
-                      checked={editForm.gender === "" || editForm.gender === null}
-                      onChange={handleInputChange}
-                      disabled={updateLoading || redirectCountdown > 0}
-                      className="mr-2 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
-                    />
-                    <span className={`text-gray-700 ${updateLoading || redirectCountdown > 0 ? "text-gray-400" : ""}`}>
-                      Không xác định
-                    </span>
+                    Nữ
                   </label>
                 </div>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Avatar URL</label>
-                <input
-                  type="url"
-                  name="avatar"
-                  value={editForm.avatar}
-                  onChange={handleInputChange}
-                  disabled={updateLoading || redirectCountdown > 0}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Nhập URL avatar"
-                />
-                {editForm.avatar && (
-                  <div className="mt-3 flex items-center space-x-3">
-                    <span className="text-sm text-gray-600">Preview:</span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ảnh đại diện</label>
+
+                {editForm.avatar && editForm.avatar !== "/img/dafaultAvatar.jpg" && (
+                  <div className="mb-4 flex items-center space-x-4">
                     <img
                       src={editForm.avatar || "/placeholder.svg"}
-                      alt="Preview"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
+                      alt="Avatar"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setEditForm((prev) => ({ ...prev, avatar: "" }))}
+                      className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                    >
+                      Xóa ảnh
+                    </button>
                   </div>
                 )}
+
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={imageUploading}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className="w-full px-4 py-3 border-2 border-dashed border-blue-300 rounded-lg text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 block"
+                  >
+                    {imageUploading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        <span className="text-blue-600">Đang tải...</span>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-blue-600 font-medium">Chọn ảnh</div>
+                        <div className="text-xs text-gray-500">PNG, JPG tối đa 5MB</div>
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+                {uploadError && <p className="mt-2 text-sm text-red-600">{uploadError}</p>}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <div className="flex gap-4 pt-6 border-t">
               <button
                 type="submit"
-                disabled={updateLoading || redirectCountdown > 0}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                disabled={updateLoading || imageUploading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg"
               >
-                {updateLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Đang cập nhật...</span>
-                  </>
-                ) : redirectCountdown > 0 ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Đã lưu thành công</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Lưu thay đổi</span>
-                  </>
-                )}
+                {updateLoading ? "Đang cập nhật..." : "Lưu thay đổi"}
               </button>
-
               <button
                 type="button"
-                onClick={handleCancel}
-                disabled={updateLoading || redirectCountdown > 0}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                onClick={() => (window.location.href = "/user-profile")}
+                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span>{redirectCountdown > 0 ? "Đang chuyển..." : "Hủy"}</span>
+                Hủy
               </button>
             </div>
           </form>
