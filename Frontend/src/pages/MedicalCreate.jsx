@@ -4,6 +4,7 @@ import AdminNavSidebar from "../components/AdminNavSidebar";
 import {
   createMedicalService,
   listService,
+  editMedicalService,
 } from "../services/medicalService";
 import {
   Container,
@@ -71,7 +72,7 @@ const MedicCreatePage = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await editMedicalService(editingId, {
+       await editMedicalService(editingId, {
         name: editForm.name,
         price: editForm.price,
         room: editForm.room,
@@ -80,7 +81,7 @@ const MedicCreatePage = () => {
       setEditingId(null);
       fetchServices();
     } catch (err) {
-      setErrorMsg("Lỗi khi cập nhật dịch vụ.", err);
+      setErrorMsg("Lỗi khi cập nhật dịch vụ: " + (err?.response?.data?.message || err.message));
     }
   };
 
