@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import { UserService } from "../services/userService"
 
@@ -131,7 +129,7 @@ function UserProfilePage() {
               </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-2xl font-bold text-white mb-2">{user.fullName || "Người dùng mới"}</h1>
-                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       user.role === "admin"
@@ -148,8 +146,16 @@ function UserProfilePage() {
                       user.status === "active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {user.status || "non-active"}
+                    {user.status || "active"}
                   </span>
+                </div>
+
+                {/* CCCD Field in Header */}
+                <div className="flex items-center space-x-3">
+                  <label className="text-sm font-medium text-white whitespace-nowrap">Mã Bệnh Nhân:</label>
+                  <div className="px-4 py-2 bg-white bg-opacity-90 text-gray-900 rounded-lg min-w-0 flex-1">
+                    {user.cidNumber || "Chưa cập nhật"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -183,11 +189,6 @@ function UserProfilePage() {
               <div className="flex flex-col sm:flex-row sm:items-center">
                 <label className="text-sm font-medium text-gray-500 w-full sm:w-32 mb-1 sm:mb-0">Số điện thoại:</label>
                 <span className="text-gray-900">{user.phone || "Chưa cập nhật"}</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center">
-                <label className="text-sm font-medium text-gray-500 w-full sm:w-32 mb-1 sm:mb-0">Số CCCD:</label>
-                <span className="text-gray-900">{user.cidNumber || "Chưa cập nhật"}</span>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-start">
@@ -250,7 +251,7 @@ function UserProfilePage() {
                     user.status === "active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                   }`}
                 >
-                  {user.status || "non-active"}
+                  {user.status || "active"}
                 </span>
               </div>
 
@@ -287,7 +288,7 @@ function UserProfilePage() {
                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
               />
             </svg>
-            <span>Cập Nhật Thông Tinh Cá Nhân</span>
+            <span>Cập Nhật Thông Tin Cá Nhân</span>
           </button>
         </div>
       </div>
