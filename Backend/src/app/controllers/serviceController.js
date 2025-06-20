@@ -65,7 +65,8 @@ class serviceController {
 
   async editService(req, res, next) {
   try {
-    const { serviceId, name, price, room, status } = req.body;
+    const {  name, price, room, status } = req.body;
+    const { serviceId } = req.params;
 
     if (!serviceId || !name || !price || !room || !status) {
       return res.status(400).json({ message: "Missing required information" });

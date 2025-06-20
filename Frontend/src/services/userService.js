@@ -119,40 +119,53 @@ try {
       throw error
     }
   },
-  updateUserProfile: async (userId, profileData) => {
-    try {
-      if (!userId) {
-        throw new Error("User ID là bắt buộc")
-      }
+// userService.js
+updateUserProfile: async (userId, profileData) => {
+  try {
+    console.log("=== SERVICE DEBUG ===")
+    console.log("Service received userId:", userId)
+    console.log("Service received profileData:", profileData)
+    console.log("Avatar in service:", profileData.avatar)
 
-      console.log("Updating profile for user:", userId, profileData)
-
-      const response = await fetch(`${API_URL}/updateprofile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: userId,
-          ...profileData,
-        }),
-      })
-
-      console.log("Update response status:", response.status)
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Update error response:", errorData)
-        throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`)
-      }
-
-      const result = await response.json()
-      console.log("Update API Response:", result)
-
-      return result
-    } catch (error) {
-      console.error("Error in updateUserProfile:", error)
-      throw error
+    // 🚨 QUAN TRỌNG: Đảm bảo avatar được include
+    const requestBody = {
+      userId: userId,
+      fullName: profileData.fullName,
+      phone: profileData.phone,
+      address: profileData.address,
+      dob: profileData.dob,
+      gender: profileData.gender,
+      avatar: profileData.avatar, // 🔥 Explicitly include avatar
+      cidNumber: profileData.cidNumber,
     }
-  },
+
+    console.log("Request body to send:", requestBody)
+    console.log("Avatar in request body:", requestBody.avatar)
+
+    const response = await fetch(`${API_URL}/updateprofile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+
+    console.log("Response status:", response.status)
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log("Service response:", result)
+    return result
+  } catch (error) {
+    console.error("Service error:", error)
+    return {
+      success: false,
+      message: error.message,
+    }
+  }
+}
 };
