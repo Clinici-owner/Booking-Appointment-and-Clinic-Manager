@@ -41,7 +41,7 @@ function MainLayout({ children }) {
     <div>
       <AdminHeader />
         <AdminNavSidebar >
-        <div className="p-6 pt-20">
+        <div className="p-6 pt-25">
           {children}
         </div>
         </AdminNavSidebar>

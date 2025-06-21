@@ -23,6 +23,8 @@ const StaffListPage = React.lazy(() => import("../pages/StaffListPage"));
 const AddStaffPage = React.lazy(() => import("../pages/StaffAddPage"));
 const UpdateStaffPage = React.lazy(() => import("../pages/StaffUpdatePage"));
 const StaffDetailPage = React.lazy(() => import("../pages/StaffDetailPage"));
+const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
+const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
 
@@ -30,6 +32,9 @@ const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
 
 const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
+
+const SpecialtiesListPage = React.lazy(() => import("../pages/SpecialtyListPage"));
+const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
 
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
@@ -59,6 +64,8 @@ const AppRoute = [
   { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout },
   { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout },
   { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout },
+  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
@@ -70,6 +77,12 @@ const AppRoute = [
 
   //Service Manager
   {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
+
+  // Specialty Manager
+  { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout },
+  // { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
+  // { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

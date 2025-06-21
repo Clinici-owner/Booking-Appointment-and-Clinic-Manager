@@ -1,26 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { listStaff } from '../services/staffService';
+import { PatientService } from '../services/patientService';
 
-function StaffList() {
-    const [staffList, setStaffList] = useState([]);
+function PatientList() {
+    const [patientList, setPatientList] = useState([]);
     const [searchName, setSearchName] = useState('');
-    const [filterRole, setFilterRole] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [staffPerPage] = useState(10);
+    const [patientsPerPage] = useState(10);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchStaff();
+        fetchPatients();
     }, []);
 
-    const fetchStaff = async () => {
+    const fetchPatients = async () => {
         try {
-            const data = await listStaff();
-            setStaffList(data);
+            const data = await PatientService.getAllPatients();
+            setPatientList(data);
         } catch (error) {
-            console.error('Lỗi khi tải danh sách nhân viên:', error);
+            console.error('Lỗi khi tải danh sách bệnh nhân:', error);
         }
     };
 
@@ -29,26 +28,20 @@ function StaffList() {
         setCurrentPage(1);
     };
 
-    const handleFilterChange = (e) => {
-        setFilterRole(e.target.value);
-        setCurrentPage(1);
+    const handleRowClick = (patientId) => {
+        navigate('/admin/patient/detail', { state: { patientId } });
     };
 
-    const handleRowClick = (staffId) => {
-        navigate('/admin/staffs/detail', { state: { id: staffId } });
-    };
-
-    const filteredStaff = staffList.filter((staff) => {
+    const filteredPatients = patientList.filter((patient) => {
         return (
-            staff.fullName.toLowerCase().includes(searchName.toLowerCase()) &&
-            (filterRole === '' || staff.role === filterRole)
+            patient.fullName.toLowerCase().includes(searchName.toLowerCase())
         );
     });
 
-    const indexOfLastStaff = currentPage * staffPerPage;
-    const indexOfFirstStaff = indexOfLastStaff - staffPerPage;
-    const currentStaff = filteredStaff.slice(indexOfFirstStaff, indexOfLastStaff);
-    const totalPages = Math.ceil(filteredStaff.length / staffPerPage);
+    const indexOfLastPatient = currentPage * patientsPerPage;
+    const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+    const currentPatients = filteredPatients.slice(indexOfFirstPatient, indexOfLastPatient);
+    const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -59,7 +52,7 @@ function StaffList() {
                     <div className="w-full max-w-6xl mx-auto p-6 relative">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                             <h2 className="text-[#212B36] font-bold text-4xl leading-8">
-                                Danh Sách Nhân Viên
+                                Danh Sách Bệnh Nhân
                             </h2>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -73,17 +66,6 @@ function StaffList() {
                                     onChange={handleSearchChange}
                                 />
                             </div>
-                            <select
-                                aria-label="Filter roles"
-                                className="bg-white border border-[#D9D9D9] rounded-lg text-base font-semibold text-[#212B36] py-4 px-6 w-full md:w-[200px] cursor-pointer"
-                                value={filterRole}
-                                onChange={handleFilterChange}
-                            >
-                                <option value="">Tất cả vai trò</option>
-                                <option value="doctor">Bác sĩ</option>
-                                <option value="technician">Kỹ thuật viên</option>
-                                <option value="receptionist">Lễ tân</option>
-                            </select>
                         </div>
                         <div className="overflow-x-auto rounded-lg border border-[#D9D9D9] bg-white">
                             <table className="w-full text-base text-[#212B36] border-collapse rounded-lg table-fixed">
@@ -92,44 +74,42 @@ function StaffList() {
                                         <th className="text-left font-semibold py-5 px-6 w-[10%]">STT</th>
                                         <th className="text-left font-semibold py-5 px-6 w-[25%]">Họ Và Tên</th>
                                         <th className="text-left font-semibold py-5 px-6 w-[20%]">Số Điện Thoại</th>
-                                        <th className="text-left font-semibold py-5 px-6 w-[15%]">Vai Trò</th>
+                                        <th className="text-left font-semibold py-5 px-6 w-[15%]">Ngày Sinh</th>
                                         <th className="text-left font-semibold py-5 px-6 w-[30%]">Email</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentStaff.length > 0 ? (
-                                        currentStaff.map((staff, index) => (
+                                    {currentPatients.length > 0 ? (
+                                        currentPatients.map((patient, index) => (
                                             <tr
-                                                key={staff._id}
-                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white' : ''}`}
-                                                onClick={() => handleRowClick(staff._id)}
+                                                key={patient._id}
+                                                className="border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50"
+                                                onClick={() => handleRowClick(patient._id)}
                                             >
                                                 <td className="py-6 px-6 font-normal w-[10%]">
-                                                    {indexOfFirstStaff + index + 1}
+                                                    {indexOfFirstPatient + index + 1}
                                                 </td>
                                                 <td className="py-6 px-6 flex items-center gap-4 w-[35%] whitespace-nowrap">
                                                     <img
-                                                        alt="Avatar of a staff member"
+                                                        alt="Avatar of a patient"
                                                         className="w-12 h-12 object-cover rounded-full"
                                                         height="56"
-                                                        src={staff.avatar || "https://storage.googleapis.com/a1aa/image/3c98d529-c1f0-4af6-6e7b-f4c0a724759b.jpg"}
+                                                        src={patient.avatar || "https://storage.googleapis.com/a1aa/image/3c98d529-c1f0-4af6-6e7b-f4c0a724759b.jpg"}
                                                         width="56"
                                                     />
-                                                    {staff.fullName}
+                                                    {patient.fullName}
                                                 </td>
-                                                <td className="py-6 px-6 w-[20%]">{staff.phone || '-'}</td>
+                                                <td className="py-6 px-6 w-[20%]">{patient.phone || '-'}</td>
                                                 <td className="py-6 px-6 w-[15%] capitalize">
-                                                    {staff.role === 'doctor' ? 'Bác sĩ' :
-                                                    staff.role === 'technician' ? 'Kỹ thuật viên' :
-                                                    staff.role === 'receptionist' ? 'Lễ tân' : staff.role}
+                                                    {patient.dob ? new Date(patient.dob).toLocaleDateString('vi-VN') : '-'}
                                                 </td>
-                                                <td className="py-6 px-6 w-[30%]">{staff.email}</td>
+                                                <td className="py-6 px-6 w-[30%]">{patient.email}</td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
                                             <td colSpan="5" className="p-6 text-center text-lg text-gray-500">
-                                                Không tìm thấy nhân viên phù hợp.
+                                                Không tìm thấy bệnh nhân phù hợp.
                                             </td>
                                         </tr>
                                     )}
@@ -163,13 +143,6 @@ function StaffList() {
                                 <i className="fas fa-chevron-right"></i>
                             </button>
                         </div>
-                        <button
-                            className="fixed bottom-10 right-10 bg-custom-blue text-white text-base font-semibold rounded-lg py-3 px-6 hover:bg-custom-bluehover2 transition-colors z-50"
-                            type="button"
-                            onClick={() => navigate('/admin/staffs/add')}
-                        >
-                            Thêm nhân viên mới
-                        </button>
                     </div>
                 </div>
             </div>
@@ -177,4 +150,4 @@ function StaffList() {
     );
 }
 
-export default StaffList;
+export default PatientList;
