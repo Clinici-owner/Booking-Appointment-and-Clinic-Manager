@@ -43,7 +43,6 @@ function UserProfilePage() {
         setError(result.message || "Không thể lấy thông tin người dùng")
       }
     } catch (err) {
-      console.error("Error in fetchUserProfile:", err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -53,6 +52,9 @@ function UserProfilePage() {
   const handleEditProfile = () => {
     window.location.href = "/user-profile/update"
   }
+  const handleChangePassword = () => {
+    window.location.href = "/user-profile/update-password"
+  }
 
   useEffect(() => {
     if (!hasInitialized.current) {
@@ -61,9 +63,6 @@ function UserProfilePage() {
       fetchUserProfile()
     }
   }, [])
-
-  console.log("Component re-rendered", { user: !!user, loading, error: !!error })
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -197,6 +196,11 @@ function UserProfilePage() {
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center">
+                <label className="text-sm font-medium text-gray-500 w-full sm:w-32 mb-1 sm:mb-0">Mã CCCD:</label>
+                <span className="text-gray-900">{user.cidNumber || "Chưa cập nhật"}</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center">
                 <label className="text-sm font-medium text-gray-500 w-full sm:w-32 mb-1 sm:mb-0">Ngày sinh:</label>
                 <span className="text-gray-900">
                   {user.dob ? new Date(user.dob).toLocaleDateString("vi-VN") : "Chưa cập nhật"}
@@ -278,7 +282,7 @@ function UserProfilePage() {
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={handleEditProfile}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -289,6 +293,20 @@ function UserProfilePage() {
               />
             </svg>
             <span>Cập Nhật Thông Tin Cá Nhân</span>
+          </button>
+          <button
+            onClick={handleChangePassword}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            <span>Thay Đổi Mật Khẩu</span>
           </button>
         </div>
       </div>

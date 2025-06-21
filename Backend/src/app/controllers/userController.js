@@ -383,5 +383,31 @@ async updateUserProfile(req, res, next) {
     })
   }
 }
+ async ChangeAccountPasswords(req, res) {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    try {
+      // Kiểm tra xem người dùng có tồn tại không
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Người dùng không tồn tại" });
+      }
+
+      // Kiểm tra mật khẩu cũ
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Mật khẩu cũ không đúng" });
+      }
+
+      // Mã hóa mật khẩu mới
+      user.password = await bcrypt.hash(newPassword, 10);
+      await user.save();
+
+      res.status(200).json({ message: "Đổi mật khẩu thành công" });
+    } catch (error) {
+      console.error("Lỗi đổi mật khẩu:", error);
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
 }
 module.exports = new userController();

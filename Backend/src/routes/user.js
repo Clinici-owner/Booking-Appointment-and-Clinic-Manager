@@ -13,5 +13,5 @@ router.post('/logout', userController.logoutUser);
 router.get('/session', userController.getSessionUser);
 router.get('/profile', userController.getUserProfileByUserID);
 router.put('/updateprofile', userController.updateUserProfile);
-
+router.put('/updatepassword', userController.ChangeAccountPasswords);
 module.exports = router;

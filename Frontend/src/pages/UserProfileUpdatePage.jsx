@@ -145,17 +145,10 @@ function UserProfileUpdatePage() {
       formData.append("file", file)
       formData.append("upload_preset", "ml_default")
       formData.append("folder", "user_avatars")
-
-      console.log("🔍 Uploading to Cloudinary...")
-      console.log("Cloud name:", CLOUDINARY_CLOUD_NAME)
-
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: "POST",
         body: formData,
       })
-
-      console.log("🔍 Cloudinary response status:", response.status)
-
       if (!response.ok) {
         const errorData = await response.json()
         console.error("❌ Cloudinary error:", errorData)
@@ -163,18 +156,15 @@ function UserProfileUpdatePage() {
       }
 
       const data = await response.json()
-      console.log("Cloudinary success:", data)
-      console.log("Secure URL:", data.secure_url)
 
       setEditForm((prev) => {
         const newForm = { ...prev, avatar: data.secure_url }
-        console.log("🔍 Updated editForm with avatar:", newForm)
         return newForm
       })
 
       setUploadError("")
     } catch (error) {
-      console.error("❌ Upload error:", error)
+      console.error(" Upload error:", error)
       setUploadError(`Có lỗi xảy ra khi tải ảnh: ${error.message}`)
     } finally {
       setImageUploading(false)
@@ -189,27 +179,12 @@ function UserProfileUpdatePage() {
       const storedUser = sessionStorage.getItem("user")
       const currentUser = JSON.parse(storedUser)
 
-      console.log("🔍 editForm before update:", editForm)
-      console.log("🔍 editForm.avatar:", editForm.avatar)
-
       const updatedForm = {
         ...editForm,
         address: getFullAddress(),
       }
 
-      console.log("=== FRONTEND DEBUG ===")
-      console.log("User ID:", currentUser._id)
-      console.log("Avatar in updatedForm:", updatedForm.avatar)
-
-      if (!updatedForm.avatar || updatedForm.avatar === "") {
-        console.log("Avatar is empty or undefined!")
-      } else {
-        console.log("Avatar has value:", updatedForm.avatar)
-      }
-
       const result = await UserService.updateUserProfile(currentUser._id, updatedForm)
-
-      console.log("API Response:", result)
 
       if (result.success) {
         setSuccessMessage("Cập nhật thành công!")
