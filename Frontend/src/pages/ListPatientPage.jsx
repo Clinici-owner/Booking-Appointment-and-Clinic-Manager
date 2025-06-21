@@ -29,7 +29,7 @@ function PatientList() {
     };
 
     const handleRowClick = (patientId) => {
-        navigate('/admin/patients/detail', { state: { id: patientId } });
+        navigate('/admin/patient/detail', { state: { patientId } });
     };
 
     const filteredPatients = patientList.filter((patient) => {

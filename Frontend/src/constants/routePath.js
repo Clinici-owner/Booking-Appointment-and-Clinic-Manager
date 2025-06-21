@@ -23,6 +23,7 @@ export const ROUTE_PATH = {
   STAFF_DETAIL: '/admin/staffs/detail',
 
   LIST_PATIENTS: '/admin/patients',
+  PATIENT_DETAIL: '/admin/patient/detail',
 
   // OAuth callback
   GOOGLE_AUTH_CALLBACK: '/google-auth-success',
