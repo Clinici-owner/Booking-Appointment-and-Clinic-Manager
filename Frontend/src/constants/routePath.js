@@ -31,7 +31,7 @@ export const ROUTE_PATH = {
   // User-profile
   USER_PROFILE: '/user-profile',
   USER_PROFILE_UPDATE: '/user-profile/update',
-
+  UPDATE_PASSWORD: '/user-profile/update-password',
   //Service manager
   SERVICES_LIST: '/createMedical',  
 

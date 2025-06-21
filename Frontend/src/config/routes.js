@@ -38,6 +38,8 @@ const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
 
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
+const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
+
 // Cấu hình route
 const AppRoute = [
   // Public
@@ -71,6 +73,7 @@ const AppRoute = [
   // User Profile
   { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },
   { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
+  { path: ROUTE_PATH.UPDATE_PASSWORD, page: UpdatepasswordPage, layout: MainLayout },
 
   //Service Manager
   {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
