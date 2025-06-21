@@ -24,6 +24,7 @@ const AddStaffPage = React.lazy(() => import("../pages/StaffAddPage"));
 const UpdateStaffPage = React.lazy(() => import("../pages/StaffUpdatePage"));
 const StaffDetailPage = React.lazy(() => import("../pages/StaffDetailPage"));
 const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
+const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
 
@@ -59,6 +60,7 @@ const AppRoute = [
   { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout },
   { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout },
   { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout },
+  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
