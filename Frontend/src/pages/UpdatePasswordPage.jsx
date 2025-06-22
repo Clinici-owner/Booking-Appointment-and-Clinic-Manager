@@ -8,8 +8,6 @@ export default function ChangePasswordPage() {
   const hasInitialized = useRef(false)
 
   const fetchUserSession = async () => {
-    console.log("fetchUserSession called")
-
     try {
       setLoading(true)
       setError(null)
@@ -21,15 +19,13 @@ export default function ChangePasswordPage() {
         try {
           currentUser = JSON.parse(storedUser)
         } catch (parseError) {
-          console.error("Dữ liệu session không hợp lệ:", storedUser, parseError)
-          setError("Dữ liệu session không hợp lệ")
+          setError("Dữ liệu session không hợp lệ", parseError.message)
           setLoading(false)
           return
         }
       }
 
       if (!currentUser || !currentUser._id) {
-        console.log("currentUser:", currentUser)
         setError("Không tìm thấy thông tin người dùng trong session hoặc thiếu id")
         setLoading(false)
         return
@@ -38,7 +34,6 @@ export default function ChangePasswordPage() {
       // Set user data from session
       setUser(currentUser)
     } catch (err) {
-      console.error("Error in fetchUserSession:", err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -47,7 +42,6 @@ export default function ChangePasswordPage() {
 
   useEffect(() => {
     if (!hasInitialized.current) {
-      console.log("useEffect triggered - First time only")
       hasInitialized.current = true
       fetchUserSession()
     }
@@ -64,6 +58,11 @@ export default function ChangePasswordPage() {
     confirm: false,
   })
   const [message, setMessage] = useState({ type: "", content: "" })
+  const [validationErrors, setValidationErrors] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -71,6 +70,42 @@ export default function ChangePasswordPage() {
       ...prev,
       [name]: value,
     }))
+
+    // Real-time validation
+    const newValidationErrors = { ...validationErrors }
+
+    if (name === "confirmPassword") {
+      if (value && formData.newPassword && value !== formData.newPassword) {
+        newValidationErrors.confirmPassword = "Mật khẩu xác nhận không khớp"
+      } else {
+        newValidationErrors.confirmPassword = ""
+      }
+    }
+
+    if (name === "newPassword") {
+      if (formData.confirmPassword && value && formData.confirmPassword !== value) {
+        newValidationErrors.confirmPassword = "Mật khẩu xác nhận không khớp"
+      } else {
+        newValidationErrors.confirmPassword = ""
+      }
+
+      if (value && value.length < 6) {
+        newValidationErrors.newPassword = "Mật khẩu mới phải có ít nhất 6 ký tự"
+      } else {
+        newValidationErrors.newPassword = ""
+      }
+    }
+
+    if (name === "oldPassword") {
+      if (value && formData.newPassword && value === formData.newPassword) {
+        newValidationErrors.oldPassword = "Mật khẩu mới phải khác mật khẩu cũ"
+      } else {
+        newValidationErrors.oldPassword = ""
+      }
+    }
+
+    setValidationErrors(newValidationErrors)
+
     // Xóa thông báo khi người dùng bắt đầu nhập
     if (message.content) {
       setMessage({ type: "", content: "" })
@@ -266,6 +301,9 @@ export default function ChangePasswordPage() {
                   )}
                 </button>
               </div>
+              {validationErrors.oldPassword && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.oldPassword}</p>
+              )}
             </div>
 
             {/* Mật khẩu mới */}
@@ -316,6 +354,9 @@ export default function ChangePasswordPage() {
                   )}
                 </button>
               </div>
+              {validationErrors.newPassword && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.newPassword}</p>
+              )}
             </div>
 
             {/* Xác nhận mật khẩu mới */}
@@ -366,6 +407,9 @@ export default function ChangePasswordPage() {
                   )}
                 </button>
               </div>
+              {validationErrors.confirmPassword && (
+                <p className="text-sm text-red-600 mt-1">{validationErrors.confirmPassword}</p>
+              )}
             </div>
 
             {/* Thông báo */}
@@ -384,7 +428,7 @@ export default function ChangePasswordPage() {
 
           {/* Action Buttons - matching user profile page style */}
           <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-              <button
+            <button
               type="button"
               onClick={() => (window.location.href = "/user-profile")}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
