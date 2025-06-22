@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getStaffById, updateStaff } from "../services/staffService";
+import { Toaster, toast } from 'sonner';
 
+// updateStaff function to handle staff updates
 function UpdateStaff() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -9,7 +11,6 @@ function UpdateStaff() {
   const [staff, setStaff] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [notification, setNotification] = useState({ message: null, type: null });
   const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -208,11 +209,9 @@ function UpdateStaff() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNotification({ message: null, type: null });
 
     if (!isValidForm()) {
-      setNotification({ message: "Vui lòng kiểm tra lại các trường thông tin.", type: "error" });
-      setTimeout(() => setNotification({ message: null, type: null }), 3000);
+      toast.error("Vui lòng kiểm tra lại các trường thông tin.", { style: { background: '#EF4444', color: '#fff' } });
       return;
     }
 
@@ -220,10 +219,8 @@ function UpdateStaff() {
     const updatedStaff = { ...staff, address: fullAddress };
 
     try {
-      // Store original values for comparison
       const originalStaff = await getStaffById(staffId);
 
-      // Only include changed fields in the update payload
       const updatePayload = {};
       if (updatedStaff.email !== originalStaff.email) updatePayload.email = updatedStaff.email;
       if (updatedStaff.phone !== originalStaff.phone) updatePayload.phone = updatedStaff.phone;
@@ -235,25 +232,26 @@ function UpdateStaff() {
       if (fullAddress !== originalStaff.address) updatePayload.address = fullAddress;
 
       await updateStaff(staffId, updatePayload);
-      setNotification({ message: "Đã cập nhật thông tin cá nhân thành công!", type: "success" });
+      toast.success("Đã cập nhật thông tin cá nhân thành công!", { style: { background: '#10B981', color: '#fff' } });
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      let errorMessage = "Cập nhật thất bại!";
-      if (error.response?.data?.message) {
-        const backendMessage = error.response.data.message.toLowerCase();
-        if (backendMessage.includes("email")) {
-          errorMessage = "Email đã tồn tại trong hệ thống.";
-        } else if (backendMessage.includes("phone")) {
-          errorMessage = "Số điện thoại đã tồn tại trong hệ thống.";
-        } else if (backendMessage.includes("cidnumber") || backendMessage.includes("cccd")) {
-          errorMessage = "CMND/CCCD đã tồn tại trong hệ thống.";
+      const errorMessage = error.response?.data?.error || 'Cập nhật thất bại!';
+      if (error.response?.status === 409) {
+        if (errorMessage.toLowerCase().includes('email')) {
+          toast.error('Cập nhật thất bại, email đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('phone')) {
+          toast.error('Cập nhật thất bại, số điện thoại đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('cidnumber') || errorMessage.toLowerCase().includes('cccd')) {
+          toast.error('Cập nhật thất bại, CMND/CCCD đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
         } else {
-          errorMessage = error.response.data.message;
+          toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
         }
+      } else if (error.response?.status === 400) {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+      } else {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
       }
-      setNotification({ message: errorMessage, type: "error" });
-      setTimeout(() => setNotification({ message: null, type: null }), 3000);
     }
   };
 
@@ -291,6 +289,7 @@ function UpdateStaff() {
 
   return (
     <div className="flex text-[18px] leading-[1.75]">
+      <Toaster />
       <div className="flex-1 flex flex-col">
         <div className="flex">
           <div className="w-full max-w-[1600px] mx-auto p-10">
@@ -299,18 +298,6 @@ function UpdateStaff() {
                 Cập nhật thông tin nhân viên
               </h2>
             </div>
-
-            {notification.message && (
-              <div
-                className={`border px-4 py-3 rounded-lg mb-6 text-center ${
-                  notification.type === "success"
-                    ? "bg-green-100 border-green-400 text-green-700"
-                    : "bg-red-100 border-red-400 text-red-700"
-                }`}
-              >
-                {notification.message}
-              </div>
-            )}
 
             <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
               <form
@@ -503,7 +490,7 @@ function UpdateStaff() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
+                      className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-28 h-12"
                     >
                       Cập nhật
                     </button>

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import { Toaster, toast } from 'sonner';
 import AdminNavSidebar from '../components/AdminNavSidebar';
 import { createStaff, importStaffExcel } from '../services/staffService';
 
@@ -10,12 +11,11 @@ function AddStaff() {
     const [formData, setFormData] = useState({
         fullName: '', email: '', phone: '', role: 'receptionist', cidNumber: '',
         password: '', confirmPassword: '', dob: '', gender: '', address: '',
-        specificAddress: '', // Added new field for specific address
+        specificAddress: '',
     });
 
     const [errors, setErrors] = useState({});
     const [excelFile, setExcelFile] = useState(null);
-    const [notification, setNotification] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [passwordMismatch, setPasswordMismatch] = useState(false);
@@ -72,7 +72,7 @@ function AddStaff() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^\d{0,11}$/;
         const cidRegex = /^\d{0,12}$/;
-        const specificAddressRegex = /^[\p{L}\d\s,.-]+$/u; // Regex for specific address
+        const specificAddressRegex = /^[\p{L}\d\s,.-]+$/u;
 
         switch (name) {
             case 'fullName':
@@ -139,49 +139,62 @@ function AddStaff() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            setNotification('Mật khẩu không khớp.');
-            setTimeout(() => setNotification(null), 3000);
-            return;
-        }
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+        toast.error('Mật khẩu không khớp.', { style: { background: '#EF4444', color: '#fff' } });
+        return;
+    }
 
-        if (!isValidForm()) {
-            return;
-        }
+    if (!isValidForm()) {
+        return;
+    }
 
-        try {
-            await createStaff(formData);
-            setNotification('Tạo nhân viên thành công!');
-            setTimeout(() => setNotification(null), 3000);
-            setTimeout(() => navigate('/admin/staffs'), 3000);
-        } catch (error) {
-            console.error('Lỗi tạo nhân viên:', error);
-            setNotification('Tạo nhân viên thất bại!');
-            setTimeout(() => setNotification(null), 3000);
+    try {
+        await createStaff(formData);
+        toast.success('Tạo nhân viên thành công!', { style: { background: '#10B981', color: '#fff' } });
+        setTimeout(() => navigate('/admin/staffs'), 3000);
+    } catch (error) {
+        console.error('Lỗi tạo nhân viên:', error);
+        const errorMessage = error.response?.data?.error || 'Tạo nhân viên thất bại!';
+        if (error.response?.status === 409) {
+            if (errorMessage.includes('email')) {
+                toast.error('Cập nhật thất bại, email đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else if (errorMessage.includes('phone')) {
+                toast.error('Cập nhật thất bại, số điện thoại đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else if (errorMessage.includes('cidNumber')) {
+                toast.error('Cập nhật thất bại, CMND/CCCD đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else {
+                toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+            }
+        } else if (error.response?.status === 400) {
+            toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+        } else {
+            toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
         }
+        return;
+    }
     };
 
     const handleExcelSubmit = async () => {
         if (!excelFile) {
-            setNotification('Vui lòng chọn tệp Excel');
-            setTimeout(() => setNotification(null), 3000);
+            toast.error('Vui lòng chọn file Excel', { style: { background: '#EF4444', color: '#fff' } });
             return;
         }
 
         try {
             await importStaffExcel(excelFile);
-            setNotification('Import thành công!');
-            setTimeout(() => setNotification(null), 3000);
+            toast.success('Import thành công!', { style: { background: '#10B981', color: '#fff' } });
             setTimeout(() => navigate('/admin/staffs'), 2000);
         } catch (error) {
             console.error('Lỗi import Excel:', error);
-            if (error.response) {
-                setNotification(`${error.response.data?.error || 'Lỗi khi import Excel.'}`);
+            const errorMessage = error.response?.data?.error || 'Lỗi khi import Excel.';
+            if (error.response?.status === 409) {
+                toast.error(`Import thất bại, email đã tồn tại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+            } else if (error.response?.status === 400) {
+                toast.error(`Import thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
             } else {
-                setNotification('Import thất bại!');
+                toast.error(`Import thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
             }
-            setTimeout(() => setNotification(null), 3000);
         }
     };
 
@@ -201,32 +214,20 @@ function AddStaff() {
     };
 
     return (
-        <div className="flex text-[18px] leading-[1.75]">
+        <div className="flex text-[1.75rem] leading-[1.75]">
+            <Toaster />
             <div className="flex-1 flex flex-col">
                 <div className="flex">
                     <div className="w-full max-w-[1600px] mx-auto p-10">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                            <h2 className="text-[#212B36] font-bold text-4xl leading-6">
+                            <h2 className="text-[#2121236] font-bold text-4xl leading-6">
                                 Tạo nhân viên mới
                             </h2>
                         </div>
 
-                        {/* Success Notification */}
-                        {notification && (
-                        <div
-                        className={`px-4 py-3 rounded-lg mb-6 text-center font-medium border
-                        ${notification.toLowerCase().includes('thất bại') || notification.toLowerCase().includes('không') || notification.toLowerCase().includes('lỗi')
-                        ? 'bg-red-100 border-red-400 text-red-700'
-                        : 'bg-green-100 border-green-400 text-green-700'
-                        }`}
-                        >
-                        {notification}
-                        </div>
-                        )}
-
                         <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
                             <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
-                                {/* Họ và tên */}
+                                {/* Họ và tên nhân viên */}
                                 <div>
                                     <label htmlFor="fullName" className="block text-sm text-gray-700 mb-1">Họ và tên</label>
                                     <input
@@ -236,12 +237,12 @@ function AddStaff() {
                                         placeholder="Họ và tên"
                                         onChange={handleChange}
                                         value={formData.fullName}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         required
                                     />
                                     {errors.fullName && <p className="text-sm text-red-600">{errors.fullName}</p>}
                                 </div>
-                                {/* Email */}
+                                {/* Email nhân viên */}
                                 <div>
                                     <label htmlFor="email" className="block text-sm text-gray-700 mb-1">Email</label>
                                     <input
@@ -251,12 +252,12 @@ function AddStaff() {
                                         placeholder="Email"
                                         onChange={handleChange}
                                         value={formData.email}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         required
                                     />
                                     {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
                                 </div>
-                                {/* Số điện thoại */}
+                                {/* Số điện thoại nhân viên */}
                                 <div>
                                     <label htmlFor="phone" className="block text-sm text-gray-700 mb-1">Số điện thoại</label>
                                     <input
@@ -266,11 +267,11 @@ function AddStaff() {
                                         placeholder="Số điện thoại"
                                         onChange={handleChange}
                                         value={formData.phone}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                     />
                                     {errors.phone && <p className="text-sm text-red-600">{errors.phone}</p>}
                                 </div>
-                                {/* CMND/CCCD */}
+                                {/* CMND/CCCD của nhân viên */}
                                 <div>
                                     <label htmlFor="cidNumber" className="block text-sm text-gray-700 mb-1">CMND/CCCD</label>
                                     <input
@@ -280,12 +281,12 @@ function AddStaff() {
                                         placeholder="CMND/CCCD"
                                         onChange={handleChange}
                                         value={formData.cidNumber}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         required
                                     />
                                     {errors.cidNumber && <p className="text-sm text-red-600">{errors.cidNumber}</p>}
                                 </div>
-                                {/* Vai trò */}
+                                {/* Vai trò của nhân viên */}
                                 <div>
                                     <label htmlFor="role" className="block text-sm text-gray-700 mb-1">Vai trò</label>
                                     <select
@@ -293,14 +294,14 @@ function AddStaff() {
                                         name="role"
                                         onChange={handleChange}
                                         value={formData.role}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                     >
                                         <option value="receptionist">Lễ tân</option>
                                         <option value="doctor">Bác sĩ</option>
                                         <option value="technician">Kỹ thuật viên</option>
                                     </select>
                                 </div>
-                                {/* Mật khẩu */}
+                                {/* Mật khẩu của nhân viên */}
                                 <div>
                                     <label htmlFor="password" className="block text-sm text-gray-700 mb-1">Mật khẩu</label>
                                     <div className="relative flex items-center">
@@ -311,7 +312,7 @@ function AddStaff() {
                                             placeholder="Mật khẩu"
                                             onChange={handleChange}
                                             value={formData.password}
-                                            className="w-full pr-10 px-4 py-3 text-sm border border-gray-200 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                            className="w-full pr-10 px-4 py-3 text-sm border-gray-200 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                             required
                                         />
                                         <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 text-gray-600 cursor-pointer text-lg">
@@ -320,7 +321,7 @@ function AddStaff() {
                                     </div>
                                     {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
                                 </div>
-                                {/* Ngày sinh */}
+                                {/* Ngày sinh của nhân viên */}
                                 <div>
                                     <label htmlFor="dob" className="block text-sm text-gray-700 mb-1">Ngày sinh</label>
                                     <input
@@ -329,9 +330,10 @@ function AddStaff() {
                                         type="date"
                                         onChange={handleChange}
                                         value={formData.dob}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                     />
                                 </div>
+                                {/* Xác nhận mật khẩu của nhân viên */}
                                 <div>
                                     <label htmlFor="confirmPassword" className="block text-sm text-gray-700 mb-1">Nhập lại mật khẩu</label>
                                     <div className="relative flex items-center">
@@ -342,7 +344,7 @@ function AddStaff() {
                                             placeholder="Nhập lại mật khẩu"
                                             onChange={handleChange}
                                             value={formData.confirmPassword}
-                                            className="w-full pr-10 px-4 py-3 text-sm border border-gray-200 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                            className="w-full pr-10 px-4 py-3 text-sm border-gray-200 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                             required
                                         />
                                         <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 text-gray-600 cursor-pointer text-lg">
@@ -351,8 +353,7 @@ function AddStaff() {
                                     </div>
                                     {passwordMismatch && <p className="text-sm font-semibold text-red-600">Mật khẩu không khớp.</p>}
                                 </div>
-                                
-                                {/* Địa chỉ */}
+                                {/* Địa chỉ của nhân viên */}
                                 <div>
                                     <label className="block text-sm text-gray-700 mb-1">Địa chỉ</label>
                                     <div className="grid grid-cols-1 gap-4">
@@ -361,7 +362,7 @@ function AddStaff() {
                                             <select
                                                 value={selectedProvince}
                                                 onChange={(e) => setSelectedProvince(e.target.value)}
-                                                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                                className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                             >
                                                 <option value="">Tỉnh/Thành phố</option>
                                                 {provinces.map((province) => (
@@ -373,7 +374,7 @@ function AddStaff() {
                                             <select
                                                 value={selectedDistrict}
                                                 onChange={(e) => setSelectedDistrict(e.target.value)}
-                                                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                                className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                                 disabled={!selectedProvince}
                                             >
                                                 <option value="">Quận/Huyện</option>
@@ -386,7 +387,7 @@ function AddStaff() {
                                             <select
                                                 value={selectedWard}
                                                 onChange={(e) => setSelectedWard(e.target.value)}
-                                                className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                                className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                                 disabled={!selectedDistrict}
                                             >
                                                 <option value="">Phường/Xã</option>
@@ -404,11 +405,11 @@ function AddStaff() {
                                             placeholder="Địa chỉ cụ thể (số nhà, đường)"
                                             onChange={handleChange}
                                             value={formData.specificAddress}
-                                            className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                            className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         />
                                     </div>
                                 </div>
-                                {/* Giới tính */}
+                                {/* Giới tính của nhân viên */}
                                 <div>
                                     <label htmlFor="gender" className="block text-sm text-gray-700 mb-1">Giới tính</label>
                                     <select
@@ -416,7 +417,7 @@ function AddStaff() {
                                         name="gender"
                                         onChange={handleChange}
                                         value={formData.gender}
-                                        className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         required
                                     >
                                         <option value="">Chọn giới tính</option>
@@ -425,7 +426,7 @@ function AddStaff() {
                                     </select>
                                 </div>
 
-                                {/* Các nút */}
+                                {/* Các nút điều khiển */}
                                 <div className="col-span-full flex justify-between items-center mt-8">
                                     <div className="flex space-x-4">
                                         <button

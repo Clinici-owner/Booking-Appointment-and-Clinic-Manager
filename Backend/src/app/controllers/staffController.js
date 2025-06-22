@@ -9,45 +9,57 @@ const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.
 class StaffController {
 
     async createStaff(req, res) {
-        try {
-            const { cidNumber, password, fullName, dob, role, phone, email, gender, address } = req.body;
-            
-            let { avatar } = req.body; 
+    try {
+        const { cidNumber, password, fullName, dob, role, phone, email, gender, address } = req.body;
+        
+        let { avatar } = req.body; 
 
-            if (!cidNumber || !password || !email || !role) {
-                return res.status(400).json({ error: 'Thiếu thông tin bắt buộc.' });
-            }
-
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                return res.status(409).json({ error: 'Email đã được sử dụng.' });
-            }
-
-            
-            if (!avatar || avatar === '/img/dafaultAvatar.jpg') {
-                avatar = DEFAULT_AVATAR_URL;
-            }
-
-            const user = new User({ 
-                cidNumber, 
-                password, 
-                fullName, 
-                dob, 
-                role, 
-                phone, 
-                email, 
-                gender, 
-                address, 
-                avatar 
-            });
-            await user.save();
-            res.status(201).json({ message: 'Nhân viên đã được tạo thành công.', user });
-
-        } catch (error) { 
-            res.status(500).json({ error: error.message });
+        if (!cidNumber || !password || !email || !role) {
+            return res.status(400).json({ error: 'Thiếu thông tin bắt buộc.' });
         }
-    }
 
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ error: 'Email đã được sử dụng.' });
+        }
+
+        if (cidNumber) {
+            const existingCid = await User.findOne({ cidNumber: cidNumber.trim() });
+            if (existingCid) {
+                return res.status(409).json({ error: 'CMND/CCCD đã tồn tại.' });
+            }
+        }
+
+        if (phone) {
+            const existingPhone = await User.findOne({ phone: phone.trim() });
+            if (existingPhone) {
+                return res.status(409).json({ error: 'Số điện thoại đã tồn tại.' });
+            }
+        }
+
+        if (!avatar || avatar === '/img/dafaultAvatar.jpg') {
+            avatar = DEFAULT_AVATAR_URL;
+        }
+
+        const user = new User({ 
+            cidNumber, 
+            password, 
+            fullName, 
+            dob, 
+            role, 
+            phone, 
+            email, 
+            gender, 
+            address, 
+            avatar 
+        });
+        await user.save();
+        res.status(201).json({ message: 'Nhân viên đã được tạo thành công.', user });
+
+    } catch (error) { 
+        res.status(500).json({ error: error.message });
+    }
+}
 
     async importExcel(req, res) {
         try {
