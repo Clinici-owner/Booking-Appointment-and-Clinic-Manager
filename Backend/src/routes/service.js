@@ -7,5 +7,6 @@ router.get('/detail', serviceController.detailService);
 router.get('/', serviceController.listService);
 router.put('/:serviceId', serviceController.editService);
 router.patch('/change-status/:id', serviceController.changeStatus);
+router.get('/search', serviceController.searchServiceByName);
 module.exports = router;
 
