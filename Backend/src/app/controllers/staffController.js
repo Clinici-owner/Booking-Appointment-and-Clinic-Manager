@@ -62,52 +62,83 @@ class StaffController {
 }
 
     async importExcel(req, res) {
-        try {
-            if (!req.file) {
-                console.error("Không có file được gửi lên.");
-                return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
-            }
-
-            const buffer = req.file.buffer;
-            const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const rawData = xlsx.utils.sheet_to_json(sheet, {
-                defval: '',
-                raw: false,
-                dateNF: 'yyyy-mm-dd',
-            });
-
-            const data = rawData.map(row => {
-                let avatarUrl = row.avatar;
-                // Gán avatar mặc định nếu không có trong Excel hoặc là giá trị mặc định cũ
-                if (!avatarUrl || avatarUrl === '/img/dafaultAvatar.jpg') {
-                    avatarUrl = DEFAULT_AVATAR_URL;
-                }
-
-                return {
-                    ...row,
-                    gender: row.gender === 'TRUE' || row.gender === true || row.gender === 'true' ? true : false,
-                    avatar: avatarUrl // Gán avatar đã được xử lý
-                };
-            });
-
-            console.log("Dữ liệu sau xử lý:", data);
-
-            if (!Array.isArray(data) || data.length === 0) {
-                return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
-            }
-
-            const inserted = await User.insertMany(data);
-            res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
-        } catch (error) {
-            console.error('Lỗi khi xử lý Excel:', error);
-            if (error.code === 11000) { 
-                return res.status(409).json({ error: 'Dữ liệu Excel chứa các mục trùng lặp (ví dụ: Email đã tồn tại).' });
-            }
-            res.status(500).json({ error: error.message || 'Lỗi khi nhập dữ liệu từ Excel.' });
+    try {
+        if (!req.file) {
+            console.error("Không có file được gửi lên.");
+            return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
         }
+
+        const buffer = req.file.buffer;
+        const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rawData = xlsx.utils.sheet_to_json(sheet, {
+            defval: '',
+            raw: false,
+            dateNF: 'yyyy-mm-dd',
+        });
+
+        const data = rawData.map(row => {
+            let avatarUrl = row.avatar;
+            
+            if (!avatarUrl || avatarUrl === '/img/dafaultAvatar.jpg') {
+                avatarUrl = DEFAULT_AVATAR_URL;
+            }
+
+            // Map role from Vietnamese to English enum values
+            let role = row.role || 'receptionist';
+            if (role.toLowerCase() === 'lễ tân') role = 'receptionist';
+            else if (role.toLowerCase() === 'bác sĩ') role = 'doctor';
+            else if (role.toLowerCase() === 'kỹ thuật viên') role = 'technician';
+
+            // Map gender from Vietnamese to boolean
+            let gender = false;
+            if (row.gender) {
+                const genderValue = row.gender.toString().toLowerCase();
+                if (genderValue === 'nam' || genderValue === 'true' || genderValue === '1') gender = true;
+                else if (genderValue === 'nữ' || genderValue === 'false' || genderValue === '0') gender = false;
+            }
+
+            return {
+                cidNumber: row.cidNumber || '',
+                password: row.password || '',
+                fullName: row.fullName || '',
+                dob: row.dob || '',
+                role: role,
+                phone: row.phone || '',
+                email: row.email || '',
+                gender: gender,
+                address: row.address || '',
+                specificAddress: row.specificAddress || '',
+                avatar: avatarUrl // Gán avatar đã được xử lý
+            };
+        });
+
+        console.log("Dữ liệu sau xử lý:", data);
+
+        if (!Array.isArray(data) || data.length === 0) {
+            return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
+        }
+
+        const inserted = await User.insertMany(data);
+        res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
+    } catch (error) {
+        console.error('Lỗi khi xử lý Excel:', error);
+        if (error.code === 11000) { 
+            const errorMessage = error.message.toLowerCase();
+            if (errorMessage.includes('email')) {
+                return res.status(409).json({ error: 'Dữ liệu Excel chứa email đã tồn tại.' });
+            } else if (errorMessage.includes('phone')) {
+                return res.status(409).json({ error: 'Dữ liệu Excel chứa số điện thoại đã tồn tại.' });
+            } else if (errorMessage.includes('cidnumber') || errorMessage.includes('cccd')) {
+                return res.status(409).json({ error: 'Dữ liệu Excel chứa CMND/CCCD đã tồn tại.' });
+            } else {
+                return res.status(409).json({ error: 'Dữ liệu Excel chứa các mục trùng lặp.' });
+            }
+        }
+        res.status(500).json({ error: error.message || 'Lỗi khi nhập dữ liệu từ Excel.' });
     }
+}
 
 
     async lockUser(req, res) {
