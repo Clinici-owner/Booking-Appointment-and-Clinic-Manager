@@ -213,9 +213,15 @@ function AddStaff() {
 
                         {/* Success Notification */}
                         {notification && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 text-center">
-                                {notification}
-                            </div>
+                        <div
+                        className={`px-4 py-3 rounded-lg mb-6 text-center font-medium border
+                        ${notification.toLowerCase().includes('thất bại') || notification.toLowerCase().includes('không') || notification.toLowerCase().includes('lỗi')
+                        ? 'bg-red-100 border-red-400 text-red-700'
+                        : 'bg-green-100 border-green-400 text-green-700'
+                        }`}
+                        >
+                        {notification}
+                        </div>
                         )}
 
                         <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">

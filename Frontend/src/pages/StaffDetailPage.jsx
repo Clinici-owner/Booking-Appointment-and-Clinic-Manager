@@ -142,146 +142,47 @@ function StaffDetailPage() {
                   className="w-32 h-32 rounded-full object-cover border border-gray-200"
                 />
               </div>
-              <form className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-15 gap-y-8">
-                {/* Thông tin nhân viên */}
-                <div>
-                  <label
-                    htmlFor="fullname"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Họ và tên
-                  </label>
-                  <input
-                    id="fullname"
-                    type="text"
-                    value={staff.fullName || ""}
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+              <form className="w-full max-w-5xl mx-auto grid grid-cols-2 gap-x-4 gap-y-4">
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Họ và tên:</span>
+                    <span className="font-medium text-gray-800">{staff.fullName || "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={staff.email || ""}
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Số điện thoại:</span>
+                    <span className="font-medium text-gray-800">{staff.phone || "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Số điện thoại
-                  </label>
-                  <input
-                    id="phone"
-                    type="text"
-                    value={staff.phone || "-"}
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">CMND/CCCD:</span>
+                    <span className="font-medium text-gray-800">{staff.cidNumber || "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="cmnd"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    CMND/CCCD
-                  </label>
-                  <input
-                    id="cmnd"
-                    type="text"
-                    value={staff.cidNumber || ""}
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Ngày sinh:</span>
+                    <span className="font-medium text-gray-800">{staff.dob ? new Date(staff.dob).toLocaleDateString("vi-VN") : "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="dob"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Ngày sinh
-                  </label>
-                  <input
-                    id="dob"
-                    type="text"
-                    value={
-                      staff.dob
-                        ? new Date(staff.dob).toLocaleDateString("vi-VN")
-                        : ""
-                    }
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+                 <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Địa chỉ:</span>
+                    <span className="font-medium text-gray-800 whitespace-pre-line">{staff.address || "-"}</span>
+                  </div>
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Email:</span>
+                    <span className="font-medium text-gray-800">{staff.email || "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="address"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Địa chỉ
-                  </label>
-                  <input
-                    id="address"
-                    type="text"
-                    value={staff.address || ""}
-                    readOnly
-                    className="w-full bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Giới tính:</span>
+                    <span className="font-medium text-gray-800">{staff.gender === true ? "Nam" : staff.gender === false ? "Nữ" : "-"}</span>
                 </div>
-                <div>
-                  <label
-                    htmlFor="role"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Vai trò
-                  </label>
-                  <input
-                    id="role"
-                    type="text"
-                    value={
-                      staff.role === "doctor"
-                        ? "Bác sĩ"
-                        : staff.role === "technician"
-                        ? "Kỹ thuật viên"
-                        : staff.role === "receptionist"
-                        ? "Lễ tân"
-                        : staff.role
-                    }
-                    readOnly
-                    className="w-48 bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="gender"
-                    className="block text-sm text-gray-700 mb-2"
-                  >
-                    Giới tính
-                  </label>
-                  <input
-                    id="gender"
-                    type="text"
-                    value={
-                      staff.gender === true
-                        ? "Nam"
-                        : staff.gender === false
-                        ? "Nữ"
-                        : "-"
-                    }
-                    readOnly
-                    className="w-48 bg-gray-50 border border-gray-200 rounded px-4 py-3 text-sm text-gray-900 focus:outline-none"
-                  />
-                </div>
+                <div className="grid grid-cols-[120px_1fr] items-start">
+                    <span className="text-sm text-gray-500">Vai trò:</span>
+                    <span className="font-medium text-gray-800">
+                    {staff.role === "doctor"
+                    ? "Bác sĩ"
+                    : staff.role === "technician"
+                    ? "Kỹ thuật viên"
+                    : staff.role === "receptionist"
+                    ? "Lễ tân"
+                    : staff.role || "-"}
+                    </span>
+              </div>
 
                 {/* Các nút hành động */}
                 <div className="col-span-1 sm:col-span-1 flex justify-start mt-8">
