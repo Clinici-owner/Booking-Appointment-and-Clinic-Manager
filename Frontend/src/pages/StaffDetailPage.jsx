@@ -186,9 +186,10 @@ function StaffDetailPage() {
 
                 {/* Các nút hành động */}
                 <div className="col-span-1 sm:col-span-1 flex justify-start mt-8">
+                  <div className="flex space-x-4">
                   <button
                     type="button"
-                    className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                    className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-36 h-12"
                     onClick={() =>
                       navigate(`/admin/staffs/update`, {
                         state: { id: staff._id },
@@ -197,24 +198,25 @@ function StaffDetailPage() {
                   >
                     Chỉnh sửa
                   </button>
-                </div>
-                <div className="col-span-1 sm:col-span-1 flex justify-end mt-8">
-                  <button
+                   <button
                     type="button"
                     className={
                       isLocked
-                        ? "bg-green-600 hover:bg-green-700 text-white font-semibold text-lg rounded-lg px-15 py-4"
-                        : "bg-red-600 hover:bg-red-700 text-white font-semibold text-lg rounded-lg px-15 py-4"
+                        ? "bg-green-600 hover:bg-green-700 text-white font-semibold text-sm rounded-lg w-36 h-12"
+                        : "bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg w-36 h-12"
                     }
                     onClick={handleToggleLockStatusClick}
                   >
                     {isLocked ? "Hủy khóa tài khoản" : "Khóa tài khoản"}
                   </button>
+                  </div>
+
+
                 </div>
-                <div className="col-span-full flex justify-center mt-10">
-                  <button
+                <div className="col-span-1 sm:col-span-1 flex justify-end mt-8">
+                 <button
                     type="button"
-                    className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
+                    className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
                     onClick={() => navigate("/admin/staffs")}
                   >
                     Quay về danh sách

@@ -211,7 +211,7 @@ function UpdateStaff() {
     e.preventDefault();
 
     if (!isValidForm()) {
-      toast.error("Vui lòng kiểm tra lại các trường thông tin.");
+      toast.error("Vui lòng kiểm tra lại các trường thông tin.", { style: { background: '#EF4444', color: '#fff' } });
       return;
     }
 
@@ -232,24 +232,26 @@ function UpdateStaff() {
       if (fullAddress !== originalStaff.address) updatePayload.address = fullAddress;
 
       await updateStaff(staffId, updatePayload);
-      toast.success("Đã cập nhật thông tin cá nhân thành công!");
+      toast.success("Đã cập nhật thông tin cá nhân thành công!", { style: { background: '#10B981', color: '#fff' } });
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      let errorMessage = "Cập nhật thất bại!";
-      if (error.response?.data?.message) {
-        const backendMessage = error.response.data.message.toLowerCase();
-        if (backendMessage.includes("email")) {
-          errorMessage = "Email đã tồn tại trong hệ thống.";
-        } else if (backendMessage.includes("phone")) {
-          errorMessage = "Số điện thoại đã tồn tại trong hệ thống.";
-        } else if (backendMessage.includes("cidnumber") || backendMessage.includes("cccd")) {
-          errorMessage = "CMND/CCCD đã tồn tại trong hệ thống.";
+      const errorMessage = error.response?.data?.error || 'Cập nhật thất bại!';
+      if (error.response?.status === 409) {
+        if (errorMessage.toLowerCase().includes('email')) {
+          toast.error('Cập nhật thất bại, email đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('phone')) {
+          toast.error('Cập nhật thất bại, số điện thoại đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('cidnumber') || errorMessage.toLowerCase().includes('cccd')) {
+          toast.error('Cập nhật thất bại, CMND/CCCD đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
         } else {
-          errorMessage = error.response.data.message;
+          toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
         }
+      } else if (error.response?.status === 400) {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+      } else {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
       }
-      toast.error(errorMessage);
     }
   };
 
@@ -488,7 +490,7 @@ function UpdateStaff() {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
+                      className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-28 h-12"
                     >
                       Cập nhật
                     </button>

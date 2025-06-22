@@ -139,43 +139,61 @@ function AddStaff() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            toast.error('Mật khẩu không khớp.');
-            return;
-        }
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+        toast.error('Mật khẩu không khớp.', { style: { background: '#EF4444', color: '#fff' } });
+        return;
+    }
 
-        if (!isValidForm()) {
-            return;
-        }
+    if (!isValidForm()) {
+        return;
+    }
 
-        try {
-            await createStaff(formData);
-            toast.success('Tạo nhân viên thành công!');
-            setTimeout(() => navigate('/admin/staffs'), 3000);
-        } catch (error) {
-            console.error('Lỗi tạo nhân viên:', error);
-            toast.error('Tạo nhân viên thất bại!');
-            return;
+    try {
+        await createStaff(formData);
+        toast.success('Tạo nhân viên thành công!', { style: { background: '#10B981', color: '#fff' } });
+        setTimeout(() => navigate('/admin/staffs'), 3000);
+    } catch (error) {
+        console.error('Lỗi tạo nhân viên:', error);
+        const errorMessage = error.response?.data?.error || 'Tạo nhân viên thất bại!';
+        if (error.response?.status === 409) {
+            if (errorMessage.includes('email')) {
+                toast.error('Cập nhật thất bại, email đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else if (errorMessage.includes('phone')) {
+                toast.error('Cập nhật thất bại, số điện thoại đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else if (errorMessage.includes('cidNumber')) {
+                toast.error('Cập nhật thất bại, CMND/CCCD đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+            } else {
+                toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+            }
+        } else if (error.response?.status === 400) {
+            toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+        } else {
+            toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
         }
+        return;
+    }
     };
 
     const handleExcelSubmit = async () => {
         if (!excelFile) {
-            toast.error('Vui lòng chọn file Excel');
+            toast.error('Vui lòng chọn file Excel', { style: { background: '#EF4444', color: '#fff' } });
             return;
         }
 
         try {
             await importStaffExcel(excelFile);
-            toast.success('Import thành công!');
+            toast.success('Import thành công!', { style: { background: '#10B981', color: '#fff' } });
             setTimeout(() => navigate('/admin/staffs'), 2000);
         } catch (error) {
             console.error('Lỗi import Excel:', error);
-            if (error.response) {
-                toast.error(`${error.response.data?.error || 'Lỗi khi import Excel.'}`);
+            const errorMessage = error.response?.data?.error || 'Lỗi khi import Excel.';
+            if (error.response?.status === 409) {
+                toast.error(`Import thất bại, email đã tồn tại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+            } else if (error.response?.status === 400) {
+                toast.error(`Import thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
             } else {
-                toast.error('Import thất bại!');
+                toast.error(`Import thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
             }
         }
     };
