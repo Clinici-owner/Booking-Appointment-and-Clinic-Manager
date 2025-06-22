@@ -3,9 +3,10 @@ const Schema = mongoose.Schema;
 
 const Specialty = new Schema({
     specialtyName: { type: String, required: true },
-    descspeciality: { type: String, default: '' },
+    descspecialty: { type: String, default: '' },
     medicalFee: { type: Number, required: true },
     documentId: [{ type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true }],
+    status: { type: Boolean, default: true },
     logo: { type: String, required: true },
 }, { timestamps: true });
 

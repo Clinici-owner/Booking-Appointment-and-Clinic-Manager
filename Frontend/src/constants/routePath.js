@@ -16,7 +16,7 @@ export const ROUTE_PATH = {
   PRIVACY_POLICY: '/privacypolicy',
   TERMS_OF_SERVICE: '/termsofservice',
 
-  // Staff
+  //Admin Manage Staff
   STAFF_LIST: '/admin/staffs',
   ADD_STAFF: '/admin/staffs/add',
   UPDATE_STAFF: '/admin/staffs/update',
@@ -38,7 +38,7 @@ export const ROUTE_PATH = {
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
   UPDATE_SPECIALTY: '/admin/specialties/update',
-  SPECIALTY_DETAIL: '/admin/specialties/detail',
+  SPECIALTY_DETAIL: '/admin/specialties/:id',
 
 
   // 404

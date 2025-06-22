@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+
+import { Toaster, toast } from "sonner";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -12,11 +14,14 @@ function SpecialtyAddPage() {
   const [logo, setLogo] = useState(null);
   const [dataSpecialty, setDataSpecialty] = useState({
     specialtyName: "",
-    descspeciality: "",
+    descspecialty: "",
     medicalFee: "",
     documentId: [],
     logo: "",
   });
+
+  const fileInputRef = useRef(null);
+  const logoInputRef = useRef(null);
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -24,10 +29,24 @@ function SpecialtyAddPage() {
     let logoUrl = "";
     let documentIds = [];
 
+    // Chuẩn bị dữ liệu để gửi
+
+
+    if (
+      !dataSpecialty.specialtyName.trim() ||
+      !dataSpecialty.descspecialty.trim() ||
+      !dataSpecialty.medicalFee ||
+      images.length === 0 ||
+      !logo
+    ) {
+      toast.error("Vui lòng điền đầy đủ thông tin trước khi gửi.");
+      return;
+    }
+
+
     if (logo) {
       logoUrl = await uploadToCloudinary(logo);
     }
-
 
     if (images && images.length > 0) {
       const uploadedUrls = await Promise.all(images.map(uploadToCloudinary)); // Upload lên Cloudinary
@@ -39,24 +58,38 @@ function SpecialtyAddPage() {
       documentIds = insertedDocuments.map((doc) => doc.document._id);
     }
 
-    // Chuẩn bị dữ liệu để gửi
-    const payload = {
+        const payload = {
       specialtyName: dataSpecialty.specialtyName,
-      descspeciality: dataSpecialty.descspeciality,
+      descspecialty: dataSpecialty.descspecialty,
       medicalFee: dataSpecialty.medicalFee,
       documentId: documentIds,
       logo: logoUrl,
     };
-
     try {
       const result = await createSpecialty(payload);
+      setDataSpecialty({
+        specialtyName: "",
+        descspecialty: "",
+        medicalFee: "",
+        documentId: [],
+        logo: "",
+      });
+      setImages([]);
+      setLogo(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+
+      if (logoInputRef.current) {
+        logoInputRef.current.value = null;
+      }
+
+      toast.success('Tạo chuyên khoa thành công')
       console.log("Tạo chuyên khoa thành công:", result);
     } catch (error) {
       console.error("Tạo chuyên khoa thất bại:", error);
     }
   };
-
-  // Handle file input change for images
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -67,11 +100,11 @@ function SpecialtyAddPage() {
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     setLogo(file);
-    console.log("Logo file selected:", file);
   };
 
   return (
     <div>
+      <Toaster position="top-right" richColors />
       <h1 className="text-3xl text-custom-blue font-bold mb-4">
         Thêm chuyên khoa
       </h1>
@@ -86,10 +119,10 @@ function SpecialtyAddPage() {
             placeholder="Nhập tên chuyên khoa"
             value={dataSpecialty.specialtyName}
             onChange={(e) =>
-              setDataSpecialty({
-                ...dataSpecialty,
+              setDataSpecialty((prev) => ({
+                ...prev,
                 specialtyName: e.target.value,
-              })
+              }))
             }
           />
         </div>
@@ -99,10 +132,13 @@ function SpecialtyAddPage() {
           </label>
           <CKEditor
             editor={ClassicEditor}
-            data={dataSpecialty.descspeciality}
+            data={dataSpecialty.descspecialty}
             onChange={(event, editor) => {
               const data = editor.getData();
-              setDataSpecialty({ ...dataSpecialty, descspeciality: data });
+              setDataSpecialty((prev) => ({
+                ...prev,
+                descspecialty: data,
+              }));
             }}
             config={{
               placeholder: "Nhập mô tả dịch vụ...",
@@ -119,7 +155,10 @@ function SpecialtyAddPage() {
             placeholder="Nhập phí khám bệnh"
             value={dataSpecialty.medicalFee}
             onChange={(e) =>
-              setDataSpecialty({ ...dataSpecialty, medicalFee: e.target.value })
+              setDataSpecialty((prev) => ({
+                ...prev,
+                medicalFee: e.target.value,
+              }))
             }
           />
         </div>
@@ -132,6 +171,7 @@ function SpecialtyAddPage() {
             className="border border-gray-300 rounded-lg p-2 w-full"
             multiple
             onChange={handleFileChange}
+            ref={fileInputRef}
             accept="image/*"
           />
 
@@ -155,6 +195,7 @@ function SpecialtyAddPage() {
           <input
             type="file"
             onChange={handleLogoChange}
+            ref={logoInputRef}
             accept="image/*"
             className="border border-gray-300 rounded-lg p-2 w-full"
           />

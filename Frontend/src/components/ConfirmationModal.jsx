@@ -1,7 +1,7 @@
 
 function ConfirmationModal({ message, onConfirm, onCancel, title }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-cente bg-opacity-10 backdrop-blur-sm">
+        <div className="fixed inset-0  flex items-center justify-cente bg-opacity-10 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto">
                 {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
                 <p className="text-sm text-gray-700 mb-6">{message}</p>
@@ -14,7 +14,7 @@ function ConfirmationModal({ message, onConfirm, onCancel, title }) {
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="px-4 py-2 text-sm font-medium text-white bg-custom-blue rounded-md hover:bg-custom-bluehover2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         Có
                     </button>
