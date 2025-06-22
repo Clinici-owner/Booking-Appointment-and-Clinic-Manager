@@ -2,29 +2,33 @@ const Service = require("../models/ParaclinicalService");
 
 class serviceController {
   async createService(req, res, next) {
-    try {
-      const { name, price, room } = req.body;
+  try {
+    const { name, price, room } = req.body;
 
-      if (!name || !price || !room) {
-        return res
-          .status(400)
-          .json({ message: "Missing required information" });
-      }
-
-      const service = new Service({
-        paraclinalName: name,
-        paraPrice: price,
-        roomNumber: room,
-      });
-      await service.save();
-      return res.status(201).json({
-        message: "Create service successfully",
-        service: service,
-      });
-    } catch (error) {
-      next(error);
+    if (!name || !price || !room) {
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
     }
+
+    const existingRoom = await Service.findOne({ roomNumber: room });
+    if (existingRoom) {
+      return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
+    }
+
+    const service = new Service({
+      paraclinalName: name,
+      paraPrice: price,
+      roomNumber: room,
+    });
+    await service.save();
+
+    return res.status(201).json({
+      message: "Tạo dịch vụ thành công",
+      service,
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   async listService(req, res){
     try{
@@ -65,15 +69,23 @@ class serviceController {
 
   async editService(req, res, next) {
   try {
-    const {  name, price, room, status } = req.body;
+    const { name, price, room, status } = req.body;
     const { serviceId } = req.params;
 
     if (!serviceId || !name || !price || !room || !status) {
-      return res.status(400).json({ message: "Missing required information" });
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
     }
 
-    if (!['available', 'disable'].includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
+    if (!["available", "disable"].includes(status)) {
+      return res.status(400).json({ message: "Trạng thái không hợp lệ" });
+    }
+
+    const duplicateRoom = await Service.findOne({
+      roomNumber: room,
+      _id: { $ne: serviceId },
+    });
+    if (duplicateRoom) {
+      return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
     }
 
     const updatedService = await Service.findByIdAndUpdate(
@@ -82,17 +94,17 @@ class serviceController {
         paraclinalName: name,
         paraPrice: price,
         roomNumber: room,
-        status: status,
+        status,
       },
       { new: true }
     );
 
     if (!updatedService) {
-      return res.status(404).json({ message: "Service not found" });
+      return res.status(404).json({ message: "Không tìm thấy dịch vụ" });
     }
 
     return res.status(200).json({
-      message: "Update service successfully",
+      message: "Cập nhật dịch vụ thành công",
       service: updatedService,
     });
   } catch (error) {
@@ -126,6 +138,26 @@ class serviceController {
     });
   } catch (err) {
     return res.status(500).json({ message: "Lỗi server.", error: err.message });
+  }
+}
+
+async searchServiceByName(req, res) {
+  try {
+    const { name } = req.query;
+
+    const query = name
+      ? { paraclinalName: { $regex: name, $options: "i" } } 
+      : {};
+
+    const services = await Service.find(query);
+
+    return res.status(200).json({
+      message: "Tìm kiếm thành công",
+      services,
+    });
+  } catch (error) {
+    console.error("Lỗi tìm kiếm:", error);
+    return res.status(500).json({ message: "Lỗi hệ thống" });
   }
 }
 
