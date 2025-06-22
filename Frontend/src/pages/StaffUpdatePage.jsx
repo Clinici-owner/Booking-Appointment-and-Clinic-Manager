@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getStaffById, updateStaff } from "../services/staffService";
 import { Toaster, toast } from 'sonner';
 
+// updateStaff function to handle staff updates
 function UpdateStaff() {
   const location = useLocation();
   const navigate = useNavigate();
