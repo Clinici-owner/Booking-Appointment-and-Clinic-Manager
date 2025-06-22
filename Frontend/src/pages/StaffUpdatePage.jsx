@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import AdminNavSidebar from "../components/AdminNavSidebar";
-import Header from "../components/Header";
 import { getStaffById, updateStaff } from "../services/staffService";
 
 function UpdateStaff() {
@@ -11,7 +9,7 @@ function UpdateStaff() {
   const [staff, setStaff] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [notification, setNotification] = useState(null);
+  const [notification, setNotification] = useState({ message: null, type: null });
   const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -210,22 +208,52 @@ function UpdateStaff() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNotification(null);
-    const fullAddress = buildAddress();
-    setStaff((prev) => ({ ...prev, address: fullAddress }));
+    setNotification({ message: null, type: null });
+
     if (!isValidForm()) {
+      setNotification({ message: "Vui lòng kiểm tra lại các trường thông tin.", type: "error" });
+      setTimeout(() => setNotification({ message: null, type: null }), 3000);
       return;
     }
+
+    const fullAddress = buildAddress();
+    const updatedStaff = { ...staff, address: fullAddress };
+
     try {
-      await updateStaff(staffId, { ...staff, address: fullAddress });
-      setNotification("Đã cập nhật thông tin cá nhân thành công!");
-      setTimeout(() => setNotification(null), 2000);
+      // Store original values for comparison
+      const originalStaff = await getStaffById(staffId);
+
+      // Only include changed fields in the update payload
+      const updatePayload = {};
+      if (updatedStaff.email !== originalStaff.email) updatePayload.email = updatedStaff.email;
+      if (updatedStaff.phone !== originalStaff.phone) updatePayload.phone = updatedStaff.phone;
+      if (updatedStaff.cidNumber !== originalStaff.cidNumber) updatePayload.cidNumber = updatedStaff.cidNumber;
+      if (updatedStaff.fullName !== originalStaff.fullName) updatePayload.fullName = updatedStaff.fullName;
+      if (updatedStaff.role !== originalStaff.role) updatePayload.role = updatedStaff.role;
+      if (updatedStaff.dob !== originalStaff.dob) updatePayload.dob = updatedStaff.dob;
+      if (updatedStaff.gender !== originalStaff.gender) updatePayload.gender = updatedStaff.gender;
+      if (fullAddress !== originalStaff.address) updatePayload.address = fullAddress;
+
+      await updateStaff(staffId, updatePayload);
+      setNotification({ message: "Đã cập nhật thông tin cá nhân thành công!", type: "success" });
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      const errorMessage = error.response?.data?.message || "Cập nhật thất bại!";
-      setNotification(errorMessage);
-      setTimeout(() => setNotification(null), 3000);
+      let errorMessage = "Cập nhật thất bại!";
+      if (error.response?.data?.message) {
+        const backendMessage = error.response.data.message.toLowerCase();
+        if (backendMessage.includes("email")) {
+          errorMessage = "Email đã tồn tại trong hệ thống.";
+        } else if (backendMessage.includes("phone")) {
+          errorMessage = "Số điện thoại đã tồn tại trong hệ thống.";
+        } else if (backendMessage.includes("cidnumber") || backendMessage.includes("cccd")) {
+          errorMessage = "CMND/CCCD đã tồn tại trong hệ thống.";
+        } else {
+          errorMessage = error.response.data.message;
+        }
+      }
+      setNotification({ message: errorMessage, type: "error" });
+      setTimeout(() => setNotification({ message: null, type: null }), 3000);
     }
   };
 
@@ -272,9 +300,15 @@ function UpdateStaff() {
               </h2>
             </div>
 
-            {notification && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 text-center">
-                {notification}
+            {notification.message && (
+              <div
+                className={`border px-4 py-3 rounded-lg mb-6 text-center ${
+                  notification.type === "success"
+                    ? "bg-green-100 border-green-400 text-green-700"
+                    : "bg-red-100 border-red-400 text-red-700"
+                }`}
+              >
+                {notification.message}
               </div>
             )}
 

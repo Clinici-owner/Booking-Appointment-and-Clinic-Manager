@@ -101,7 +101,7 @@ function StaffList() {
                                         currentStaff.map((staff, index) => (
                                             <tr
                                                 key={staff._id}
-                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white' : ''}`}
+                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white hover:bg-red-300 text-white' : ''}`}
                                                 onClick={() => handleRowClick(staff._id)}
                                             >
                                                 <td className="py-6 px-6 font-normal w-[10%]">

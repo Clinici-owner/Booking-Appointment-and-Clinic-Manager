@@ -127,16 +127,54 @@ class StaffController {
 }
 
     async updateStaff(req, res) {
-        try {
-            const { id } = req.params;
-            const updateData = req.body;
-            const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
-            if (!updatedUser) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
-            res.json({ message: 'Cập nhật thành công', user: updatedUser });
-        } catch (error) { // Đổi err thành error
-            res.status(500).json({ error: error.message });
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        console.log(`Updating user ID: ${id}, Update data: ${JSON.stringify(updateData)}`);
+
+        if (updateData.email) {
+            const normalizedEmail = updateData.email.toLowerCase();
+            const existingEmail = await User.findOne({ 
+                email: normalizedEmail,
+                _id: { $ne: id }
+            });
+            console.log(`Email check for ${normalizedEmail}: ${existingEmail ? 'Found' : 'Not found'}`);
+            if (existingEmail) {
+                return res.status(409).json({ error: 'Email đã tồn tại' });
+            }
         }
+
+        if (updateData.phone) {
+            const existingPhone = await User.findOne({ 
+                phone: updateData.phone.trim(),
+                _id: { $ne: id }
+            });
+            console.log(`Phone check for ${updateData.phone}: ${existingPhone ? 'Found' : 'Not found'}`);
+            if (existingPhone) {
+                return res.status(409).json({ error: 'Số điện thoại đã tồn tại' });
+            }
+        }
+
+        if (updateData.cidNumber) {
+            const existingCid = await User.findOne({ 
+                cidNumber: updateData.cidNumber.trim(),
+                _id: { $ne: id }
+            });
+            console.log(`CID check for ${updateData.cidNumber}: ${existingCid ? 'Found' : 'Not found'}`);
+            if (existingCid) {
+                return res.status(409).json({ error: 'CMND/CCCD đã tồn tại' });
+            }
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+        if (!updatedUser) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        res.json({ message: 'Cập nhật thành công', user: updatedUser });
+    } catch (error) {
+        console.error(`Error updating staff: ${error.message}`);
+        res.status(500).json({ error: error.message });
     }
+}
 
     async getStaffById(req, res) {
         try {
@@ -144,7 +182,7 @@ class StaffController {
             const user = await User.findById(id);
             if (!user || user.role === 'patient') return res.status(404).json({ error: 'Không tìm thấy nhân viên' });
             res.json(user);
-        } catch (error) { // Đổi err thành error
+        } catch (error) { 
             res.status(500).json({ error: error.message });
         }
     }
