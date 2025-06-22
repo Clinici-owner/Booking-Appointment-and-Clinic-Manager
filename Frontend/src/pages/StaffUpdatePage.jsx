@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getStaffById, updateStaff } from "../services/staffService";
+import { Toaster, toast } from 'sonner';
 
 function UpdateStaff() {
   const location = useLocation();
@@ -9,7 +10,6 @@ function UpdateStaff() {
   const [staff, setStaff] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [notification, setNotification] = useState({ message: null, type: null });
   const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -208,11 +208,9 @@ function UpdateStaff() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNotification({ message: null, type: null });
 
     if (!isValidForm()) {
-      setNotification({ message: "Vui lòng kiểm tra lại các trường thông tin.", type: "error" });
-      setTimeout(() => setNotification({ message: null, type: null }), 3000);
+      toast.error("Vui lòng kiểm tra lại các trường thông tin.");
       return;
     }
 
@@ -220,10 +218,8 @@ function UpdateStaff() {
     const updatedStaff = { ...staff, address: fullAddress };
 
     try {
-      // Store original values for comparison
       const originalStaff = await getStaffById(staffId);
 
-      // Only include changed fields in the update payload
       const updatePayload = {};
       if (updatedStaff.email !== originalStaff.email) updatePayload.email = updatedStaff.email;
       if (updatedStaff.phone !== originalStaff.phone) updatePayload.phone = updatedStaff.phone;
@@ -235,7 +231,7 @@ function UpdateStaff() {
       if (fullAddress !== originalStaff.address) updatePayload.address = fullAddress;
 
       await updateStaff(staffId, updatePayload);
-      setNotification({ message: "Đã cập nhật thông tin cá nhân thành công!", type: "success" });
+      toast.success("Đã cập nhật thông tin cá nhân thành công!");
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
@@ -252,8 +248,7 @@ function UpdateStaff() {
           errorMessage = error.response.data.message;
         }
       }
-      setNotification({ message: errorMessage, type: "error" });
-      setTimeout(() => setNotification({ message: null, type: null }), 3000);
+      toast.error(errorMessage);
     }
   };
 
@@ -291,6 +286,7 @@ function UpdateStaff() {
 
   return (
     <div className="flex text-[18px] leading-[1.75]">
+      <Toaster />
       <div className="flex-1 flex flex-col">
         <div className="flex">
           <div className="w-full max-w-[1600px] mx-auto p-10">
@@ -299,18 +295,6 @@ function UpdateStaff() {
                 Cập nhật thông tin nhân viên
               </h2>
             </div>
-
-            {notification.message && (
-              <div
-                className={`border px-4 py-3 rounded-lg mb-6 text-center ${
-                  notification.type === "success"
-                    ? "bg-green-100 border-green-400 text-green-700"
-                    : "bg-red-100 border-red-400 text-red-700"
-                }`}
-              >
-                {notification.message}
-              </div>
-            )}
 
             <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
               <form
