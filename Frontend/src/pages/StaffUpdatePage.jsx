@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import AdminNavSidebar from "../components/AdminNavSidebar";
-import Header from "../components/Header";
 import { getStaffById, updateStaff } from "../services/staffService";
+import { Toaster, toast } from 'sonner';
 
+// updateStaff function to handle staff updates
 function UpdateStaff() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -11,7 +11,6 @@ function UpdateStaff() {
   const [staff, setStaff] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [notification, setNotification] = useState(null);
   const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -142,6 +141,29 @@ function UpdateStaff() {
     const cidRegex = /^\d{0,12}$/;
     const specificAddressRegex = /^[\p{L}\d\s,.-]+$/u;
 
+    if (name === 'fullName' && !value?.trim()) {
+      return 'Họ và tên không được để trống.';
+    }
+    if (name === 'email' && !value?.trim()) {
+      return 'Email không được để trống.';
+    }
+    if (name === 'phone' && !value?.trim()) {
+      return 'Số điện thoại không được để trống.';
+    }
+    if (name === 'cidNumber' && !value?.trim()) {
+      return 'CMND/CCCD không được để trống.';
+    }
+    if (name === 'dob' && !value) {
+      return 'Ngày sinh không được để trống.';
+    }
+    if (name === 'role' && !value) {
+      return 'Vai trò không được để trống.';
+    }
+    if (name === 'gender' && value === undefined) {
+      return 'Giới tính không được để trống.';
+    }
+
+    // Additional validation for non-empty fields
     switch (name) {
       case 'fullName':
         if (value.length > 50 || !nameRegex.test(value)) {
@@ -167,7 +189,7 @@ function UpdateStaff() {
         if (value && !specificAddressRegex.test(value)) {
           return 'Địa chỉ cụ thể không hợp lệ. Chỉ được chứa chữ cái, số, dấu phẩy, dấu chấm và dấu gạch ngang.';
         }
-        if (value.length > 100) {
+        if (value?.length > 100) {
           return 'Địa chỉ cụ thể không được vượt quá 100 ký tự.';
         }
         break;
@@ -200,32 +222,72 @@ function UpdateStaff() {
 
   const isValidForm = () => {
     const newErrors = {};
-    Object.keys(staff).forEach((key) => {
+    // Validate required fields
+    Object.keys(staff || {}).forEach((key) => {
       const error = validateField(key, staff[key]);
       if (error) newErrors[key] = error;
     });
+
+    // Validate address fields
+    if (!selectedProvince) {
+      newErrors.province = 'Vui lòng chọn Tỉnh/Thành phố.';
+    }
+    if (!selectedDistrict) {
+      newErrors.district = 'Vui lòng chọn Quận/Huyện.';
+    }
+    if (!selectedWard) {
+      newErrors.ward = 'Vui lòng chọn Phường/Xã.';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setNotification(null);
-    const fullAddress = buildAddress();
-    setStaff((prev) => ({ ...prev, address: fullAddress }));
+
     if (!isValidForm()) {
+      toast.error("Vui lòng kiểm tra lại các trường thông tin.", { style: { background: '#EF4444', color: '#fff' } });
       return;
     }
+
+    const fullAddress = buildAddress();
+    const updatedStaff = { ...staff, address: fullAddress };
+
     try {
-      await updateStaff(staffId, { ...staff, address: fullAddress });
-      setNotification("Đã cập nhật thông tin cá nhân thành công!");
-      setTimeout(() => setNotification(null), 2000);
+      const originalStaff = await getStaffById(staffId);
+
+      const updatePayload = {};
+      if (updatedStaff.email !== originalStaff.email) updatePayload.email = updatedStaff.email;
+      if (updatedStaff.phone !== originalStaff.phone) updatePayload.phone = updatedStaff.phone;
+      if (updatedStaff.cidNumber !== originalStaff.cidNumber) updatePayload.cidNumber = updatedStaff.cidNumber;
+      if (updatedStaff.fullName !== originalStaff.fullName) updatePayload.fullName = updatedStaff.fullName;
+      if (updatedStaff.role !== originalStaff.role) updatePayload.role = updatedStaff.role;
+      if (updatedStaff.dob !== originalStaff.dob) updatePayload.dob = updatedStaff.dob;
+      if (updatedStaff.gender !== originalStaff.gender) updatePayload.gender = updatedStaff.gender;
+      if (fullAddress !== originalStaff.address) updatePayload.address = fullAddress;
+
+      await updateStaff(staffId, updatePayload);
+      toast.success("Đã cập nhật thông tin cá nhân thành công!", { style: { background: '#10B981', color: '#fff' } });
       setTimeout(() => navigate("/admin/staffs"), 2000);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      const errorMessage = error.response?.data?.message || "Cập nhật thất bại!";
-      setNotification(errorMessage);
-      setTimeout(() => setNotification(null), 3000);
+      const errorMessage = error.response?.data?.error || 'Cập nhật thất bại!';
+      if (error.response?.status === 409) {
+        if (errorMessage.toLowerCase().includes('email')) {
+          toast.error('Cập nhật thất bại, email đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('phone')) {
+          toast.error('Cập nhật thất bại, số điện thoại đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else if (errorMessage.toLowerCase().includes('cidnumber') || errorMessage.toLowerCase().includes('cccd')) {
+          toast.error('Cập nhật thất bại, CMND/CCCD đã tồn tại!', { style: { background: '#EF4444', color: '#fff' } });
+        } else {
+          toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+        }
+      } else if (error.response?.status === 400) {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+      } else {
+        toast.error(`Cập nhật thất bại: ${errorMessage}`, { style: { background: '#EF4444', color: '#fff' } });
+      }
     }
   };
 
@@ -263,6 +325,7 @@ function UpdateStaff() {
 
   return (
     <div className="flex text-[18px] leading-[1.75]">
+      <Toaster />
       <div className="flex-1 flex flex-col">
         <div className="flex">
           <div className="w-full max-w-[1600px] mx-auto p-10">
@@ -271,12 +334,6 @@ function UpdateStaff() {
                 Cập nhật thông tin nhân viên
               </h2>
             </div>
-
-            {notification && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6 text-center">
-                {notification}
-              </div>
-            )}
 
             <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
               <form
@@ -369,6 +426,7 @@ function UpdateStaff() {
                     <option value="doctor">Bác sĩ</option>
                     <option value="technician">Kỹ thuật viên</option>
                   </select>
+                  {errors.role && <p className="text-sm text-red-600">{errors.role}</p>}
                 </div>
                 <div>
                   <label
@@ -389,6 +447,7 @@ function UpdateStaff() {
                     onChange={handleChange}
                     className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
+                  {errors.dob && <p className="text-sm text-red-600">{errors.dob}</p>}
                 </div>
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
@@ -401,6 +460,7 @@ function UpdateStaff() {
                         value={selectedProvince}
                         onChange={(e) => setSelectedProvince(e.target.value)}
                         className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        disabled={!provinces.length}
                       >
                         <option value="">Tỉnh/Thành phố</option>
                         {provinces.map((province) => (
@@ -409,11 +469,12 @@ function UpdateStaff() {
                           </option>
                         ))}
                       </select>
+                      {errors.province && <p className="text-sm text-red-600">{errors.province}</p>}
                       <select
                         value={selectedDistrict}
                         onChange={(e) => setSelectedDistrict(e.target.value)}
                         className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        disabled={!selectedProvince}
+                        disabled={!selectedProvince || !districts.length}
                       >
                         <option value="">Quận/Huyện</option>
                         {districts.map((district) => (
@@ -422,11 +483,12 @@ function UpdateStaff() {
                           </option>
                         ))}
                       </select>
+                      {errors.district && <p className="text-sm text-red-600">{errors.district}</p>}
                       <select
                         value={selectedWard}
                         onChange={(e) => setSelectedWard(e.target.value)}
                         className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        disabled={!selectedDistrict}
+                        disabled={!selectedDistrict || !wards.length}
                       >
                         <option value="">Phường/Xã</option>
                         {wards.map((ward) => (
@@ -435,6 +497,7 @@ function UpdateStaff() {
                           </option>
                         ))}
                       </select>
+                      {errors.ward && <p className="text-sm text-red-600">{errors.ward}</p>}
                     </div>
                     <input
                       id="specificAddress"
@@ -464,12 +527,13 @@ function UpdateStaff() {
                     <option value="true">Nam</option>
                     <option value="false">Nữ</option>
                   </select>
+                  {errors.gender && <p className="text-sm text-red-600">{errors.gender}</p>}
                 </div>
                 <div className="col-span-full flex justify-between items-center mt-8">
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-sm rounded-lg w-28 h-12"
+                      className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-28 h-12"
                     >
                       Cập nhật
                     </button>

@@ -77,6 +77,50 @@ class SpecialtyController {
             res.status(500).json({ error: 'Lỗi khi xuất dữ liệu ra Excel.' });
         }
     }
+
+    async getAllSpecialties(req, res) {
+        try {
+            const specialties = await Specialty.find({}).populate('documentId');
+            res.status(200).json(specialties);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách chuyên khoa:", error);
+            res.status(500).json({ error: 'Lỗi khi lấy danh sách chuyên khoa.' });
+        }
+    }
+
+    async getSpecialtyById(req, res) {
+        try {
+            const { id } = req.params;
+            const specialty = await Specialty.findById(id).populate('documentId');
+            if (!specialty) {
+                return res.status(404).json({ error: 'Chuyên khoa không tồn tại.' });
+            }
+            res.status(200).json(specialty);
+        } catch (error) {
+            console.error("Lỗi khi lấy chuyên khoa:", error);
+            res.status(500).json({ error: 'Lỗi khi lấy chuyên khoa.' });
+        }
+    }
+
+    async lockSpecialty(req, res) {
+        try {
+            const { id } = req.params;
+            const {status} = req.body;
+            if (status !== true && status !== false) {
+                return res.status(400).json({ error: 'Trạng thái không hợp lệ. Chỉ có thể là true hoặc false.' });
+            }
+            const specialty = await Specialty.findById(id);
+            if (!specialty) {
+                return res.status(404).json({ error: 'Chuyên khoa không tồn tại.' });
+            }
+            specialty.status = status;
+            await specialty.save();
+            res.status(200).json({ message: 'Trạng thái chuyên khoa đã được cập nhật.', specialty });
+        } catch (error) {
+            console.error("Lỗi khi khóa chuyên khoa:", error);
+            res.status(500).json({ error: 'Lỗi khi khóa chuyên khoa.' });
+        }
+    }
 }
 
 module.exports = new SpecialtyController();

@@ -101,7 +101,7 @@ function StaffList() {
                                         currentStaff.map((staff, index) => (
                                             <tr
                                                 key={staff._id}
-                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white' : ''}`}
+                                                className={`border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50 ${staff.locked || staff.isLocked || (staff.status && staff.status === 'locked') ? 'bg-red-400 text-white hover:bg-red-300 text-white' : ''}`}
                                                 onClick={() => handleRowClick(staff._id)}
                                             >
                                                 <td className="py-6 px-6 font-normal w-[10%]">
@@ -164,10 +164,9 @@ function StaffList() {
                             </button>
                         </div>
                         <button
-                            className="fixed bottom-10 right-10 bg-custom-blue text-white text-base font-semibold rounded-lg py-3 px-6 hover:bg-custom-bluehover2 transition-colors z-50"
+                            className="fixed bottom-18 right-10 bg-custom-blue text-white text-base font-semibold rounded-lg py-3 px-6 hover:bg-custom-bluehover2 transition-colors z-50"
                             type="button"
-                            onClick={() => navigate('/admin/staffs/add')}
-                        >
+                            onClick={() => navigate('/admin/staffs/add')}>
                             Thêm nhân viên mới
                         </button>
                     </div>
