@@ -167,5 +167,19 @@ updateUserProfile: async (userId, profileData) => {
       message: error.message,
     }
   }
-}
+},
+  ChangeAccountPasswords: async (userId, oldPassword, newPassword) => {
+    try {
+      const res = await axios.put(`${API_URL}/updatepassword`, {
+        userId,
+        oldPassword,
+        newPassword,
+      });
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Thay đổi mật khẩu thất bại"
+      );
+    }
+  },
 };

@@ -17,11 +17,13 @@ export const ROUTE_PATH = {
   TERMS_OF_SERVICE: '/termsofservice',
 
   // Staff
-  STAFF_LIST: 'admin/staffs',
-  ADD_STAFF: 'admin/staffs/add',
-  UPDATE_STAFF: 'admin/staffs/update',
-  STAFF_DETAIL: 'admin/staffs/detail',
+  STAFF_LIST: '/admin/staffs',
+  ADD_STAFF: '/admin/staffs/add',
+  UPDATE_STAFF: '/admin/staffs/update',
+  STAFF_DETAIL: '/admin/staffs/detail',
+
   LIST_PATIENTS: '/admin/patients',
+  PATIENT_DETAIL: '/admin/patient/detail',
 
   // OAuth callback
   GOOGLE_AUTH_CALLBACK: '/google-auth-success',
@@ -29,9 +31,16 @@ export const ROUTE_PATH = {
   // User-profile
   USER_PROFILE: '/user-profile',
   USER_PROFILE_UPDATE: '/user-profile/update',
-
+  UPDATE_PASSWORD: '/user-profile/update-password',
   //Service manager
   SERVICES_LIST: '/createMedical',  
+
+  //Specialty manager
+  SPECIALTIES_LIST: '/admin/specialties',
+  ADD_SPECIALTY: '/admin/specialties/add',
+  UPDATE_SPECIALTY: '/admin/specialties/update',
+  SPECIALTY_DETAIL: '/admin/specialties/detail',
+
 
   // 404
   NOT_FOUND: '*',

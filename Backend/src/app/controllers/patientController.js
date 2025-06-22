@@ -12,5 +12,18 @@ class patientController {
         }
     }
 
+    async getPatientById(req, res) {
+        const { id } = req.params; 
+        try {
+            const patient = await User.findById(id).select("-password");
+            if (!patient) {
+                return res.status(404).json({ message: "Patient not found" });
+            }
+            res.status(200).json(patient);
+        } catch (error) {
+            console.error("Error fetching patient:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
 }
 module.exports = new patientController();

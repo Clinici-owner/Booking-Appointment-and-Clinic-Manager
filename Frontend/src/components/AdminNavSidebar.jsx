@@ -19,13 +19,16 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import SettingsIcon from "@mui/icons-material/Settings";
+import PersonalInjuryIcon from '@mui/icons-material/PersonalInjury';
+import EmergencyIcon from '@mui/icons-material/Emergency';
 
 const drawerWidth = 240;
 
 const navItems = [
   { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/dashboard" },
   { label: "Quản lý nhân viên", icon: <PeopleIcon />, path: "/admin/staffs" },
-  { label: "Quản lý bệnh nhân", icon: <PeopleIcon />, path: "/admin/patients" },
+  { label: "Quản lý bệnh nhân", icon: <PersonalInjuryIcon />, path: "/admin/patients" },
+  { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },
   { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedule" },
   { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointments" },
   { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/admin/services" },

@@ -8,6 +8,7 @@ const MedicalHistory = new Schema({
     status: { type: String, enum: ['waiting', 'examining', 'complete'], default: 'waiting' },
     service: [{ type: Schema.Types.ObjectId, ref: 'ParaclinicalService', required: true }],
     diagnosis: { type: String, default: '' },
+    resultParaclinical: [{ type: Schema.Types.ObjectId, ref: 'ResultParaclinical' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('MedicalHistory', MedicalHistory);
