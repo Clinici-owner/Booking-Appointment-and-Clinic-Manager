@@ -42,6 +42,9 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
 
+  //News manager
+  CREATE_NEWS: '/admin/news',
+
   // 404
   NOT_FOUND: '*',
 };
