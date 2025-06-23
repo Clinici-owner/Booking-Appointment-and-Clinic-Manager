@@ -141,7 +141,6 @@ function UpdateStaff() {
     const cidRegex = /^\d{0,12}$/;
     const specificAddressRegex = /^[\p{L}\d\s,.-]+$/u;
 
-    // Check for empty required fields
     if (name === 'fullName' && !value?.trim()) {
       return 'Họ và tên không được để trống.';
     }

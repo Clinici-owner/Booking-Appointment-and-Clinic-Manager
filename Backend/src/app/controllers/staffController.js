@@ -62,83 +62,163 @@ class StaffController {
 }
 
     async importExcel(req, res) {
-    try {
-        if (!req.file) {
-            console.error("Không có file được gửi lên.");
-            return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
-        }
+        try {
+            if (!req.file) {
+                console.error("Không có file được gửi lên.");
+                return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
+            }
 
-        const buffer = req.file.buffer;
-        const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const rawData = xlsx.utils.sheet_to_json(sheet, {
-            defval: '',
-            raw: false,
-            dateNF: 'yyyy-mm-dd',
-        });
+            const buffer = req.file.buffer;
+            const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(sheet, {
+                defval: '',
+                raw: false,
+                dateNF: 'yyyy-mm-dd',
+            });
 
-        const data = rawData.map(row => {
-            let avatarUrl = row.avatar;
+            // Validation regex và danh sách vai trò hợp lệ
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phoneRegex = /^\d{10,11}$/;
+            const cidRegex = /^\d{9,12}$/;
+            const validRoles = ['receptionist', 'doctor', 'technician', 'lễ tân', 'bác sĩ', 'kỹ thuật viên'];
+            const invalidRows = [];
+
+            const data = rawData.map((row, index) => {
+                // Xử lý avatar
+                let avatarUrl = row.avatar || '';
+                if (!avatarUrl || avatarUrl === '/img/dafaultAvatar.jpg') {
+                    avatarUrl = DEFAULT_AVATAR_URL;
+                }
+
+                // Map role
+                let role = (row.role || 'receptionist').toLowerCase();
+                if (role === 'lễ tân') role = 'receptionist';
+                else if (role === 'bác sĩ') role = 'doctor';
+                else if (role === 'kỹ thuật viên') role = 'technician';
+                else if (!['receptionist', 'doctor', 'technician'].includes(role)) {
+                    invalidRows.push({ row: index + 2, error: `Vai trò '${role}' không hợp lệ` });
+                    return null;
+                }
+
+                
+                let gender = false;
+                if (row.gender) {
+                    const genderValue = row.gender.toString().toLowerCase();
+                    if (['nam', 'true', '1'].includes(genderValue)) gender = true;
+                    else if (['nữ', 'false', '0'].includes(genderValue)) gender = false;
+                    else {
+                        invalidRows.push({ row: index + 2, error: `Giới tính '${genderValue}' không hợp lệ` });
+                        return null;
+                    }
+                }
+
+                const email = row.email || '';
+                const cidNumber = row.cidNumber || '';
+                const phone = row.phone || '';
+                const password = row.password || '';
+                const errors = [];
+
+                if (!email) errors.push('Email không được để trống');
+                else if (!emailRegex.test(email)) errors.push('Email không hợp lệ');
+                if (!cidNumber) errors.push('CMND/CCCD không được để trống');
+                else if (!cidRegex.test(cidNumber)) errors.push('CMND/CCCD không hợp lệ (9-12 số)');
+                if (phone && !phoneRegex.test(phone)) errors.push('Số điện thoại không hợp lệ (10-11 số)');
+                if (!password) errors.push('Mật khẩu không được để trống');
+                else if (password.length < 6) errors.push('Mật khẩu phải có ít nhất 6 ký tự');
+
+                if (errors.length > 0) {
+                    invalidRows.push({ row: index + 2, errors });
+                    return null;
+                }
+
+                return {
+                    cidNumber: cidNumber.trim(),
+                    password: password,
+                    fullName: row.fullName || '',
+                    dob: row.dob || '',
+                    role,
+                    phone: phone || '',
+                    email: email.toLowerCase(),
+                    gender,
+                    address: row.address || '',
+                    specificAddress: row.specificAddress || '',
+                    avatar: avatarUrl
+                };
+            }).filter(item => item !== null); 
+
+            console.log("Dữ liệu sau xử lý:", data);
+
+            if (invalidRows.length > 0) {
+                return res.status(400).json({
+                    error: 'Tệp Excel chứa dữ liệu không hợp lệ.',
+                    invalidRows
+                });
+            }
+
+            if (!Array.isArray(data) || data.length === 0) {
+                return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
+            }
+
             
-            if (!avatarUrl || avatarUrl === '/img/dafaultAvatar.jpg') {
-                avatarUrl = DEFAULT_AVATAR_URL;
+            const emails = data.map(item => item.email).filter(Boolean);
+            const phones = data.map(item => item.phone).filter(Boolean);
+            const cidNumbers = data.map(item => item.cidNumber).filter(Boolean);
+
+            const [existingEmails, existingPhones, existingCids] = await Promise.all([
+                User.find({ email: { $in: emails } }).select('email'),
+                User.find({ phone: { $in: phones } }).select('phone'),
+                User.find({ cidNumber: { $in: cidNumbers } }).select('cidNumber')
+            ]);
+
+            const duplicates = [];
+            data.forEach((item, index) => {
+                const errors = [];
+                if (existingEmails.some(e => e.email === item.email)) {
+                    errors.push(`Email '${item.email}' đã tồn tại`);
+                }
+                if (existingPhones.some(p => p.phone === item.phone)) {
+                    errors.push(`Số điện thoại '${item.phone}' đã tồn tại`);
+                }
+                if (existingCids.some(c => c.cidNumber === item.cidNumber)) {
+                    errors.push(`CMND/CCCD '${item.cidNumber}' đã tồn tại`);
+                }
+                if (errors.length > 0) {
+                    duplicates.push({ row: index + 2, errors });
+                }
+            });
+
+            if (duplicates.length > 0) {
+                return res.status(409).json({
+                    error: 'Dữ liệu Excel chứa các mục trùng lặp.',
+                    duplicates
+                });
             }
 
-            // Map role from Vietnamese to English enum values
-            let role = row.role || 'receptionist';
-            if (role.toLowerCase() === 'lễ tân') role = 'receptionist';
-            else if (role.toLowerCase() === 'bác sĩ') role = 'doctor';
-            else if (role.toLowerCase() === 'kỹ thuật viên') role = 'technician';
-
-            // Map gender from Vietnamese to boolean
-            let gender = false;
-            if (row.gender) {
-                const genderValue = row.gender.toString().toLowerCase();
-                if (genderValue === 'nam' || genderValue === 'true' || genderValue === '1') gender = true;
-                else if (genderValue === 'nữ' || genderValue === 'false' || genderValue === '0') gender = false;
+            // Chèn dữ liệu
+            const inserted = await User.insertMany(data, { ordered: false });
+            res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
+        } catch (error) {
+            console.error('Lỗi khi xử lý Excel:', error);
+            if (error.code === 11000) {
+                const errorMessage = error.message.toLowerCase();
+                if (errorMessage.includes('email')) {
+                    return res.status(409).json({ error: 'Dữ liệu Excel chứa email đã tồn tại.' });
+                } else if (errorMessage.includes('phone')) {
+                    return res.status(409).json({ error: 'Dữ liệu Excel chứa số điện thoại đã tồn tại.' });
+                } else if (errorMessage.includes('cidnumber') || errorMessage.includes('cccd')) {
+                    return res.status(409).json({ error: 'Dữ liệu Excel chứa CMND/CCCD đã tồn tại.' });
+                } else {
+                    return res.status(409).json({ error: 'Dữ liệu Excel chứa các mục trùng lặp.' });
+                }
             }
-
-            return {
-                cidNumber: row.cidNumber || '',
-                password: row.password || '',
-                fullName: row.fullName || '',
-                dob: row.dob || '',
-                role: role,
-                phone: row.phone || '',
-                email: row.email || '',
-                gender: gender,
-                address: row.address || '',
-                specificAddress: row.specificAddress || '',
-                avatar: avatarUrl // Gán avatar đã được xử lý
-            };
-        });
-
-        console.log("Dữ liệu sau xử lý:", data);
-
-        if (!Array.isArray(data) || data.length === 0) {
-            return res.status(400).json({ error: 'Tệp Excel không hợp lệ hoặc trống.' });
+            if (error.name === 'ValidationError') {
+                return res.status(400).json({ error: `Lỗi validation: ${error.message}` });
+            }
+            res.status(500).json({ error: error.message || 'Lỗi khi nhập dữ liệu từ Excel.' });
         }
-
-        const inserted = await User.insertMany(data);
-        res.status(201).json({ message: 'Nhân viên đã được nhập thành công.', users: inserted });
-    } catch (error) {
-        console.error('Lỗi khi xử lý Excel:', error);
-        if (error.code === 11000) { 
-            const errorMessage = error.message.toLowerCase();
-            if (errorMessage.includes('email')) {
-                return res.status(409).json({ error: 'Dữ liệu Excel chứa email đã tồn tại.' });
-            } else if (errorMessage.includes('phone')) {
-                return res.status(409).json({ error: 'Dữ liệu Excel chứa số điện thoại đã tồn tại.' });
-            } else if (errorMessage.includes('cidnumber') || errorMessage.includes('cccd')) {
-                return res.status(409).json({ error: 'Dữ liệu Excel chứa CMND/CCCD đã tồn tại.' });
-            } else {
-                return res.status(409).json({ error: 'Dữ liệu Excel chứa các mục trùng lặp.' });
-            }
-        }
-        res.status(500).json({ error: error.message || 'Lỗi khi nhập dữ liệu từ Excel.' });
     }
-}
 
 
     async lockUser(req, res) {
