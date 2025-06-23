@@ -3,25 +3,25 @@ const News = require('../models/News');
 class NewsController {
   async createNews(req, res) {
     try {
-      const { title, blocks, tags, category, createdBy } = req.body;
+      const { title, blocks, tags, category } = req.body;
 
       if (!title || !Array.isArray(blocks)) {
-        return res.status(400).json({ message: "Missing required fields" });
+        return res.status(400).json({ message: "Thiếu tiêu đề hoặc blocks" });
       }
 
-      const news = new News({
-        title,
-        blocks,
-        tags,
-        category,
-        createdBy,
-      });
+      const news = await News.create({
+      title,
+      blocks,
+      tags,
+      category,
+      createdBy: req.user._id, 
+    });
 
       await news.save();
-      return res.status(201).json({ message: "News created successfully", news });
+      return res.status(201).json({ message: "Tạo bài viết thành công", news });
     } catch (error) {
       console.error("Error creating news:", error);
-      return res.status(500).json({ message: "Server error" });
+      return res.status(500).json({ message: "Lỗi server" });
     }
   }
 
