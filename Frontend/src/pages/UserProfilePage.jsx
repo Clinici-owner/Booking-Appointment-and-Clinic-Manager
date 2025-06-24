@@ -8,7 +8,6 @@ function UserProfilePage() {
   const hasInitialized = useRef(false)
 
   const fetchUserProfile = async () => {
-    console.log("fetchUserProfile called")
 
     try {
       setLoading(true)
@@ -29,7 +28,6 @@ function UserProfilePage() {
       }
 
       if (!currentUser || !currentUser._id) {
-        console.log("currentUser:", currentUser)
         setError("Không tìm thấy thông tin người dùng trong session hoặc thiếu id")
         setLoading(false)
         return
@@ -58,7 +56,6 @@ function UserProfilePage() {
 
   useEffect(() => {
     if (!hasInitialized.current) {
-      console.log("useEffect triggered - First time only")
       hasInitialized.current = true
       fetchUserProfile()
     }

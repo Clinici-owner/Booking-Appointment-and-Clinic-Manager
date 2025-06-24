@@ -21,7 +21,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonalInjuryIcon from '@mui/icons-material/PersonalInjury';
 import EmergencyIcon from '@mui/icons-material/Emergency';
-
+import NewspaperIcon from '@mui/icons-material/Newspaper';
 const drawerWidth = 240;
 
 const navItems = [
@@ -31,8 +31,9 @@ const navItems = [
   { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },
   { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedule" },
   { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointments" },
-  { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/admin/services" },
+  { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/createMedical" },
   { label: "Hồ sơ bệnh án", icon: <AssignmentIcon />, path: "/admin/records" },
+  { label: "Tạo bài đăng", icon: <NewspaperIcon />, path: "/admin/news" },
   { label: "Tài chính & thanh toán", icon: <MonetizationOnIcon />, path: "/admin/billing" },
   { label: "Cài đặt hệ thống", icon: <SettingsIcon />, path: "/admin/settings" },
 ];
