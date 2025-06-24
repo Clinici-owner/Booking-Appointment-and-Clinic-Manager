@@ -12,3 +12,13 @@ export const createSpecialty = async (specialtyData) => {
     throw error;
   }
 }   
+
+export const getAllSpecialties = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/getAll`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching specialties:", error);
+    throw error;
+  }
+}

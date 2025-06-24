@@ -42,6 +42,9 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL: '/admin/specialties/detail',
 
 
+  //Doctor
+  DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
+
   // 404
   NOT_FOUND: '*',
 };
