@@ -42,6 +42,9 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
 
+  //Doctor
+  DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
+
   //News manager
   CREATE_NEWS: '/admin/news',
 
