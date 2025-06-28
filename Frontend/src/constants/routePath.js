@@ -41,6 +41,13 @@ export const ROUTE_PATH = {
   UPDATE_SPECIALTY: '/admin/specialties/update',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
+
+  //Doctor
+  DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
+
+  //News manager
+  CREATE_NEWS: '/admin/news',
+
   //Health package manager
   HEALTH_PACKAGE_MANAGER: '/admin/health-packages',
   HEALTH_PACKAGE_CREATE: '/admin/health-packages/create',

@@ -1,10 +1,24 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const News = new Schema({
-    newsName: { type: String, required: true },
-    description: { type: String, required: true },
-    image: { type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true },
-}, { timestamps: true });
+  title: { type: String, required: true },
+  blocks: [
+    {
+      type: {
+        type: String, 
+        required: true,
+        enum: ["text", "image", "quote", "video"]
+      },
+      content: { type: Schema.Types.Mixed, required: true }, 
+      order: { type: Number, default: 0 }
+    }
+  ],
+  tags: [String], 
+  category: { type: String }, 
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdAt: { type: Date, default: Date.now },
+});
 
-module.exports = mongoose.model('News', News);
+module.exports = mongoose.model("News", News);
+ 

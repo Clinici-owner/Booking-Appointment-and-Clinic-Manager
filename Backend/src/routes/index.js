@@ -6,8 +6,13 @@ const documentUploadRouter = require('./documentUpload')
 const specialtiesRouter = require('./specialty')
 const patientRouter = require('./patient')
 const medicalHistoryRouter = require('./medicalHistory')
+const doctorProfileRouter = require('./doctorProfile')
 const testRouter = require('./test')
+<<<<<<< HEAD
 const healthPackageRouter = require('./healthPackage')
+=======
+const newsRouter = require('./news');
+>>>>>>> d4d628ea5445d56c8384d5d29a1db2c202b871ec
 function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
@@ -17,8 +22,13 @@ function route(app) {
     app.use('/api/specialty', specialtiesRouter);
     app.use('/api/patient', patientRouter);
     app.use('/api/medicalHistory', medicalHistoryRouter);
+    app.use('/api/doctorProfile', doctorProfileRouter);
     app.use('/api/test', testRouter);
+<<<<<<< HEAD
     app.use('/api/healthPackage', healthPackageRouter);
+=======
+    app.use('/api/news', newsRouter);
+>>>>>>> d4d628ea5445d56c8384d5d29a1db2c202b871ec
 }
 
 module.exports = route

@@ -100,103 +100,244 @@ function HomePage() {
         </section>
 
         {/* Dịch vụ nổi bật */}
-        <section className="py-16 bg-gray-50" id="services">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-custom-blue mb-4">
+        <section class="py-16 bg-gray-50" id="services">
+          <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+              <h2 class="text-3xl font-bold text-blue-800 mb-4">
                 Dịch vụ y tế
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p class="text-gray-600 max-w-2xl mx-auto">
                 Phúc Hưng Clinic cung cấp đa dạng các dịch vụ y tế chất lượng
                 cao
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <i className="fas fa-heartbeat text-2xl text-blue-600"></i>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-heartbeat text-2xl text-blue-600"></i>
                   </div>
-                  <h3 className="text-xl font-semibold text-blue-800">
+                  <h3 class="text-xl font-semibold text-blue-800">
                     Khám tổng quát
                   </h3>
                 </div>
-                <p className="text-gray-600 mb-4">
+                <p class="text-gray-600 mb-4">
                   Kiểm tra sức khỏe toàn diện, phát hiện sớm các bệnh lý tiềm
                   ẩn.
                 </p>
                 <a
                   href="#"
-                  className="text-green-600 font-medium flex items-center"
+                  class="text-green-600 font-medium flex items-center"
                 >
-                  Xem chi tiết{" "}
-                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-green-100 p-3 rounded-lg">
+                    <i class="fas fa-baby text-2xl text-green-600"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold text-blue-800">Khám nhi</h3>
+                </div>
+                <p class="text-gray-600 mb-4">
+                  Chăm sóc sức khỏe toàn diện cho trẻ em từ sơ sinh đến dưới 16
+                  tuổi.
+                </p>
+                <a
+                  href="#"
+                  class="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-purple-100 p-3 rounded-lg">
+                    <i class="fas fa-female text-2xl text-purple-600"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold text-blue-800">Phụ khoa</h3>
+                </div>
+                <p class="text-gray-600 mb-4">
+                  Khám và điều trị các bệnh lý phụ khoa, kế hoạch hóa gia đình.
+                </p>
+                <a
+                  href="#"
+                  class="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-yellow-100 p-3 rounded-lg">
+                    <i class="fas fa-male text-2xl text-yellow-600"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold text-blue-800">Nam khoa</h3>
+                </div>
+                <p class="text-gray-600 mb-4">
+                  Khám và điều trị các bệnh lý về sinh sản, tiết niệu ở nam
+                  giới.
+                </p>
+                <a
+                  href="#"
+                  class="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-red-100 p-3 rounded-lg">
+                    <i class="fas fa-ear text-2xl text-red-600"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold text-blue-800">
+                    Tai mũi họng
+                  </h3>
+                </div>
+                <p class="text-gray-600 mb-4">
+                  Chẩn đoán và điều trị các bệnh lý về tai, mũi, họng, thanh
+                  quản.
+                </p>
+                <a
+                  href="#"
+                  class="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
+                </a>
+              </div>
+
+              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
+                <div class="flex items-start space-x-4 mb-4">
+                  <div class="bg-indigo-100 p-3 rounded-lg">
+                    <i class="fas fa-tooth text-2xl text-indigo-600"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold text-blue-800">
+                    Răng hàm mặt
+                  </h3>
+                </div>
+                <p class="text-gray-600 mb-4">
+                  Khám và điều trị các vấn đề về răng, hàm, nha chu, chỉnh nha.
+                </p>
+                <a
+                  href="#"
+                  class="text-green-600 font-medium flex items-center"
+                >
+                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
                 </a>
               </div>
             </div>
 
-            <div className="text-center mt-10">
+            <div class="text-center mt-10">
               <a
                 href="#"
-                className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
+                class="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
               >
                 Xem tất cả dịch vụ{" "}
-                <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                <i class="fas fa-chevron-right ml-2 text-sm"></i>
               </a>
             </div>
           </div>
         </section>
 
         {/* Đội ngũ bác sĩ */}
-        <section className="py-16 bg-white" id="doctors">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-custom-blue mb-4">
+        <section class="py-16 bg-white">
+          <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+              <h2 class="text-3xl font-bold text-blue-800 mb-4">
                 Đội ngũ bác sĩ
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Đội ngũ bác sĩ giàu kinh nghiệm, tận tâm với bệnh nhân, luôn sẵn
-                sàng lắng nghe và tư vấn tận tình.
+              <p class="text-gray-600 max-w-2xl mx-auto">
+                Gặp gỡ các chuyên gia y tế giàu kinh nghiệm của chúng tôi
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Bác sĩ 1 */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
-                  <img
-                    src="https://img4.thuthuatphanmem.vn/uploads/2021/01/10/hinh-anh-bac-si-ao-trang-rat-dep_021521356.jpg"
-                    alt="Bác sĩ Nguyễn Văn A"
-                    className="rounded-xl w-full h-80 object-cover mb-4"
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold text-custom-blue">
-                      Bác sĩ Nguyễn Văn A
-                    </h3>
 
-                    <p className="text-green-600 text-sm">Chuyên khoa Nội tổng quát</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
+                <img
+                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/HO-THI-HUONG-THAO.png"
+                  alt="Bác sĩ Nguyễn Thị Mai"
+                  class="w-full h-64 object-cover"
+                />
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-blue-800">
+                    BS. Nguyễn Thị Mai
+                  </h3>
+                  <p class="text-green-600 mb-3">Chuyên khoa Nhi</p>
+                  <p class="text-gray-600 text-sm">
+                    Hơn 15 năm kinh nghiệm khám chữa bệnh nhi, từng công tác tại
+                    Bệnh viện Nhi Trung ương.
+                  </p>
                 </div>
-                <p className="text-gray-600 mb-4 mt-2">
-                  Hơn 10 năm kinh nghiệm trong lĩnh vực nội khoa, chuyên khám và
-                  điều trị các bệnh lý nội khoa phổ biến.
-                </p>
-                <a
-                  href="#"
-                  className="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết{" "}
-                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
+              </div>
+
+              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
+                <img
+                  src="https://th.bing.com/th/id/OIP.c6pvDTw7il7NpjVj-4_VIQHaHa?w=183&h=184&c=7&r=0&o=7&dpr=2&pid=1.7&rm=3"
+                  alt="Bác sĩ Trần Văn Nam"
+                  class="w-full h-64 object-cover"
+                />
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-blue-800">
+                    BS. Trần Văn Nam
+                  </h3>
+                  <p class="text-green-600 mb-3">Chuyên khoa Tai Mũi Họng</p>
+                  <p class="text-gray-600 text-sm">
+                    Chuyên gia đầu ngành về Tai Mũi Họng, có nhiều năm nghiên
+                    cứu và làm việc tại nước ngoài.
+                  </p>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
+                <img
+                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/Avatar-8.png"
+                  alt="Bác sĩ Lê Thị Hương"
+                  class="w-full h-64 object-cover"
+                />
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-blue-800">
+                    BS. Lê Thị Hương
+                  </h3>
+                  <p class="text-green-600 mb-3">Chuyên khoa Phụ sản</p>
+                  <p class="text-gray-600 text-sm">
+                    Nguyên trưởng khoa Phụ sản Bệnh viện Phụ sản Trung ương, với
+                    20+ năm kinh nghiệm.
+                  </p>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
+                <img
+                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/NGUYEN-VAN-MY.png"
+                  alt="Bác sĩ Phạm Văn Khánh"
+                  class="w-full h-64 object-cover"
+                />
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-blue-800">
+                    BS. Phạm Văn Khánh
+                  </h3>
+                  <p class="text-green-600 mb-3">Chuyên khoa Răng Hàm Mặt</p>
+                  <p class="text-gray-600 text-sm">
+                    Chuyên gia về nha khoa thẩm mỹ và chỉnh nha, tốt nghiệp Đại
+                    học Y Hà Nội.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="text-center mt-10">
-            <a
-              href="#"
-              className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
-            >
-              Xem tất cả bác sĩ{" "}
-              <i className="fas fa-chevron-right ml-2 text-sm"></i>
-            </a>
+
+            <div class="text-center mt-10">
+              <a
+                href="#"
+                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium inline-block transition"
+              >
+                Xem tất cả bác sĩ
+              </a>
+            </div>
           </div>
         </section>
 
@@ -313,15 +454,14 @@ function HomePage() {
                   Tiêu đề bài viết 1
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 1. Đây là một bài viết rất hữu ích về
-                  sức khỏe.
+                  Tóm tắt nội dung bài viết 1. Đây là một bài viết rất hữu ích
+                  về sức khỏe.
                 </p>
                 <a
                   href="#"
                   className="text-green-600 font-medium flex items-center"
                 >
-                  Đọc thêm{" "}
-                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
                 </a>
               </div>
 
@@ -336,15 +476,14 @@ function HomePage() {
                   Tiêu đề bài viết 2
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 2. Đây là một bài viết rất hữu ích về
-                  sức khỏe.
+                  Tóm tắt nội dung bài viết 2. Đây là một bài viết rất hữu ích
+                  về sức khỏe.
                 </p>
                 <a
                   href="#"
                   className="text-green-600 font-medium flex items-center"
                 >
-                  Đọc thêm{" "}
-                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
                 </a>
               </div>
 
@@ -359,15 +498,14 @@ function HomePage() {
                   Tiêu đề bài viết 3
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 3. Đây là một bài viết rất hữu ích về
-                  sức khỏe.
+                  Tóm tắt nội dung bài viết 3. Đây là một bài viết rất hữu ích
+                  về sức khỏe.
                 </p>
                 <a
                   href="#"
                   className="text-green-600 font-medium flex items-center"
                 >
-                  Đọc thêm{" "}
-                  <i className="fas fa-chevron-right ml-2 text-sm"></i>
+                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
                 </a>
               </div>
             </div>
