@@ -83,9 +83,6 @@ try {
       if (!user || !user._id) {
         throw new Error("User object hoặc user ID không hợp lệ")
       }
-
-      console.log("Calling API with user:", user) // Debug log
-
       // Tạo URL với đường dẫn đúng
       const url = new URL(`${API_URL}/profile`)
       url.searchParams.append("userId", user._id)

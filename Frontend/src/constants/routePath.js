@@ -41,7 +41,15 @@ export const ROUTE_PATH = {
   UPDATE_SPECIALTY: '/admin/specialties/update',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
+  //Health package manager
+  HEALTH_PACKAGE_MANAGER: '/admin/health-packages',
+  HEALTH_PACKAGE_CREATE: '/admin/health-packages/create',
+  HEALTH_PACKAGE_UPDATE: '/admin/health-packages/update/:id',
+  HEALTH_PACKAGE_DETAIL: '/admin/health-packages/detail/:id',
+  HEALTH_PACKAGE_lOCK_STATUS: '/admin/health-packages/lockstatus/:id',
 
+  // Health package for user
+  HEALTH_PACKAGE_USER: '/health-packages',
   // 404
   NOT_FOUND: '*',
 };
