@@ -47,6 +47,7 @@ const LockHealthPackagePage = React.lazy(() => import("../pages/LockHealthPackag
 const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
 
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
+const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 
 const createNewspage = React.lazy(() => import("../pages/createNews"));
 
@@ -104,6 +105,7 @@ const AppRoute = [
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
+  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
