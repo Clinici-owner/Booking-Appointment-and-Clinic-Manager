@@ -7,6 +7,7 @@ const specialtiesRouter = require('./specialty')
 const patientRouter = require('./patient')
 const medicalHistoryRouter = require('./medicalHistory')
 const doctorProfileRouter = require('./doctorProfile')
+const medicalProcessRouter = require('./medicalProcess')
 const testRouter = require('./test')
 const newsRouter = require('./news');
 function route(app) {
@@ -19,6 +20,7 @@ function route(app) {
     app.use('/api/patient', patientRouter);
     app.use('/api/medicalHistory', medicalHistoryRouter);
     app.use('/api/doctorProfile', doctorProfileRouter);
+    app.use('/api/medicalProcess', medicalProcessRouter);
     app.use('/api/test', testRouter);
     app.use('/api/news', newsRouter);
 }

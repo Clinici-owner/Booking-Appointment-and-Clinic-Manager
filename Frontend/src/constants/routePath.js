@@ -44,6 +44,7 @@ export const ROUTE_PATH = {
 
   //Doctor
   DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
+  DOCTOR_CREATE_MEDICAL_PROCESS: '/doctor/createMedicalProcess',
 
   //News manager
   CREATE_NEWS: '/admin/news',
