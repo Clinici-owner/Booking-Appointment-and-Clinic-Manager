@@ -43,6 +43,12 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 
 const createNewspage = React.lazy(() => import("../pages/createNews"));
 
+const ScheduleListPage = React.lazy(() => import("../pages/ScheduleListPage"));
+const ScheduleDetailPage = React.lazy(() => import("../pages/ScheduleDetailPage"));
+const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
+const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
+const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
+
 
 // Cấu hình route
 const AppRoute = [
@@ -90,6 +96,13 @@ const AppRoute = [
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
+
+  // Schedule Manager
+  {path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
+  {path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
+  {path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: MainLayout },
+  {path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
+  {path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

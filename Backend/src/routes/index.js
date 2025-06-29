@@ -8,6 +8,7 @@ const patientRouter = require('./patient')
 const medicalHistoryRouter = require('./medicalHistory')
 const testRouter = require('./test')
 const newsRouter = require('./news');
+const scheduleRouter = require('./schedule')
 function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
@@ -19,6 +20,7 @@ function route(app) {
     app.use('/api/medicalHistory', medicalHistoryRouter);
     app.use('/api/test', testRouter);
     app.use('/api/news', newsRouter);
+    app.use('/api/schedules', scheduleRouter);
 }
 
 module.exports = route
