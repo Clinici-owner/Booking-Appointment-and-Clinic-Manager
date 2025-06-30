@@ -115,7 +115,7 @@ function SpecialtyAddPage() {
       logo: logoUrl,
     };
     try {
-      const result = await createSpecialty(payload);
+      await createSpecialty(payload);
       setDataSpecialty({
         specialtyName: "",
         descspecialty: "",
@@ -134,7 +134,6 @@ function SpecialtyAddPage() {
       }
 
       toast.success("Tạo chuyên khoa thành công");
-      console.log("Tạo chuyên khoa thành công:", result);
     } catch (error) {
       console.error("Tạo chuyên khoa thất bại:", error);
     }
@@ -204,10 +203,9 @@ function SpecialtyAddPage() {
       documentId: documentIds, // ← chỉ ảnh mới
       logo: logoUrl,
     };
-    console.log("Cập nhật chuyên khoa thành công:", payload);
 
     try {
-      const result = await updateSpecialty(id, payload);
+      await updateSpecialty(id, payload);
       // Reset
       setDataSpecialty({
         specialtyName: "",
@@ -220,7 +218,6 @@ function SpecialtyAddPage() {
       setLogo(null);
       fileInputRef.current && (fileInputRef.current.value = null);
       logoInputRef.current && (logoInputRef.current.value = null);
-
       toast.success("Cập nhật chuyên khoa thành công");
       navigator(`/admin/specialties/${id}`); // Chuyển hướng về danh sách chuyên khoa
     } catch (error) {

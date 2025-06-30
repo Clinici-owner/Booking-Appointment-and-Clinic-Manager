@@ -1,25 +1,57 @@
 import axios from "axios";
+import { DoctorService } from "./doctorService";
 
 const API_URL = "http://localhost:3000/api/user";
 
 export const UserService = {
   login: async (email, password) => {
-  try {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
-    console.log("Đăng nhập thành công:", res.data);
-    if (res.data && res.data.user) {
+    try {
+      const res = await axios.post(`${API_URL}/login`, { email, password });
+
+      if (!res.data?.user) {
+        throw new Error("Dữ liệu người dùng không hợp lệ từ server");
+      }
+
+      console.log("Đăng nhập thành công:", res.data);
+
+      // Lưu thông tin user
       const userData = {
         ...res.data.user,
-        expiresAt: Date.now() + 3600000, // hết hạn sau 1h
+        expiresAt: Date.now() + 3600000, // 1 giờ
+        token: res.data.token, // Giả sử server trả về token
       };
       sessionStorage.setItem("user", JSON.stringify(userData));
+
+      // Xử lý redirect
+      switch (res.data.user.role) {
+        case "admin":
+          window.location.href = "/admin/staffs";
+          break;
+        case "doctor":
+          try {
+            const doctorProfile = await DoctorService.getDoctorProfileById(
+              res.data.user._id
+            );
+            window.location.href = doctorProfile
+              ? "/"
+              : "/doctor/createDoctorProfile";
+          } catch (error) {
+            console.error("Lỗi khi kiểm tra hồ sơ bác sĩ:", error);
+            window.location.href = "/doctor/createDoctorProfile";
+          }
+          break;
+        default:
+          window.location.href = "/";
+      }
+
+      return res.data;
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+      throw new Error(
+        error.response?.data?.message || error.message || "Đăng nhập thất bại"
+      );
     }
-    window.location.href = "/";
-    return res.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Đăng nhập thất bại");
-  }
-},
+  },
 
   register: async (email, password) => {
     try {
@@ -77,20 +109,20 @@ export const UserService = {
       );
     }
   },
-getUserProfileByUserID: async (user) => {
-try {
+  getUserProfileByUserID: async (user) => {
+    try {
       // Kiểm tra user object
       if (!user || !user._id) {
-        throw new Error("User object hoặc user ID không hợp lệ")
+        throw new Error("User object hoặc user ID không hợp lệ");
       }
 
-      console.log("Calling API with user:", user) // Debug log
+      console.log("Calling API with user:", user); // Debug log
 
       // Tạo URL với đường dẫn đúng
-      const url = new URL(`${API_URL}/profile`)
-      url.searchParams.append("userId", user._id)
+      const url = new URL(`${API_URL}/profile`);
+      url.searchParams.append("userId", user._id);
 
-      console.log("Request URL:", url.toString()) // Debug log
+      console.log("Request URL:", url.toString()); // Debug log
 
       // Sử dụng GET method
       const response = await fetch(url, {
@@ -98,76 +130,80 @@ try {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      });
 
-      console.log("Response status:", response.status) // Debug log
-      console.log("Response ok:", response.ok) // Debug log
+      console.log("Response status:", response.status); // Debug log
+      console.log("Response ok:", response.ok); // Debug log
 
       // Kiểm tra response status
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Error response:", errorText) // Debug log
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+        const errorText = await response.text();
+        console.error("Error response:", errorText); // Debug log
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorText}`
+        );
       }
 
-      const result = await response.json()
-      console.log("API Response:", result) // Debug log - Kiểm tra structure của response
+      const result = await response.json();
+      console.log("API Response:", result); // Debug log - Kiểm tra structure của response
 
-      return result
+      return result;
     } catch (error) {
-      console.error("Error in getUserProfileByUserID:", error)
-      throw error
+      console.error("Error in getUserProfileByUserID:", error);
+      throw error;
     }
   },
-// userService.js
-updateUserProfile: async (userId, profileData) => {
-  try {
-    console.log("=== SERVICE DEBUG ===")
-    console.log("Service received userId:", userId)
-    console.log("Service received profileData:", profileData)
-    console.log("Avatar in service:", profileData.avatar)
+  // userService.js
+  updateUserProfile: async (userId, profileData) => {
+    try {
+      console.log("=== SERVICE DEBUG ===");
+      console.log("Service received userId:", userId);
+      console.log("Service received profileData:", profileData);
+      console.log("Avatar in service:", profileData.avatar);
 
-    // 🚨 QUAN TRỌNG: Đảm bảo avatar được include
-    const requestBody = {
-      userId: userId,
-      fullName: profileData.fullName,
-      phone: profileData.phone,
-      address: profileData.address,
-      dob: profileData.dob,
-      gender: profileData.gender,
-      avatar: profileData.avatar, // 🔥 Explicitly include avatar
-      cidNumber: profileData.cidNumber,
+      // 🚨 QUAN TRỌNG: Đảm bảo avatar được include
+      const requestBody = {
+        userId: userId,
+        fullName: profileData.fullName,
+        phone: profileData.phone,
+        address: profileData.address,
+        dob: profileData.dob,
+        gender: profileData.gender,
+        avatar: profileData.avatar, // 🔥 Explicitly include avatar
+        cidNumber: profileData.cidNumber,
+      };
+
+      console.log("Request body to send:", requestBody);
+      console.log("Avatar in request body:", requestBody.avatar);
+
+      const response = await fetch(`${API_URL}/updateprofile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("Service response:", result);
+      return result;
+    } catch (error) {
+      console.error("Service error:", error);
+      return {
+        success: false,
+        message: error.message,
+      };
     }
-
-    console.log("Request body to send:", requestBody)
-    console.log("Avatar in request body:", requestBody.avatar)
-
-    const response = await fetch(`${API_URL}/updateprofile`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-
-    console.log("Response status:", response.status)
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
-    console.log("Service response:", result)
-    return result
-  } catch (error) {
-    console.error("Service error:", error)
-    return {
-      success: false,
-      message: error.message,
-    }
-  }
-},
+  },
   ChangeAccountPasswords: async (userId, oldPassword, newPassword) => {
     try {
       const res = await axios.put(`${API_URL}/updatepassword`, {

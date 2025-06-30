@@ -20,6 +20,12 @@ function UserProfileUpdatePage() {
   const [imageUploading, setImageUploading] = useState(false)
   const [uploadError, setUploadError] = useState("")
 
+  // Validation errors state
+  const [validationErrors, setValidationErrors] = useState({
+    phone: "",
+    cidNumber: "",
+  })
+
   const CLOUDINARY_CLOUD_NAME = "dqncabikk"
 
   useEffect(() => {
@@ -103,9 +109,45 @@ function UserProfileUpdatePage() {
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target
+    let processedValue = value
+
+    // Validation for phone and cidNumber fields
+    if (name === "phone" || name === "cidNumber") {
+      // Only allow numeric characters
+      processedValue = value.replace(/[^0-9]/g, "")
+
+      // Validate phone number
+      if (name === "phone") {
+        const newErrors = { ...validationErrors }
+
+        if (processedValue && !processedValue.startsWith("0")) {
+          newErrors.phone = "Số điện thoại phải bắt đầu bằng số 0"
+        } else if (processedValue && (processedValue.length < 10 || processedValue.length > 11)) {
+          newErrors.phone = "Số điện thoại phải có 10-11 chữ số"
+        } else {
+          newErrors.phone = ""
+        }
+
+        setValidationErrors(newErrors)
+      }
+
+      // Validate CCCD/CMND
+      if (name === "cidNumber") {
+        const newErrors = { ...validationErrors }
+
+        if (processedValue && processedValue.length !== 9 && processedValue.length !== 12) {
+          newErrors.cidNumber = "CMND phải có 9 chữ số hoặc CCCD phải có 12 chữ số"
+        } else {
+          newErrors.cidNumber = ""
+        }
+
+        setValidationErrors(newErrors)
+      }
+    }
+
     setEditForm((prev) => ({
       ...prev,
-      [name]: type === "radio" ? (value === "true" ? true : value === "false" ? false : value) : value,
+      [name]: type === "radio" ? (value === "true" ? true : value === "false" ? false : value) : processedValue,
     }))
   }
 
@@ -151,7 +193,6 @@ function UserProfileUpdatePage() {
       })
       if (!response.ok) {
         const errorData = await response.json()
-        console.error("❌ Cloudinary error:", errorData)
         throw new Error(`Upload failed: ${errorData.error?.message || "Unknown error"}`)
       }
 
@@ -164,7 +205,6 @@ function UserProfileUpdatePage() {
 
       setUploadError("")
     } catch (error) {
-      console.error(" Upload error:", error)
       setUploadError(`Có lỗi xảy ra khi tải ảnh: ${error.message}`)
     } finally {
       setImageUploading(false)
@@ -173,6 +213,13 @@ function UserProfileUpdatePage() {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault()
+
+    // Check for validation errors before submitting
+    if (validationErrors.phone || validationErrors.cidNumber) {
+      setError("Vui lòng sửa các lỗi trong form trước khi lưu")
+      return
+    }
+
     setUpdateLoading(true)
 
     try {
@@ -187,13 +234,29 @@ function UserProfileUpdatePage() {
       const result = await UserService.updateUserProfile(currentUser._id, updatedForm)
 
       if (result.success) {
+        // Update session storage with new user information
+        const updatedUser = {
+          ...currentUser,
+          fullName: updatedForm.fullName,
+          phone: updatedForm.phone,
+          address: updatedForm.address,
+          dob: updatedForm.dob,
+          gender: updatedForm.gender,
+          avatar: updatedForm.avatar,
+          cidNumber: updatedForm.cidNumber,
+          // Keep other existing fields that weren't updated
+          updatedAt: new Date().toISOString(),
+        }
+
+        // Save updated user data to session storage
+        sessionStorage.setItem("user", JSON.stringify(updatedUser))
+
         setSuccessMessage("Cập nhật thành công!")
         setTimeout(() => (window.location.href = "/user-profile"), 2000)
       } else {
         setError(result.message)
       }
     } catch (err) {
-      console.error("Update error:", err)
       setError(err.message)
     } finally {
       setUpdateLoading(false)
@@ -256,8 +319,10 @@ function UserProfileUpdatePage() {
                   name="phone"
                   value={editForm.phone}
                   onChange={handleInputChange}
+                  placeholder="Ví dụ: 0123456789"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                {validationErrors.phone && <p className="text-sm text-red-600 mt-1">{validationErrors.phone}</p>}
               </div>
 
               <div>
@@ -267,8 +332,12 @@ function UserProfileUpdatePage() {
                   name="cidNumber"
                   value={editForm.cidNumber}
                   onChange={handleInputChange}
+                  placeholder="CMND: 9 chữ số, CCCD: 12 chữ số"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                {validationErrors.cidNumber && (
+                  <p className="text-sm text-red-600 mt-1">{validationErrors.cidNumber}</p>
+                )}
               </div>
 
               <div>
@@ -426,7 +495,7 @@ function UserProfileUpdatePage() {
             <div className="flex gap-4 pt-6 border-t">
               <button
                 type="submit"
-                disabled={updateLoading || imageUploading}
+                disabled={updateLoading || imageUploading || validationErrors.phone || validationErrors.cidNumber}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg"
               >
                 {updateLoading ? "Đang cập nhật..." : "Lưu thay đổi"}
