@@ -41,9 +41,17 @@ export const ROUTE_PATH = {
   UPDATE_SPECIALTY: '/admin/specialties/update',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
+  //Schedule manager
+  SCHEDULE_LIST: '/admin/schedules',
+  ADD_SCHEDULE: '/admin/schedules/add',
+  UPDATE_SCHEDULE: '/admin/schedules/update',
+  SCHEDULE_DETAIL: '/admin/schedules/detail',
+  OWN_SCHEDULE: '/schedules/own',
+  
 
   //Doctor
   DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
+  DOCTOR_CREATE_MEDICAL_PROCESS: '/doctor/createMedicalProcess',
 
   //News manager
   CREATE_NEWS: '/admin/news',

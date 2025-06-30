@@ -47,8 +47,15 @@ const LockHealthPackagePage = React.lazy(() => import("../pages/LockHealthPackag
 const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
 
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
+const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 
-const createNewspage = React.lazy(() => import("../pages/createNews"));
+const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
+
+const ScheduleListPage = React.lazy(() => import("../pages/ScheduleListPage"));
+const ScheduleDetailPage = React.lazy(() => import("../pages/ScheduleDetailPage"));
+const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
+const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
+const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
 
 // Cấu hình route
@@ -104,9 +111,10 @@ const AppRoute = [
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
+  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
 
   //News Manager 
-  {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
+  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

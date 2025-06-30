@@ -1,5 +1,5 @@
-const MedicalProcess = require('../models/medicalProcessModel');
-const ProcessStep = require('../models/processStepModel');
+const MedicalProcess = require('../models/MedicalProcess');
+const ProcessStep = require('../models/ProcessStep');
 
 class medicalProcessController {
 
