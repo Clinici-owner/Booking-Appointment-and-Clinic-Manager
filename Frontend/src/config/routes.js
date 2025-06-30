@@ -114,7 +114,7 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
 
   //News Manager 
-  {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
+  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
