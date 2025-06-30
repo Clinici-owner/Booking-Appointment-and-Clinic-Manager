@@ -6,8 +6,8 @@ const Appointment = new Schema({
     doctorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     time: { type: Date, required: true },
     status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'pending' },
-    specialties: [{ type: Schema.Types.ObjectId, ref: 'Specialty', required: true }],
-    healthPackage: { type: Schema.Types.ObjectId, ref: 'HealthPackage', required: true },
+    specialties: [{ type: Schema.Types.ObjectId, ref: 'Specialty' }],
+    healthPackage: { type: Schema.Types.ObjectId, ref: 'HealthPackage'},
     symptoms: { type: String, default: '' },
 }, { timestamps: true });
 
