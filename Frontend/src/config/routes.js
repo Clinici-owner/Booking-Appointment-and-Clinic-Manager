@@ -57,6 +57,7 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
 // Cấu hình route
 const AppRoute = [
@@ -113,11 +114,20 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
 
+
+  //Booking from package
+
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
+
+ 
+
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
+
+  
 ];
 
 export default AppRoute;
