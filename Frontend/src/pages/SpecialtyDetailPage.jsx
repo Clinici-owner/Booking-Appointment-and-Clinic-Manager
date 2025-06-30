@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getSpecialtyById } from "../services/specialtyService";
 import { lockSpecialty } from "../services/specialtyService";
 
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import ConfirmationModal from "../components/ConfirmationModal";
 
@@ -95,12 +95,12 @@ function SpecialtyDetailPage() {
           </div>
           <div className="flex flex-col gap-4 mt-6 justify-center items-center">
             <button>
-              <a
-                href={`/admin/specialties/${id}/edit`}
+              <Link
+                to={`/admin/specialties/update/${id}`}
                 className="bg-custom-blue text-white px-4 py-2 rounded-lg hover:bg-custom-bluehover2 transition"
               >
                 Chỉnh sửa chuyên khoa
-              </a>
+              </Link>
             </button>
             <button className="" onClick={() => handleToggleLockStatusClick()}>
               {specialty.status === false ? (
@@ -123,18 +123,18 @@ function SpecialtyDetailPage() {
         <ConfirmationModal
           title={
             actionType === "lock"
-              ? "Xác nhận đóng chuyên khoa"
-              : "Xác nhận mở chuyên khoa"
+              ? "Xác nhận mở chuyên khoa"
+              : "Xác nhận đóng chuyên khoa"
           }
           message={
             actionType === "lock" ? (
               <>
-                Bạn có chắc chắn muốn đóng chuyên khoa{" "}
+                Bạn có chắc chắn muốn mở chuyên khoa{" "}
                 <strong>{specialty.specialtyName}</strong> này không?
               </>
             ) : (
               <>
-                Bạn có chắc chắn muốn mở chuyên khoa{" "}
+                Bạn có chắc chắn muốn đóng chuyên khoa{" "}
                 <strong>{specialty.specialtyName}</strong> này không?
               </>
             )
