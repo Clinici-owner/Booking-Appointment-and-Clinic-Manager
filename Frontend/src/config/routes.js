@@ -49,7 +49,7 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 
-const createNewspage = React.lazy(() => import("../pages/createNews"));
+const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
 const ScheduleListPage = React.lazy(() => import("../pages/ScheduleListPage"));
 const ScheduleDetailPage = React.lazy(() => import("../pages/ScheduleDetailPage"));
@@ -57,6 +57,7 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
 // Cấu hình route
 const AppRoute = [
@@ -113,18 +114,20 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
 
-  //News Manager 
-  {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
 
-  // Schedule Manager
-  {path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
-  {path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
-  {path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: MainLayout },
-  {path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  {path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
+  //Booking from package
+
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
+
+ 
+
+  //News Manager 
+  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
+
+  
 ];
 
 export default AppRoute;
