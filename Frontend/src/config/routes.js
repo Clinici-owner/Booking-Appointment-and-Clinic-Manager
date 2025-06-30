@@ -41,7 +41,7 @@ const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 
 const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
 
-const createNewspage = React.lazy(() => import("../pages/createNews"));
+const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
 
 // Cấu hình route
@@ -89,7 +89,7 @@ const AppRoute = [
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
   //News Manager 
-  {path: ROUTE_PATH.CREATE_NEWS, page: createNewspage, layout: AdminLayout},
+  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
