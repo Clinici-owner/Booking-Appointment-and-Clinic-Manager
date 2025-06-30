@@ -115,12 +115,9 @@ export const UserService = {
       if (!user || !user._id) {
         throw new Error("User object hoặc user ID không hợp lệ");
       }
-<<<<<<< HEAD
-=======
 
       console.log("Calling API with user:", user); // Debug log
 
->>>>>>> d4d628ea5445d56c8384d5d29a1db2c202b871ec
       // Tạo URL với đường dẫn đúng
       const url = new URL(`${API_URL}/profile`);
       url.searchParams.append("userId", user._id);
