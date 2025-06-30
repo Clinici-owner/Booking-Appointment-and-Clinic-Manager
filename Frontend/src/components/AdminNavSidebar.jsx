@@ -5,7 +5,9 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  CssBaseline,
+  ListItemButton,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
@@ -55,15 +57,14 @@ export default function AdminNavSidebar({ children }) {
       >
         <List>
           {navItems.map((item, index) => (
-            <ListItem
-              button
+            <ListItemButton
               key={index}
               component={Link}
               to={item.path}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.label} />
-            </ListItem>
+            </ListItemButton>
           ))}
         </List>
       </Drawer>
