@@ -6,7 +6,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  CssBaseline,
   ListItemButton,
 } from "@mui/material";
 import { Link } from "react-router-dom";
