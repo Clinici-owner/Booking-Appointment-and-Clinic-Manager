@@ -121,7 +121,8 @@ const CreateMedicalProcessPage = () => {
       const processStepPromises = processStepsForm.map(step => 
         MedicalProcessService.createProcessStep({
           serviceId: step.serviceId,
-          notes: step.notes
+          notes: step.notes,
+          patientId: selectedPatient._id
         })
       );
 
