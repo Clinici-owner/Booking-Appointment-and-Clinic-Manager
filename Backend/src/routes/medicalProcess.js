@@ -5,6 +5,10 @@ const medicalProcessController = require('../app/controllers/medicalProcessContr
 router.get('/getAll', medicalProcessController.getAllMedicalProcesses);
 router.post('/create', medicalProcessController.createMedicalProcess);
 router.post('/update/:processId', medicalProcessController.updateMedicalProcess);
+router.post('/updateStatus/:processId', medicalProcessController.updateMedicalProcessStatus);
+router.get('/:processId', medicalProcessController.getMedicalProcessById);
+router.post('/updateCurrentStep/:processId', medicalProcessController.updateMedicalProcessCurrentStep);
+
 router.post('/step/create', medicalProcessController.createProcessStep);
 router.post('/step/update/:stepId', medicalProcessController.updateProcessStep);
 

@@ -8,10 +8,11 @@ export const DoctorService = {
       const response = await axios.get(`${API_URL}/${doctorId}`);
       return response.data;
     } catch (error) {
+      if (error.response?.status === 404) {
+        return null; // Trả về null nếu không tìm thấy
+      }
       console.error("Error fetching doctor profile:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch doctor profile"
-      );
+      throw error;
     }
   },
   createDoctorProfile: async (profileData) => {

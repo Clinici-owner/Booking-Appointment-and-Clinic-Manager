@@ -34,7 +34,7 @@ const GoogleAuthCallback = () => {
           case 'doctor':
             try {
               const doctorProfile = await DoctorService.getDoctorProfileById(userData._id);
-              navigate(doctorProfile ? '/' : '/doctor/createDoctorProfile');
+              navigate(doctorProfile ? '/doctor/createMedicalProcess' : '/doctor/createDoctorProfile');
             } catch (error) {
               console.error('Error checking doctor profile:', error);
               navigate('/doctor/createDoctorProfile', {
