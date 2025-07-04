@@ -16,12 +16,12 @@ function ScheduleAddPage() {
         shift: '',
         day: ''
     });
-    const [users, setUsers] = useState([]);
+    // const [users, setUsers] = useState([]); // Đã thay thế bằng doctors, không còn dùng users
     const [paraclinicalServices, setParaclinicalServices] = useState([]);
     const [specialties, setSpecialties] = useState([{ value: '', label: 'Chọn chuyên khoa' }]);
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
-    const [loadingUsers, setLoadingUsers] = useState(false);
+    // const [loadingUsers, setLoadingUsers] = useState(false); // Không còn dùng nữa
     const navigate = useNavigate();
     const days = [
         { value: '', label: 'Chọn ngày' },
@@ -36,21 +36,6 @@ function ScheduleAddPage() {
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoadingUsers(true);
-            try {
-                const usersData = await fetch('http://localhost:3000/api/staff').then(res => {
-                    if (!res.ok) throw new Error('Không thể tải danh sách nhân viên.');
-                    return res.json();
-                });
-                if (!Array.isArray(usersData)) throw new Error('Dữ liệu nhân viên không hợp lệ.');
-                setUsers(usersData);
-            } catch (error) {
-                setFetchError(`Không thể tải danh sách nhân viên. Lỗi: ${error.message}`);
-                toast.error('Không thể tải danh sách nhân viên.', { style: { background: '#EF4444', color: '#fff' } });
-            } finally {
-                setLoadingUsers(false);
-            }
-
             setIsLoadingServices(true);
             try {
                 const data = await listService();
@@ -145,16 +130,56 @@ function ScheduleAddPage() {
         }
     };
 
-    // Danh sách phòng mẫu (có thể lấy từ API nếu cần)
-    const ROOMS = [
-        'Phòng 101',
-        'Phòng 102',
-        'Phòng 103',
-        'Phòng 104',
-        'Phòng 105',
-    ];
 
-    if (fetchError) {
+
+    // Danh sách phòng và bác sĩ theo chuyên khoa
+    const [rooms, setRooms] = useState([]);
+    const [loadingRooms, setLoadingRooms] = useState(false);
+    const [roomError, setRoomError] = useState(null);
+    const [doctors, setDoctors] = useState([]);
+    const [loadingDoctors, setLoadingDoctors] = useState(false);
+    const [doctorError, setDoctorError] = useState(null);
+
+    // Fetch rooms and doctors when department (specialty) changes
+    useEffect(() => {
+        const fetchRoomsAndDoctors = async () => {
+            if (!formData.department) {
+                setRooms([]);
+                setDoctors([]);
+                return;
+            }
+            setLoadingRooms(true);
+            setLoadingDoctors(true);
+            try {
+                // Lấy chi tiết chuyên khoa để lấy danh sách phòng
+                const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${formData.department}`);
+                if (!specialtyRes.ok) throw new Error('Không thể tải chuyên khoa.');
+                const specialty = await specialtyRes.json();
+                setRooms(Array.isArray(specialty.room) ? specialty.room : []);
+            } catch {
+                setRoomError('Không thể tải danh sách phòng.');
+                setRooms([]);
+            } finally {
+                setLoadingRooms(false);
+            }
+            try {
+                // Lấy danh sách bác sĩ thuộc chuyên khoa (đúng endpoint và đúng tên route, phân biệt hoa thường)
+                const doctorRes = await fetch(`http://localhost:3000/api/doctorProfile?specialtyId=${formData.department}`);
+                if (!doctorRes.ok) throw new Error('Không thể tải danh sách bác sĩ.');
+                const doctorProfiles = await doctorRes.json();
+                // Trả về mảng doctorProfile, mỗi phần tử có doctorId là object User
+                setDoctors(Array.isArray(doctorProfiles) ? doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId) : []);
+            } catch {
+                setDoctorError('Không thể tải danh sách bác sĩ.');
+                setDoctors([]);
+            } finally {
+                setLoadingDoctors(false);
+            }
+        };
+        fetchRoomsAndDoctors();
+    }, [formData.department]);
+
+    if (fetchError || roomError || doctorError) {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
@@ -172,7 +197,7 @@ function ScheduleAddPage() {
         );
     }
 
-    if (loadingUsers || isLoadingServices) {
+    if (isLoadingServices || loadingRooms || loadingDoctors) {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
@@ -234,15 +259,17 @@ function ScheduleAddPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {ROOMS.map((room) => (
-                                <tr key={room} className="border-t border-gray-300">
-                                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">{room}</td>
+                            {rooms.map((room) => (
+                                <tr key={room._id || room.roomNumber} className="border-t border-gray-300">
+                                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
+                                        {room.roomName || room.roomNumber}
+                                    </td>
                                     {days.slice(1).map((d) => (
                                         <td
                                             key={d.value}
                                             className="border-r border-gray-300 py-5 cursor-pointer schedule-cell hover:bg-blue-50"
-                                            onClick={() => handleCellClick(room, d.value)}
-                                        >             
+                                            onClick={() => handleCellClick(room.roomNumber, d.value)}
+                                        >
                                         </td>
                                     ))}
                                 </tr>
@@ -292,8 +319,8 @@ function ScheduleAddPage() {
                                         onChange={handleModalFormChange}
                                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Chọn nhân viên</option>
-                                        {users.map((user) => (
+                                        <option value="">Chọn bác sĩ</option>
+                                        {doctors.map((user) => (
                                             <option key={user._id} value={user._id}>{user.fullName}</option>
                                         ))}
                                     </select>

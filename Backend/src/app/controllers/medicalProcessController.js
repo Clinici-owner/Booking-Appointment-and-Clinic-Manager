@@ -1,16 +1,28 @@
 const MedicalProcess = require('../models/MedicalProcess');
 const ProcessStep = require('../models/ProcessStep');
+const Room = require('../models/Room');
+const ParaclinicalService = require('../models/ParaclinicalService');
 
 class medicalProcessController {
 
     async createProcessStep(req, res) {
-        const { serviceId, notes } = req.body;
+        const { serviceId, notes, patientId } = req.body;
         try {
             const processStep = new ProcessStep({
                 serviceId,
                 notes
             });
             await processStep.save();
+    
+            // Update the patient's queue in the room associated with the service
+            const service = await ParaclinicalService.findById(serviceId).populate('room');
+            if (service && service.room) {
+                await Room.updateOne(
+                    { _id: service.room._id },
+                    { $push: { patientQueue: patientId } }
+                );
+            }
+
             res.status(201).json(processStep);
         } catch (error) {
             console.error("Error creating process step:", error);
@@ -139,7 +151,9 @@ class medicalProcessController {
                     path: 'processSteps',
                     populate: {
                         path: 'serviceId',
-                        model: 'ParaclinicalService'
+                        populate: {
+                            path: 'room',
+                        }
                     }
                 });
             if (!medicalProcess) {
