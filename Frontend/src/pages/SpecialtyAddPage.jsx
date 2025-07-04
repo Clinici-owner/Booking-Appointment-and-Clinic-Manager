@@ -11,6 +11,8 @@ import {
   updateSpecialty,
   getSpecialtyById,
 } from "../services/specialtyService";
+import { UserService } from "../services/userService";
+import { roomService } from "../services/roomService";
 
 import { uploadDocument } from "../services/documentUploadService";
 
@@ -20,9 +22,37 @@ function SpecialtyAddPage() {
   const { id } = useParams();
   const navigator = useNavigate();
 
+  const [user, setUser] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [roomMaster, setRoomMaster] = useState("");
+
+  // Lấy danh sách phòng từ backend
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const roomData = await roomService.getUnusedRooms();
+        setRooms(roomData);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách phòng:", error);
+      }
+    };
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await UserService.getAllDoctors();
+        setUser(userData);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const [checkUpdate, setCheckUpdate] = useState(false);
 
-  console.log(checkUpdate);
   const [images, setImages] = useState([]);
   const [logo, setLogo] = useState(null);
   const [dataSpecialty, setDataSpecialty] = useState({
@@ -30,6 +60,9 @@ function SpecialtyAddPage() {
     descspecialty: "",
     medicalFee: "",
     documentId: [],
+    room: [],
+    masterRoom: "",
+    chiefPhysician: "",
     logo: "",
   });
 
@@ -37,10 +70,14 @@ function SpecialtyAddPage() {
     const fetchSpecialty = async () => {
       try {
         const data = await getSpecialtyById(id);
+        
         setDataSpecialty({
           specialtyName: data.specialtyName || "",
           descspecialty: data.descspecialty || "",
           medicalFee: data.medicalFee || "",
+          chiefPhysician: data.chiefPhysician._id || "",
+          masterRoom: data.masterRoom._id || "",
+          room: data.room.map((r) => r._id) || [],
           documentId: data.documentId || [],
           logo: data.logo || "",
         });
@@ -62,7 +99,6 @@ function SpecialtyAddPage() {
         src: url.file_path,
         isLocal: false,
       }));
-      console.log("Normalized images:", normalized);
 
       setImages(normalized);
     }
@@ -83,6 +119,9 @@ function SpecialtyAddPage() {
       !dataSpecialty.specialtyName.trim() ||
       !dataSpecialty.descspecialty.trim() ||
       !dataSpecialty.medicalFee ||
+      !dataSpecialty.chiefPhysician ||
+      !dataSpecialty.masterRoom ||
+      dataSpecialty.room.length === 0 ||
       images.length === 0 ||
       !logo
     ) {
@@ -111,6 +150,9 @@ function SpecialtyAddPage() {
       specialtyName: dataSpecialty.specialtyName,
       descspecialty: dataSpecialty.descspecialty,
       medicalFee: dataSpecialty.medicalFee,
+      chiefPhysician: dataSpecialty.chiefPhysician,
+      masterRoom: dataSpecialty.masterRoom,
+      room: dataSpecialty.room,
       documentId: documentIds,
       logo: logoUrl,
     };
@@ -121,6 +163,9 @@ function SpecialtyAddPage() {
         descspecialty: "",
         medicalFee: "",
         documentId: [],
+        room: [],
+        masterRoom: "",
+        chiefPhysician: "",
         logo: "",
       });
       setImages([]);
@@ -165,6 +210,9 @@ function SpecialtyAddPage() {
       !dataSpecialty.specialtyName.trim() ||
       !dataSpecialty.descspecialty.trim() ||
       !dataSpecialty.medicalFee ||
+      !dataSpecialty.chiefPhysician ||
+      !dataSpecialty.masterRoom ||
+      dataSpecialty.room.length === 0 ||
       images.length === 0 ||
       !logo
     ) {
@@ -200,6 +248,9 @@ function SpecialtyAddPage() {
       specialtyName: dataSpecialty.specialtyName,
       descspecialty: dataSpecialty.descspecialty,
       medicalFee: dataSpecialty.medicalFee,
+      chiefPhysician: dataSpecialty.chiefPhysician,
+      masterRoom: dataSpecialty.masterRoom,
+      room: dataSpecialty.room,
       documentId: documentIds, // ← chỉ ảnh mới
       logo: logoUrl,
     };
@@ -278,6 +329,30 @@ function SpecialtyAddPage() {
             }}
           />
         </div>
+        {/* Chọn bác sĩ trưởng khoa */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Bác sĩ trưởng khoa
+          </label>
+          <select
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            value={dataSpecialty.chiefPhysician}
+            onChange={(e) =>
+              setDataSpecialty((prev) => ({
+                ...prev,
+                chiefPhysician: e.target.value,
+              }))
+            }
+          >
+            <option value="">Chọn bác sĩ trưởng khoa</option>
+            {user &&
+              user.map((doctor) => (
+                <option key={doctor._id} value={doctor._id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+          </select>
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
             Phí khám bệnh
@@ -287,6 +362,7 @@ function SpecialtyAddPage() {
             className="border border-gray-300 rounded-lg p-2 w-full"
             placeholder="Nhập phí khám bệnh"
             value={dataSpecialty.medicalFee}
+            min={1000}
             onChange={(e) =>
               setDataSpecialty((prev) => ({
                 ...prev,
@@ -295,6 +371,67 @@ function SpecialtyAddPage() {
             }
           />
         </div>
+        {/* Chọn phòng khám chính */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Phòng khám chính
+          </label>
+          <select
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            value={dataSpecialty.masterRoom}
+            onChange={(e) => {
+              setDataSpecialty((prev) => ({
+                ...prev,
+                masterRoom: e.target.value,
+              }));
+              setRoomMaster(e.target.value); // Cập nhật phòng chính
+            }}
+          >
+            <option value="">Chọn phòng khám chính</option>
+            {rooms &&
+              rooms.map((room) => (
+                <option key={room._id} value={room._id}>
+                  {room.roomNumber}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        {/* Chọn phòng khám theo check box */}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Chọn phòng khám dịch vụ
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {rooms
+              .filter((room) => room._id !== dataSpecialty.masterRoom) // Lọc bỏ phòng khám chính
+              .map((room) => (
+                <div key={room._id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={dataSpecialty.room?.includes(room._id)}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setDataSpecialty((prev) => {
+                        const updatedRooms = isChecked
+                          ? [...prev.room, room._id] // Thêm phòng
+                          : prev.room.filter((r) => r !== room._id); // Xóa phòng
+                        return {
+                          ...prev,
+                          room: updatedRooms,
+                        };
+                      });
+                    }}
+                  />
+                  <label className="text-sm">{room.roomNumber}</label>
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* Chọn hình ảnh chuyên khoa */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
             Hình ảnh về chuyên khoa

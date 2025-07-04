@@ -14,4 +14,5 @@ router.get('/session', userController.getSessionUser);
 router.get('/profile', userController.getUserProfileByUserID);
 router.put('/updateprofile', userController.updateUserProfile);
 router.put('/updatepassword', userController.ChangeAccountPasswords);
+router.get('/get-all-doctors', userController.getAllDoctors);
 module.exports = router;

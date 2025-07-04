@@ -7,7 +7,7 @@ class SpecialtyController {
         try {
             const { dataSpecialty } = req.body;
 
-            const { specialtyName, descspecialty, medicalFee, documentId, logo } = dataSpecialty;
+            const { specialtyName, descspecialty, medicalFee, documentId, room, masterRoom, chiefPhysician, logo } = dataSpecialty;
 
             if (!specialtyName) {
                 return res.status(400).json({ error: 'Tên chuyên khoa là bắt buộc.' });
@@ -18,7 +18,7 @@ class SpecialtyController {
                 return res.status(409).json({ error: 'Chuyên khoa đã tồn tại.' });
             }
 
-            const specialty = new Specialty({ specialtyName, descspecialty, medicalFee, documentId, logo });
+            const specialty = new Specialty({ specialtyName, descspecialty, medicalFee, documentId, room, masterRoom, chiefPhysician, logo });
             await specialty.save();
             res.status(201).json({ message: 'Chuyên khoa đã được tạo thành công.', specialty });
 
@@ -27,60 +27,9 @@ class SpecialtyController {
         }
     }
 
-    async importExcel(req, res) {
-        try {
-            if (!req.file) {
-                console.error("Không có file được gửi lên.");
-                return res.status(400).json({ error: 'Không có tệp Excel được tải lên.' });
-            }
-
-            const buffer = req.file.buffer;
-            const workbook = xlsx.read(buffer, { type: 'buffer', cellDates: true });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const data = xlsx.utils.sheet_to_json(worksheet);
-
-            for (const item of data) {
-                if (!item.name) continue; // Bỏ qua nếu không có tên chuyên khoa
-                const existingSpecialty = await Specialty.findOne({ name: item.name });
-                if (!existingSpecialty) {
-                    const specialty = new Specialty(item);
-                    await specialty.save();
-                }
-            }
-
-            res.status(200).json({ message: 'Dữ liệu đã được nhập thành công.' });
-
-        } catch (error) {
-            console.error("Lỗi khi nhập dữ liệu từ Excel:", error);
-            res.status(500).json({ error: 'Lỗi khi nhập dữ liệu từ Excel.' });
-        }
-    }
-
-    async exportExcel(req, res) {
-        try {
-            const specialties = await Specialty.find({});
-            const data = specialties.map(s => ({
-                name: s.name,
-                description: s.description
-            }));
-
-            const worksheet = xlsx.utils.json_to_sheet(data);
-            const workbook = xlsx.utils.book_new();
-            xlsx.utils.book_append_sheet(workbook, worksheet, 'Specialties');
-
-            const filePath = path.join(__dirname, '../../uploads/specialties.xlsx');
-            xlsx.writeFile(workbook, filePath);
-            res.status(200).json({ message: 'Dữ liệu đã được xuất thành công.', filePath });
-        } catch (error) {
-            console.error("Lỗi khi xuất dữ liệu ra Excel:", error);
-            res.status(500).json({ error: 'Lỗi khi xuất dữ liệu ra Excel.' });
-        }
-    }
-
     async getAllSpecialties(req, res) {
         try {
-            const specialties = await Specialty.find({}).populate('documentId');
+            const specialties = await Specialty.find({}).populate('documentId room masterRoom chiefPhysician');
             res.status(200).json(specialties);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách chuyên khoa:", error);
@@ -91,7 +40,7 @@ class SpecialtyController {
     async getSpecialtyById(req, res) {
         try {
             const { id } = req.params;
-            const specialty = await Specialty.findById(id).populate('documentId');
+            const specialty = await Specialty.findById(id).populate('documentId room masterRoom chiefPhysician');
             if (!specialty) {
                 return res.status(404).json({ error: 'Chuyên khoa không tồn tại.' });
             }
@@ -126,7 +75,7 @@ class SpecialtyController {
         try {
             const { id } = req.params;
             const { dataSpecialty } = req.body;
-            const { specialtyName, descspecialty, medicalFee, documentId, logo } = dataSpecialty;
+            const { specialtyName, descspecialty, medicalFee, documentId, room, masterRoom, chiefPhysician, logo } = dataSpecialty;
 
             const specialty = await Specialty.findById(id);
             if (!specialty) {
@@ -137,6 +86,9 @@ class SpecialtyController {
             specialty.descspecialty = descspecialty || specialty.descspecialty;
             specialty.medicalFee = medicalFee || specialty.medicalFee;
             specialty.documentId = documentId || specialty.documentId;
+            specialty.room = room || specialty.room;
+            specialty.masterRoom = masterRoom || specialty.masterRoom;
+            specialty.chiefPhysician = chiefPhysician || specialty.chiefPhysician;
             specialty.logo = logo || specialty.logo;
 
             await specialty.save();
