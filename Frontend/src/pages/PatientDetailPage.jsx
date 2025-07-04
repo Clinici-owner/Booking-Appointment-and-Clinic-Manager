@@ -154,35 +154,22 @@ const PatientDetail = () => {
             {medicalHistory.map((record, index) => (
               <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                 <p className="font-medium text-gray-800">Ngày khám: {formatDate(record.createdAt)}</p>
-                <p className="text-gray-700">Chuẩn đoán ban đầu: {record.initialDiagnosis || 'N/A'}</p>
-                <p className="text-gray-700">Chuẩn đoán: {record.diagnosis || 'N/A'}</p>
+                <p className="text-gray-700">Chuẩn đoán: {record.processStep.notes || 'N/A'}</p>
 
                 {/* Services Section */}
                 <div className="mt-2">
-                  <p className="text-gray-700 font-medium">Dịch vụ:</p>
-                  {record.service && record.service.length > 0 ? (
-                    <ul className="list-disc pl-5 space-y-1">
-                      {record.service.map((service, serviceIndex) => (
-                        <li key={serviceIndex} className="text-gray-700">
-                          {service.paraclinalName} - {service.paraPrice.toLocaleString('vi-VN')} VND
-                          {service.roomNumber && ` (Phòng ${service.roomNumber})`}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500">Không có dịch vụ</p>
-                  )}
+                  <p className="text-gray-700 font-medium">Dịch vụ: {record.processStep.serviceId.paraclinalName}</p>
                 </div>
 
                 {/* Results Section */}
-                {record.resultParaclinical && record.resultParaclinical.length > 0 && (
+                {record.resultFiles && record.resultFiles.length > 0 && (
                   <div className="mt-2">
                     <p className="text-gray-700 font-medium">Kết quả cận lâm sàng:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                      {record.resultParaclinical.map((result, resultIndex) => (
+                      {record.resultFiles.map((result, resultIndex) => (
                         <a
                           key={resultIndex}
-                          href={result.fileResult}
+                          href={result.file_path}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:text-blue-700 underline"
