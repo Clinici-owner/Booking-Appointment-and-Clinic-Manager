@@ -2,6 +2,7 @@ import React from "react";
 import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
+import DoctorLayout from "../layouts/doctor-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -49,6 +50,8 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
+const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
@@ -112,8 +115,17 @@ const AppRoute = [
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
   // Doctor
-  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
-  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
+  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
+
+
+  //Booking from package
+
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
+
+ 
 
 
   //Booking from package

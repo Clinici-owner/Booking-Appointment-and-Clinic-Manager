@@ -57,10 +57,10 @@ const CreateMedicalProcessPage = () => {
         setServices(servicesRes.services || []);
 
         const doctorData = JSON.parse(sessionStorage.getItem('user'));
-        if (doctorData) {
-          setDoctor(doctorData);
-        } else {
+        if (!doctorData || doctorData.role !== 'doctor') {
           window.location.href = '/login';
+        } else {
+          setDoctor(doctorData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
