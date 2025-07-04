@@ -71,8 +71,10 @@ class ScheduleController {
 
             await schedule.save();
             const populatedSchedule = await Schedule.findById(schedule._id)
-                .populate('userId', 'fullName')
-                .populate('paraclinicalId', 'paraclinalName');
+                .populate('userId', 'fullName', 'role')
+                .populate('roomNumber', 'roomName')
+                .populate('paraclinicalId', 'paraclinicalName');
+
 
             console.log('Schedule created successfully:', populatedSchedule);
             res.status(201).json({ message: 'Lịch trình đã được tạo thành công.', schedule: populatedSchedule });

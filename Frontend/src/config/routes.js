@@ -114,6 +114,13 @@ const AppRoute = [
   { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
+  // Schedule Manager
+  { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
+  { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
+  { path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
+
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout },
