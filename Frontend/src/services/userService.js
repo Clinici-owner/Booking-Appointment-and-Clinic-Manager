@@ -33,7 +33,7 @@ export const UserService = {
               res.data.user._id
             );
             window.location.href = doctorProfile
-              ? "/"
+              ? "/doctor/createMedicalProcess"
               : "/doctor/createDoctorProfile";
           } catch (error) {
             console.error("Lỗi khi kiểm tra hồ sơ bác sĩ:", error);
@@ -41,7 +41,7 @@ export const UserService = {
           }
           break;
         default:
-          window.location.href = "/";
+          window.location.href = "/doctor/createMedicalProcess";
       }
 
       return res.data;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -8,15 +8,14 @@ import { getAllSpecialties } from "../services/specialtyService";
 import { DoctorService } from "../services/doctorService";
 
 function CreateDoctorProfilePage() {
-  // State management
   const [images, setImages] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
-
 
   const [doctorProfile, setDoctorProfile] = useState({
     doctorId: "",
@@ -26,36 +25,58 @@ function CreateDoctorProfilePage() {
     certificateId: [],
   });
 
-  // Fetch specialties on component mount
+  // Fetch specialties and check existing profile
   useEffect(() => {
-    const fetchSpecialties = async () => {
+    let isMounted = true;
+    const fetchData = async () => {
       try {
-        const data = await getAllSpecialties();
-        setSpecialties(data);
+        setIsLoading(true);
         const user = sessionStorage.getItem("user");
-        if (user) {
-          const userData = JSON.parse(user);
+        if (!user) {
+          throw new Error("User not found in session");
+        }
+
+        const userData = JSON.parse(user);
+        const specialtiesData = await getAllSpecialties();
+
+        try {
+          const existingProfile = await DoctorService.getDoctorProfileById(userData._id);
+          if (existingProfile) {
+            navigate("/doctor/createMedicalProcess");
+          }
+        } catch (error) {
+          // Bỏ qua lỗi 404 vì có nghĩa là profile chưa tồn tại
+          if (error.response?.status !== 404) {
+            console.error("Error checking profile:", error);
+          }
+        }
+
+        if (isMounted) {
+          setSpecialties(specialtiesData);
           setDoctorProfile(prev => ({
             ...prev,
             doctorId: userData._id,
           }));
         }
       } catch (error) {
-        console.error("Error fetching specialties:", error);
-        setError("Không thể tải danh sách chuyên khoa");
+        if (isMounted) {
+          console.error("Error:", error);
+          setError(error.message || "Không thể tải dữ liệu cần thiết");
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    fetchSpecialties();
+    fetchData();
 
-    // Clean up image preview URLs when component unmounts
     return () => {
+      isMounted = false;
       images.forEach(image => URL.revokeObjectURL(image.preview));
     };
-  }, []);
+  }, [navigate, images]);
 
-  // Validate form fields
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const errors = {};
 
     if (doctorProfile.specialties.length === 0) {
@@ -74,42 +95,30 @@ function CreateDoctorProfilePage() {
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [doctorProfile]);
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
       let certificateId = [];
 
-      // Upload images if any
       if (images.length > 0) {
-        try {
-          const uploadedUrls = await Promise.all(
-            images.map(image => uploadToCloudinary(image.file))
-          );
+        const uploadPromises = images.map(image =>
+          uploadToCloudinary(image.file)
+            .then(url => uploadDocument(url))
+            .then(doc => doc.document._id)
+        );
 
-          const insertedDocuments = await Promise.all(
-            uploadedUrls.map(url => uploadDocument(url))
-          );
-
-          certificateId = insertedDocuments.map(doc => doc.document._id);
-        } catch (uploadError) {
-          console.error("Error uploading documents:", uploadError);
-          throw new Error("Có lỗi khi tải lên chứng chỉ. Vui lòng thử lại.");
-        }
+        certificateId = await Promise.all(uploadPromises);
       }
 
-      // Prepare payload
       const payload = {
         doctorId: doctorProfile.doctorId,
         description: doctorProfile.description,
@@ -118,32 +127,20 @@ function CreateDoctorProfilePage() {
         certificateId,
       };
 
-      // Submit to API
-      const result = await DoctorService.createDoctorProfile(payload);
-      console.log("Doctor profile created successfully:", result);
-
-      // Reset form on success
-      setDoctorProfile(prev => ({
-        ...prev,
-        description: "",
-        yearsOfExperience: "",
-        specialties: [],
-      }));
-      setImages([]);
+      await DoctorService.createDoctorProfile(payload);
       setSuccess(true);
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
+
+      // Redirect sau 1.5s thay vì 3s
+      setTimeout(() => navigate("/doctor/dashboard"), 1500);
     } catch (error) {
-      console.error("Failed to create doctor profile:", error);
+      console.error("Error:", error);
       setError(error.message || "Có lỗi xảy ra khi tạo hồ sơ. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle specialty selection
-  const handleSpecialtyChange = (e) => {
+  const handleSpecialtyChange = useCallback((e) => {
     const selectedId = e.target.value;
     if (!selectedId) return;
 
@@ -153,22 +150,42 @@ function CreateDoctorProfilePage() {
         ? prev.specialties.filter(id => id !== selectedId)
         : [...prev.specialties, selectedId]
     }));
-  };
+  }, []);
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files).map(file => ({
+  const handleFileChange = useCallback((e) => {
+    const files = Array.from(e.target.files).slice(0, 5 - images.length).map(file => ({
       file,
       preview: URL.createObjectURL(file)
     }));
     setImages(prev => [...prev, ...files]);
-  };
+  }, [images.length]);
 
-  // Remove an uploaded image
-  const removeImage = (index) => {
-    URL.revokeObjectURL(images[index].preview);
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeImage = useCallback((index) => {
+    setImages(prev => {
+      const newImages = [...prev];
+      URL.revokeObjectURL(newImages[index].preview);
+      newImages.splice(index, 1);
+      return newImages;
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4 max-w-4xl flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-custom-blue"></div>
+      </div>
+    );
+  }
+
+  // if (error) {
+  //   return (
+  //     <div className="container mx-auto p-4 max-w-4xl">
+  //       <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+  //         {error}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
