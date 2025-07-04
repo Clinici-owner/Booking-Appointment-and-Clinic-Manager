@@ -1,17 +1,16 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import AdminNavSidebar from '../components/AdminNavSidebar';
 import ConfirmationModal from '../components/ConfirmationModal';
-import { viewAllSchedules, deleteSchedule } from '../services/scheduleService';
 import { listService } from '../services/medicalService';
+import { deleteSchedule, getAllSchedules } from '../services/scheduleService';
 
 function ScheduleListPage() {
     const [allSchedules, setAllSchedules] = useState([]);
-    const [paraclinicalServices, setParaclinicalServices] = useState([]);
+    const [specialties, setSpecialties] = useState([]);
     const [searchName, setSearchName] = useState('');
-    const [filterService, setFilterService] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc');
+    const [filterSpecialty, setFilterSpecialty] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [schedulesPerPage] = useState(10);
     const [loading, setLoading] = useState(true);
@@ -22,36 +21,20 @@ function ScheduleListPage() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [scheduleToDelete, setScheduleToDelete] = useState(null); // Lưu ID của lịch trình cần xóa
 
+    // Lấy lịch trình và chuyên khoa (logic mới)
     const fetchData = useCallback(async () => {
         setLoading(true);
         setFetchError(null);
         try {
-            const [schedulesResponse, servicesResponse] = await Promise.all([
-                viewAllSchedules(),
+            const [schedules, specialtiesRes] = await Promise.all([
+                getAllSchedules(),
                 listService()
             ]);
-
-            if (!schedulesResponse || !Array.isArray(schedulesResponse.schedules)) {
-                throw new Error('Dữ liệu lịch trình không hợp lệ hoặc thiếu thuộc tính schedules.');
-            }
-            setAllSchedules(schedulesResponse.schedules);
-            console.log("Fetched Schedules:", schedulesResponse.schedules);
-
-            let services = [];
-            if (servicesResponse && Array.isArray(servicesResponse.services)) {
-                services = servicesResponse.services;
-            } else if (servicesResponse && Array.isArray(servicesResponse)) {
-                services = servicesResponse;
-            } else {
-                throw new Error('Dữ liệu dịch vụ cận lâm sàng không hợp lệ.');
-            }
-            setParaclinicalServices(services);
-            console.log("Fetched Services:", services);
-
+            setAllSchedules(Array.isArray(schedules) ? schedules : (schedules.schedules || []));
+            setSpecialties(Array.isArray(specialtiesRes) ? specialtiesRes : (specialtiesRes.specialties || []));
         } catch (error) {
-            console.error('Lỗi khi tải dữ liệu:', error);
             setFetchError(`Không thể tải dữ liệu. Lỗi: ${error.response?.data?.error || error.message}`);
-            toast.error('Không thể tải dữ liệu danh sách lịch trình và dịch vụ.', {
+            toast.error('Không thể tải dữ liệu danh sách lịch trình và chuyên khoa.', {
                 classNames: {
                     error: 'bg-red-500 text-white',
                 }
@@ -71,13 +54,10 @@ function ScheduleListPage() {
     }, []);
 
     const handleFilterChange = useCallback((e) => {
-        setFilterService(e.target.value);
+        setFilterSpecialty(e.target.value);
         setCurrentPage(1);
     }, []);
 
-    const handleSortClick = useCallback(() => {
-        setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
-    }, []);
 
     // Hàm mở modal xác nhận xóa
     const confirmDelete = useCallback((scheduleId, event) => {
@@ -117,6 +97,7 @@ function ScheduleListPage() {
         navigate('/admin/schedules/detail', { state: { id: scheduleId } });
     }, [navigate]);
 
+    // Lọc theo chuyên khoa, tên bác sĩ (không sort)
     const processedSchedules = useMemo(() => {
         let filtered = allSchedules;
 
@@ -126,36 +107,27 @@ function ScheduleListPage() {
             );
         }
 
-        if (filterService) {
+        if (filterSpecialty) {
             filtered = filtered.filter(schedule => {
-                const serviceName = schedule.paraclinicalId?.paraclinalName;
-                return serviceName?.toLowerCase().includes(filterService.toLowerCase());
+                const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
+                return specialty?.specialtyName?.toLowerCase().includes(filterSpecialty.toLowerCase());
             });
         }
-
-        const sorted = [...filtered].sort((a, b) => {
-            const serviceNameA = a.paraclinicalId?.paraclinalName?.toLowerCase() || '';
-            const serviceNameB = b.paraclinicalId?.paraclinalName?.toLowerCase() || '';
-
-            if (serviceNameA < serviceNameB) return sortOrder === 'asc' ? -1 : 1;
-            if (serviceNameA > serviceNameB) return sortOrder === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        return sorted;
-    }, [allSchedules, searchName, filterService, sortOrder]);
+        return filtered;
+    }, [allSchedules, searchName, filterSpecialty, specialties]);
 
     const totalPages = Math.ceil(processedSchedules.length / schedulesPerPage);
     const indexOfLastSchedule = currentPage * schedulesPerPage;
     const indexOfFirstSchedule = indexOfLastSchedule - schedulesPerPage;
     const currentSchedules = processedSchedules.slice(indexOfFirstSchedule, indexOfLastSchedule);
 
-    const uniqueServices = useMemo(() => {
-        const serviceNames = paraclinicalServices
-            .filter(service => service && service.paraclinalName)
-            .map(service => service.paraclinalName);
-        return [...new Set(serviceNames)].sort();
-    }, [paraclinicalServices]);
+    // Danh sách chuyên khoa duy nhất
+    const uniqueSpecialties = useMemo(() => {
+        const specialtyNames = specialties
+            .filter(spec => spec && spec.specialtyName)
+            .map(spec => spec.specialtyName);
+        return [...new Set(specialtyNames)].sort();
+    }, [specialties]);
 
     const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
 
@@ -225,14 +197,14 @@ function ScheduleListPage() {
                             />
                         </div>
                         <select
-                            aria-label="Filter services"
+                            aria-label="Filter specialties"
                             className="bg-white border border-[#D9D9D9] rounded-lg text-base font-semibold text-[#212B36] py-4 px-6 w-full md:w-[250px] cursor-pointer"
-                            value={filterService}
+                            value={filterSpecialty}
                             onChange={handleFilterChange}
                         >
-                            <option value="">Tất cả dịch vụ</option>
-                            {uniqueServices.map(serviceName => (
-                                <option key={serviceName} value={serviceName}>{serviceName}</option>
+                            <option value="">Tất cả chuyên khoa</option>
+                            {uniqueSpecialties.map(specialtyName => (
+                                <option key={specialtyName} value={specialtyName}>{specialtyName}</option>
                             ))}
                         </select>
                     </div>
@@ -241,20 +213,36 @@ function ScheduleListPage() {
                             <thead>
                                 <tr className="border-b border-[#D9D9D9]">
                                     <th className="text-left font-semibold py-5 px-6 w-[5%]">STT</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[20%]">Nhân viên</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[18%]">Thời gian bắt đầu</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[18%]">Thời gian kết thúc</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[10%]">Phòng</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[18%] cursor-pointer" onClick={handleSortClick}>
-                                        Dịch vụ {sortOrder === 'asc' ? <i className="fas fa-arrow-up"></i> : <i className="fas fa-arrow-down"></i>}
-                                    </th>
-                                    <th className="text-center font-semibold py-5 px-6 w-[15%]">Hành động</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[18%]">Bác sĩ</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[18%]">Chuyên khoa</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[12%]">Phòng</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[12%]">Ngày</th>
+                                    <th className="text-left font-semibold py-5 px-6 w-[12%]">Ca làm</th>
+                                    <th className="text-center font-semibold py-5 px-6 w-[10%]">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentSchedules.length > 0 ? (
                                     currentSchedules.map((schedule, index) => {
-                                        const serviceName = schedule.paraclinicalId?.paraclinalName || '-';
+                                        // Lấy chuyên khoa
+                                        const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
+                                        const specialtyName = specialty?.specialtyName || '-';
+                                        // Lấy phòng (ưu tiên masterRoom nếu không tìm thấy)
+                                        let roomNumber = '-';
+                                        if (specialty && schedule.room) {
+                                            const roomObj = (specialty.room || []).find(r => r._id?.toString() === schedule.room?.toString());
+                                            roomNumber = roomObj?.roomNumber || specialty.masterRoom?.roomNumber || '-';
+                                        }
+                                        // Format ngày
+                                        const dateStr = schedule.date ? new Date(schedule.date).toLocaleDateString('vi-VN') : '-';
+                                        // Format ca làm
+                                        let shiftStr = '-';
+                                        switch (schedule.shift) {
+                                            case 'MORNING': shiftStr = 'Sáng'; break;
+                                            case 'AFTERNOON': shiftStr = 'Chiều'; break;
+                                            case 'EVENING': shiftStr = 'Tối'; break;
+                                            default: shiftStr = '-';
+                                        }
                                         return (
                                             <tr
                                                 key={schedule._id}
@@ -267,7 +255,7 @@ function ScheduleListPage() {
                                                     {indexOfFirstSchedule + index + 1}
                                                 </td>
                                                 <td
-                                                    className="py-6 px-6 w-[20%]"
+                                                    className="py-6 px-6 w-[18%]"
                                                     onClick={() => handleRowClick(schedule._id)}
                                                 >
                                                     {schedule.userId?.fullName || '-'}
@@ -276,29 +264,29 @@ function ScheduleListPage() {
                                                     className="py-6 px-6 w-[18%]"
                                                     onClick={() => handleRowClick(schedule._id)}
                                                 >
-                                                    {schedule.startTime ? new Date(schedule.startTime).toLocaleString('vi-VN') : '-'}
+                                                    {specialtyName}
                                                 </td>
                                                 <td
-                                                    className="py-6 px-6 w-[18%]"
+                                                    className="py-6 px-6 w-[12%]"
                                                     onClick={() => handleRowClick(schedule._id)}
                                                 >
-                                                    {schedule.endTime ? new Date(schedule.endTime).toLocaleString('vi-VN') : '-'}
+                                                    {roomNumber}
                                                 </td>
                                                 <td
-                                                    className="py-6 px-6 w-[10%]"
+                                                    className="py-6 px-6 w-[12%]"
                                                     onClick={() => handleRowClick(schedule._id)}
                                                 >
-                                                    {schedule.roomNumber || '-'}
+                                                    {dateStr}
                                                 </td>
                                                 <td
-                                                    className="py-6 px-6 w-[18%]"
+                                                    className="py-6 px-6 w-[12%]"
                                                     onClick={() => handleRowClick(schedule._id)}
                                                 >
-                                                    {serviceName}
+                                                    {shiftStr}
                                                 </td>
                                                 <td className="py-6 px-6 text-center w-[10%]">
                                                     <button
-                                                        onClick={(event) => confirmDelete(schedule._id, event)} // Gọi confirmDelete
+                                                        onClick={(event) => confirmDelete(schedule._id, event)}
                                                         className="text-red-600 hover:text-red-800 text-lg"
                                                         aria-label="Delete schedule"
                                                         title="Xóa lịch trình"

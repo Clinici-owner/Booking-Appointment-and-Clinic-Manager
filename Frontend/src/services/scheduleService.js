@@ -49,11 +49,12 @@ export const getOwnSchedules = async (userId) => {
     }
 };
 
-export const viewAllSchedules = async (page = 1, limit = 10, roomNumber = '', searchName = '') => {
+
+// Lấy tất cả lịch trình (logic mới: trả về mảng schedule đã populate userId, room, specialties)
+export const getAllSchedules = async () => {
     try {
-        const params = { page, limit, roomNumber, searchName };
-        const res = await axios.get(`${API_URL}/all`, { params });
-        if (!Array.isArray(res.data.schedules)) {
+        const res = await axios.get(`${API_URL}/all`);
+        if (!Array.isArray(res.data)) {
             throw new Error('Dữ liệu lịch trình không hợp lệ.');
         }
         return res.data;

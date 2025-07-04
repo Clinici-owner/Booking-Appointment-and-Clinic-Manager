@@ -11,16 +11,28 @@ function ScheduleAddPage() {
         startTime: '',
         endTime: '',
         roomNumber: '',
-        paraclinicalId: ''
+        paraclinicalId: '',
+        department: '',
+        shift: '',
+        day: ''
     });
-
-    const [errors, setErrors] = useState({});
     const [users, setUsers] = useState([]);
     const [paraclinicalServices, setParaclinicalServices] = useState([]);
+    const [specialties, setSpecialties] = useState([{ value: '', label: 'Chọn chuyên khoa' }]);
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const navigate = useNavigate();
+    const days = [
+        { value: '', label: 'Chọn ngày' },
+        { value: 'Thứ 2', label: 'Thứ 2 (01/05)' },
+        { value: 'Thứ 3', label: 'Thứ 3 (02/05)' },
+        { value: 'Thứ 4', label: 'Thứ 4 (03/05)' },
+        { value: 'Thứ 5', label: 'Thứ 5 (04/05)' },
+        { value: 'Thứ 6', label: 'Thứ 6 (05/05)' },
+        { value: 'Thứ 7', label: 'Thứ 7 (06/05)' },
+        { value: 'Chủ nhật', label: 'Chủ nhật (07/05)' }
+    ];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,7 +45,6 @@ function ScheduleAddPage() {
                 if (!Array.isArray(usersData)) throw new Error('Dữ liệu nhân viên không hợp lệ.');
                 setUsers(usersData);
             } catch (error) {
-                console.error('Error fetching users:', error);
                 setFetchError(`Không thể tải danh sách nhân viên. Lỗi: ${error.message}`);
                 toast.error('Không thể tải danh sách nhân viên.', { style: { background: '#EF4444', color: '#fff' } });
             } finally {
@@ -47,97 +58,101 @@ function ScheduleAddPage() {
                 if (!Array.isArray(services)) throw new Error('Dữ liệu dịch vụ cận lâm sàng không hợp lệ.');
                 setParaclinicalServices(services);
             } catch (error) {
-                console.error('Error fetching paraclinical services:', error);
                 setFetchError(`Không thể tải danh sách dịch vụ cận lâm sàng. Lỗi: ${error.message}`);
                 toast.error('Không thể tải danh sách dịch vụ cận lâm sàng.', { style: { background: '#EF4444', color: '#fff' } });
             } finally {
                 setIsLoadingServices(false);
             }
+
+            try {
+                const specialtiesData = await fetch('http://localhost:3000/api/specialty').then(res => {
+                    if (!res.ok) throw new Error('Không thể tải danh sách chuyên khoa.');
+                    return res.json();
+                });
+                const specialtiesOptions = [{ value: '', label: 'Chọn chuyên khoa' }].concat(
+                    (Array.isArray(specialtiesData) ? specialtiesData : []).map(s => ({
+                        value: s._id || s.id || s.value,
+                        label: s.name || s.label || s.specialtyName || 'Chuyên khoa',
+                    }))
+                );
+                setSpecialties(specialtiesOptions);
+            } catch {
+                toast.error('Không thể tải danh sách chuyên khoa.', { style: { background: '#EF4444', color: '#fff' } });
+            }
         };
         fetchData();
     }, []);
 
-    const validateField = (name, value) => {
-        switch (name) {
-            case 'userId':
-                return value ? '' : 'Vui lòng chọn nhân viên.';
-            case 'startTime':
-                return value ? '' : 'Vui lòng chọn thời gian bắt đầu.';
-            case 'endTime':
-                if (!value) return 'Vui lòng chọn thời gian kết thúc.';
-                if (formData.startTime && new Date(value) <= new Date(formData.startTime)) {
-                    return 'Thời gian kết thúc phải sau thời gian bắt đầu.';
-                }
-                return '';
-            case 'roomNumber':
-                if (!value) return 'Vui lòng chọn dịch vụ để tự động điền số phòng.';
-                return '';
-            case 'paraclinicalId':
-                return value ? '' : 'Vui lòng chọn dịch vụ cận lâm sàng.';
-            default:
-                return '';
-        }
-    };
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalCell, setModalCell] = useState({ room: '', day: '' });
+    const [modalForm, setModalForm] = useState({
+        userId: '',
+        startTime: '',
+        endTime: '',
+        paraclinicalId: ''
+    });
+    const [modalErrors, setModalErrors] = useState({});
 
-    const handleChange = (e) => {
+    // Open modal when click cell
+    const handleCellClick = (room, day) => {
+        setModalCell({ room, day });
+        setModalForm({ userId: '', startTime: '', endTime: '', paraclinicalId: '' });
+        setModalErrors({});
+        setModalOpen(true);
+    };
+    const handleModalClose = () => setModalOpen(false);
+    const handleModalFormChange = (e) => {
         const { name, value } = e.target;
-        const updatedFormData = { ...formData, [name]: value };
-
-        if (name === 'paraclinicalId' && value) {
-            const selectedService = paraclinicalServices.find(service => service._id === value);
-            updatedFormData.roomNumber = selectedService?.roomNumber || '';
+        setModalForm((prev) => ({ ...prev, [name]: value }));
+        setModalErrors((prev) => ({ ...prev, [name]: '' }));
+    };
+    const validateModalForm = () => {
+        const errors = {};
+        if (!modalForm.userId) errors.userId = 'Vui lòng chọn nhân viên';
+        if (!modalForm.startTime) errors.startTime = 'Vui lòng chọn giờ bắt đầu';
+        if (!modalForm.endTime) errors.endTime = 'Vui lòng chọn giờ kết thúc';
+        if (!modalForm.paraclinicalId) errors.paraclinicalId = 'Vui lòng chọn dịch vụ';
+        if (modalForm.startTime && modalForm.endTime && modalForm.endTime <= modalForm.startTime) {
+            errors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
         }
-
-        setFormData(updatedFormData);
-
-        const errorMessage = validateField(name, updatedFormData[name]);
-        setErrors(prev => ({ ...prev, [name]: errorMessage }));
+        return errors;
+    };
+    const handleModalSubmit = async (e) => {
+        e.preventDefault();
+        const errors = validateModalForm();
+        if (Object.keys(errors).length > 0) {
+            setModalErrors(errors);
+            return;
+        }
+        // Gửi dữ liệu tạo lịch trình
+        const schedulePayload = {
+            userId: modalForm.userId,
+            roomNumber: modalCell.room,
+            department: formData.department,
+            shift: formData.shift,
+            day: modalCell.day,
+            startTime: modalForm.startTime,
+            endTime: modalForm.endTime,
+            paraclinicalId: modalForm.paraclinicalId,
+        };
+        try {
+            await createSchedule(schedulePayload);
+            toast.success('Tạo lịch trình thành công!', { style: { background: '#10B981', color: '#fff' } });
+            setModalOpen(false);
+        } catch {
+            toast.error('Tạo lịch trình thất bại!', { style: { background: '#EF4444', color: '#fff' } });
+        }
     };
 
-    const isValidForm = () => {
-        const newErrors = {};
-        Object.keys(formData).forEach(key => {
-            const error = validateField(key, formData[key]);
-            if (error) newErrors[key] = error;
-        });
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!isValidForm()) {
-        toast.error('Vui lòng kiểm tra lại các trường thông tin.', {
-            style: { background: '#EF4444', color: '#fff' },
-        });
-        return;
-    }
-
-    try {
-        console.log('Form data being sent:', formData);
-        const response = await createSchedule(formData);
-
-        if (response && response.message) {
-            toast.success('Tạo lịch trình thành công!', {
-                style: { background: '#10B981', color: '#fff' },
-            });
-            setTimeout(() => navigate('/admin/schedules'), 3000);
-        } else {
-            toast.error('Tạo lịch trình thất bại: Phản hồi không hợp lệ.', {
-                style: { background: '#EF4444', color: '#fff' },
-            });
-        }
-    } catch (error) {
-        console.error('Lỗi tạo lịch trình:', error);
-        const errorMessage =
-            error?.response?.data?.error || error.message || 'Tạo lịch trình thất bại!';
-
-        toast.error(`Tạo thất bại: ${errorMessage}`, {
-            style: { background: '#EF4444', color: '#fff' },
-        });
-    }
-};
+    // Danh sách phòng mẫu (có thể lấy từ API nếu cần)
+    const ROOMS = [
+        'Phòng 101',
+        'Phòng 102',
+        'Phòng 103',
+        'Phòng 104',
+        'Phòng 105',
+    ];
 
     if (fetchError) {
         return (
@@ -170,116 +185,180 @@ function ScheduleAddPage() {
     }
 
     return (
-        <div className="flex text-[1.75rem] leading-[1.75]">
+        <div className="flex min-h-screen">
             <Toaster />
-            <div className="flex-1 flex flex-col">
-                <div className="flex">
-                    <div className="w-full max-w-[1600px] mx-auto p-10">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                            <h2 className="text-[#212123] font-bold text-4xl leading-6">
-                                Tạo lịch trình mới
-                            </h2>
-                        </div>
+            <main className="flex-1 p-8 flex flex-col gap-6">
+                <div className="flex justify-between items-center max-w-6xl w-full">
+                    <h1 className="text-4xl font-bold">Tạo lịch trình làm việc mới</h1>
+                    <div className="w-64">
+                        <label htmlFor="department" className="block mb-1 font-semibold text-gray-700">Chọn chuyên khoa</label>
+                        <select
+                            id="department"
+                            name="department"
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={formData.department}
+                            onChange={e => setFormData({ ...formData, department: e.target.value })}
+                        >
+                            {specialties.map((s) => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="w-64">
+                        <label htmlFor="shift" className="block mb-1 font-semibold text-gray-700">Chọn ca làm việc</label>
+                        <select
+                            id="shift"
+                            name="shift"
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={formData.shift}
+                            onChange={e => setFormData({ ...formData, shift: e.target.value })}
+                        >
+                            <option value="">Chọn ca làm việc</option>
+                            <option value="MORNING">Ca sáng (7h - 12h)</option>
+                            <option value="AFTERNOON">Ca chiều (13h - 17h)</option>
+                            <option value="EVENING">Ca tối (18h - 21h)</option>
+                        </select>
+                    </div> 
+                </div>
 
-                        <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
-                            <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+                <section className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm max-w-8xl w-full overflow-x-auto">
+                    <table className="w-full border border-gray-300 rounded-lg table-fixed text-center">
+                        <thead>
+                            <tr className="bg-gray-100 border-b border-gray-300">
+                                <th className="border-r border-gray-300 py-3 font-semibold text-sm bg-white max-w-[140px]">Phòng</th>
+                                {days.slice(1).map((d) => (
+                                    <th key={d.value} className="border-r border-gray-300 py-3 font-semibold text-sm">
+                                        {d.label}<br /><span className="text-xs font-normal">{d.label.match(/\((.*?)\)/)?.[1]}</span>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ROOMS.map((room) => (
+                                <tr key={room} className="border-t border-gray-300">
+                                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">{room}</td>
+                                    {days.slice(1).map((d) => (
+                                        <td
+                                            key={d.value}
+                                            className="border-r border-gray-300 py-5 cursor-pointer schedule-cell hover:bg-blue-50"
+                                            onClick={() => handleCellClick(room, d.value)}
+                                        >             
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
+
+                
+                {modalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+                            <button
+                                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                                aria-label="Close modal"
+                                type="button"
+                                onClick={handleModalClose}
+                            >
+                                <span className="text-xl">×</span>
+                            </button>
+                            <h3 className="text-xl font-semibold mb-4">Tạo lịch trình</h3>
+                            <form className="space-y-4" onSubmit={handleModalSubmit}>
                                 <div>
-                                    <label htmlFor="userId" className="block text-sm text-gray-700 mb-1">Nhân viên</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phòng</label>
+                                    <input
+                                        type="text"
+                                        value={modalCell.room}
+                                        readOnly
+                                        className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày</label>
+                                    <input
+                                        type="text"
+                                        value={modalCell.day}
+                                        readOnly
+                                        className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
                                     <select
-                                        id="userId"
                                         name="userId"
-                                        onChange={handleChange}
-                                        value={formData.userId}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                                         required
+                                        value={modalForm.userId}
+                                        onChange={handleModalFormChange}
+                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Chọn nhân viên</option>
-                                        {users.map(user => (
+                                        {users.map((user) => (
                                             <option key={user._id} value={user._id}>{user.fullName}</option>
                                         ))}
                                     </select>
-                                    {errors.userId && <p className="text-sm text-red-600">{errors.userId}</p>}
+                                    {modalErrors.userId && <p className="text-xs text-red-600 mt-1">{modalErrors.userId}</p>}
                                 </div>
                                 <div>
-                                    <label htmlFor="paraclinicalId" className="block text-sm text-gray-700 mb-1">Dịch vụ cận lâm sàng</label>
-                                    <select
-                                        id="paraclinicalId"
-                                        name="paraclinicalId"
-                                        onChange={handleChange}
-                                        value={formData.paraclinicalId}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Giờ bắt đầu</label>
+                                    <input
+                                        type="time"
+                                        name="startTime"
                                         required
-                                        disabled={isLoadingServices}
+                                        value={modalForm.startTime}
+                                        onChange={handleModalFormChange}
+                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    {modalErrors.startTime && <p className="text-xs text-red-600 mt-1">{modalErrors.startTime}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Giờ kết thúc</label>
+                                    <input
+                                        type="time"
+                                        name="endTime"
+                                        required
+                                        value={modalForm.endTime}
+                                        onChange={handleModalFormChange}
+                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    {modalErrors.endTime && <p className="text-xs text-red-600 mt-1">{modalErrors.endTime}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Dịch vụ cận lâm sàng</label>
+                                    <select
+                                        name="paraclinicalId"
+                                        required
+                                        value={modalForm.paraclinicalId}
+                                        onChange={handleModalFormChange}
+                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">{isLoadingServices ? 'Đang tải...' : 'Chọn dịch vụ'}</option>
-                                        {Array.isArray(paraclinicalServices) && paraclinicalServices.map(service => (
-                                            <option key={service._id} value={service._id}>{service.paraclinalName}</option>
+                                        <option value="">Chọn dịch vụ</option>
+                                        {paraclinicalServices.map((service) => (
+                                            <option key={service._id} value={service._id}>{service.paraclinalName || service.name}</option>
                                         ))}
                                     </select>
-                                    {errors.paraclinicalId && <p className="text-sm text-red-600">{errors.paraclinicalId}</p>}
+                                    {modalErrors.paraclinicalId && <p className="text-xs text-red-600 mt-1">{modalErrors.paraclinicalId}</p>}
                                 </div>
-                                <div>
-                                    <label htmlFor="startTime" className="block text-sm text-gray-700 mb-1">Thời gian bắt đầu</label>
-                                    <input
-                                        id="startTime"
-                                        name="startTime"
-                                        type="datetime-local"
-                                        onChange={handleChange}
-                                        value={formData.startTime}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    />
-                                    {errors.startTime && <p className="text-sm text-red-600">{errors.startTime}</p>}
-                                </div>
-                                <div>
-                                    <label htmlFor="endTime" className="block text-sm text-gray-700 mb-1">Thời gian kết thúc</label>
-                                    <input
-                                        id="endTime"
-                                        name="endTime"
-                                        type="datetime-local"
-                                        onChange={handleChange}
-                                        value={formData.endTime}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    />
-                                    {errors.endTime && <p className="text-sm text-red-600">{errors.endTime}</p>}
-                                </div>
-                                <div>
-                                    <label htmlFor="roomNumber" className="block text-sm text-gray-700 mb-1">Số phòng</label>
-                                    <input
-                                        id="roomNumber"
-                                        name="roomNumber"
-                                        type="text"
-                                        placeholder="Tự động điền khi chọn dịch vụ"
-                                        value={formData.roomNumber}
-                                        disabled
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    />
-                                    {errors.roomNumber && <p className="text-sm text-red-600">{errors.roomNumber}</p>}
-                                </div>
-                                <div className="col-span-full flex justify-between items-center mt-8">
-                                    <div className="flex space-x-4">
-                                        <button
-                                            type="submit"
-                                            className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-28 h-12"
-                                        >
-                                            Tạo mới
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate('/admin/schedules')}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
-                                        >
-                                            Quay về danh sách
-                                        </button>
-                                    </div>
+                                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                                    <button
+                                        type="button"
+                                        className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-md transition"
+                                        onClick={handleModalClose}
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition"
+                                    >
+                                        Lưu
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
+                )}
+            </main>
         </div>
     );
 }

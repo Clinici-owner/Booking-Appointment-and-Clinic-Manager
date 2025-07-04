@@ -1,207 +1,108 @@
+
 const Schedule = require('../models/Schedule');
 const User = require('../models/User');
-const ParaclinicalService = require('../models/ParaclinicalService');
+const Room = require('../models/Room');
+const Specialty = require('../models/Specialty');
+const DoctorProfile = require('../models/DoctorProfile');
 
 class ScheduleController {
+    // Lấy danh sách lịch trình của tất cả nhân viên
+    async getAllSchedules(req, res) {
+        try {
+            const schedules = await Schedule.find()
+                .populate('userId', 'fullName role')
+                .populate('room', 'roomName')
+                .populate('specialties', 'specialtyName');
+            res.status(200).json(schedules);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Tạo lịch trình cho nhân viên: chọn chuyên khoa, ca làm, bác sĩ
     async createSchedule(req, res) {
         try {
-            console.log('Received request at /api/schedules. Request body:', req.body);
-            // Removed admin check since this is an admin-only route
-
-            const { userId, startTime, endTime, roomNumber, paraclinicalId } = req.body;
-
-            // Validate required fields
-            if (!userId || !startTime || !endTime || !roomNumber || !paraclinicalId) {
-                console.log('Missing required fields:', { userId, startTime, endTime, roomNumber, paraclinicalId });
-                return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: userId, startTime, endTime, roomNumber, paraclinicalId.' });
+            const { specialtyId, userId, roomId, shift, date } = req.body;
+            if (!specialtyId || !userId || !roomId || !shift || !date) {
+                return res.status(400).json({ error: 'Thiếu thông tin bắt buộc.' });
             }
-
-            // Validate user
+            // Kiểm tra chuyên khoa
+            const specialty = await Specialty.findById(specialtyId);
+            if (!specialty) return res.status(404).json({ error: 'Không tìm thấy chuyên khoa.' });
+            // Kiểm tra nhân viên
             const user = await User.findById(userId);
-            if (!user) {
-                return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
-            }
-            if (!['doctor', 'technician', 'receptionist'].includes(user.role)) {
-                return res.status(400).json({ error: 'Chỉ bác sĩ, kỹ thuật viên hoặc lễ tân được phân công lịch trình.' });
-            }
-
-            // Validate service
-            const service = await ParaclinicalService.findById(paraclinicalId);
-            if (!service) {
-                return res.status(404).json({ error: 'Không tìm thấy dịch vụ cận lâm sàng.' });
-            }
-            if (service.status !== 'available') {
-                return res.status(400).json({ error: 'Dịch vụ cận lâm sàng không khả dụng.' });
-            }
-            if (service.roomNumber !== roomNumber) {
-                return res.status(400).json({ error: 'Số phòng phải khớp với phòng của dịch vụ cận lâm sàng.' });
-            }
-
-            // Validate and parse dates
-            const start = new Date(startTime);
-            const end = new Date(endTime);
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                console.log('Invalid date format:', { startTime, endTime });
-                return res.status(400).json({ error: 'Thời gian bắt đầu hoặc kết thúc không hợp lệ.' });
-            }
-            if (start >= end) {
-                return res.status(400).json({ error: 'Thời gian bắt đầu phải trước thời gian kết thúc.' });
-            }
-
-            // Check for conflicting schedules
-            const conflictingSchedules = await Schedule.find({
-                $or: [
-                    { userId, startTime: { $lt: end }, endTime: { $gt: start } },
-                    { roomNumber, startTime: { $lt: end }, endTime: { $gt: start } }
-                ]
-            });
-            if (conflictingSchedules.length > 0) {
-                console.log('Conflicting schedules found:', conflictingSchedules);
-                return res.status(400).json({ error: 'Lịch trình xung đột với lịch hiện có của nhân viên hoặc phòng.' });
-            }
-
-            // Create and save schedule
-            const schedule = new Schedule({
+            if (!user || user.role !== 'doctor') return res.status(404).json({ error: 'Không tìm thấy bác sĩ.' });
+            // Kiểm tra phòng
+            const room = await Room.findById(roomId);
+            if (!room) return res.status(404).json({ error: 'Không tìm thấy phòng.' });
+            // Kiểm tra trùng lịch
+            const exist = await Schedule.findOne({ userId, date, shift });
+            if (exist) return res.status(400).json({ error: 'Bác sĩ đã có lịch trình ca này.' });
+            // Tạo lịch trình
+            const schedule = await Schedule.create({
                 userId,
-                startTime: start,
-                endTime: end,
-                roomNumber,
-                paraclinicalId
+                room: roomId,
+                specialties: specialtyId,
+                shift,
+                date
             });
-
-            await schedule.save();
-            const populatedSchedule = await Schedule.findById(schedule._id)
-                .populate('userId', 'fullName', 'role')
-                .populate('roomNumber', 'roomName')
-                .populate('paraclinicalId', 'paraclinicalName');
-
-
-            console.log('Schedule created successfully:', populatedSchedule);
-            res.status(201).json({ message: 'Lịch trình đã được tạo thành công.', schedule: populatedSchedule });
-
+            res.status(201).json({ message: 'Tạo lịch trình thành công.', schedule });
         } catch (error) {
-            console.error('Server error in createSchedule:', error.stack);
-            res.status(500).json({ error: `Lỗi server: ${error.message}` });
+            res.status(500).json({ error: error.message });
         }
     }
 
+    // Lấy danh sách bác sĩ theo chuyên khoa
+    async getDoctorsBySpecialty(req, res) {
+        try {
+            const { specialtyId } = req.params;
+            if (!specialtyId) return res.status(400).json({ error: 'Thiếu chuyên khoa.' });
+            const doctors = await DoctorProfile.find({ specialties: specialtyId })
+                .populate('doctorId', 'fullName');
+            res.status(200).json(doctors.map(d => d.doctorId));
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Chỉnh sửa lịch trình
     async updateSchedule(req, res) {
         try {
-            // Removed admin check since this is an admin-only route
-
             const { id } = req.params;
-            const updateData = req.body;
-
-            const existingSchedule = await Schedule.findById(id);
-            if (!existingSchedule) {
-                return res.status(404).json({ error: 'Không tìm thấy lịch trình.' });
+            const { specialtyId, userId, roomId, shift, date } = req.body;
+            const schedule = await Schedule.findById(id);
+            if (!schedule) return res.status(404).json({ error: 'Không tìm thấy lịch trình.' });
+            // Kiểm tra trùng lịch nếu đổi bác sĩ, ca, ngày
+            if ((userId && userId !== String(schedule.userId)) || (shift && shift !== schedule.shift) || (date && date !== schedule.date)) {
+                const exist = await Schedule.findOne({
+                    _id: { $ne: id },
+                    userId: userId || schedule.userId,
+                    shift: shift || schedule.shift,
+                    date: date || schedule.date
+                });
+                if (exist) return res.status(400).json({ error: 'Bác sĩ đã có lịch trình ca này.' });
             }
-
-            // Validate and parse dates if provided in updateData
-            if (updateData.startTime || updateData.endTime) {
-                const start = new Date(updateData.startTime || existingSchedule.startTime);
-                const end = new Date(updateData.endTime || existingSchedule.endTime);
-
-                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                    return res.status(400).json({ error: 'Thời gian bắt đầu hoặc kết thúc không hợp lệ.' });
-                }
-                if (start >= end) {
-                    return res.status(400).json({ error: 'Thời gian bắt đầu phải trước thời gian kết thúc.' });
-                }
-                // Update dates in updateData for consistency before Mongoose update
-                updateData.startTime = start;
-                updateData.endTime = end;
-            }
-
-            // Validate userId if provided
-            if (updateData.userId) {
-                const user = await User.findById(updateData.userId);
-                if (!user) {
-                    return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
-                }
-                if (!['doctor', 'technician', 'receptionist'].includes(user.role)) {
-                    return res.status(400).json({ error: 'Chỉ bác sĩ, kỹ thuật viên hoặc lễ tân được phân công lịch trình.' });
-                }
-            }
-
-            // Validate paraclinicalId and roomNumber if provided
-            if (updateData.paraclinicalId) {
-                const service = await ParaclinicalService.findById(updateData.paraclinicalId);
-                if (!service) {
-                    return res.status(404).json({ error: 'Không tìm thấy dịch vụ cận lâm sàng.' });
-                }
-                if (service.status !== 'available') {
-                    return res.status(400).json({ error: 'Dịch vụ cận lâm sàng không khả dụng.' });
-                }
-                // If roomNumber is also being updated, check if it matches the service's roomNumber
-                if (updateData.roomNumber && service.roomNumber !== updateData.roomNumber) {
-                    return res.status(400).json({ error: 'Số phòng phải khớp với phòng của dịch vụ cận lâm sàng.' });
-                }
-                // If paraclinicalId is updated but roomNumber is not provided, update roomNumber from service
-                if (!updateData.roomNumber) {
-                    updateData.roomNumber = service.roomNumber;
-                }
-            } else if (updateData.roomNumber && !updateData.paraclinicalId) {
-                // If only roomNumber is updated, ensure it matches the current service's roomNumber
-                const service = await ParaclinicalService.findById(existingSchedule.paraclinicalId);
-                if (!service) {
-                    return res.status(400).json({ error: 'Không tìm thấy dịch vụ cận lâm sàng cho lịch trình hiện có.' });
-                }
-                if (service.roomNumber !== updateData.roomNumber) {
-                    return res.status(400).json({ error: 'Số phòng phải khớp với phòng của dịch vụ cận lâm sàng hiện tại.' });
-                }
-            }
-
-            // Check for conflicting schedules with updated data
-            // Use logical OR (||) to get the most current value (updated or existing)
-            const checkUserId = updateData.userId || existingSchedule.userId;
-            const checkRoomNumber = updateData.roomNumber || existingSchedule.roomNumber;
-            const checkStartTime = new Date(updateData.startTime || existingSchedule.startTime);
-            const checkEndTime = new Date(updateData.endTime || existingSchedule.endTime);
-
-            const conflictingSchedules = await Schedule.find({
-                _id: { $ne: id }, // Exclude the current schedule being updated
-                $or: [
-                    { userId: checkUserId, startTime: { $lt: checkEndTime }, endTime: { $gt: checkStartTime } },
-                    { roomNumber: checkRoomNumber, startTime: { $lt: checkEndTime }, endTime: { $gt: checkStartTime } }
-                ]
-            });
-            if (conflictingSchedules.length > 0) {
-                return res.status(400).json({ error: 'Lịch trình xung đột với lịch hiện có của nhân viên hoặc phòng.' });
-            }
-
-            const updatedSchedule = await Schedule.findByIdAndUpdate(id, updateData, { new: true })
-                .populate('userId', 'fullName')
-                .populate('paraclinicalId', 'paraclinalName');
-
-            if (!updatedSchedule) {
-                return res.status(404).json({ error: 'Không tìm thấy lịch trình để cập nhật sau tìm kiếm.' });
-            }
-
-            res.json({ message: 'Cập nhật lịch trình thành công.', schedule: updatedSchedule });
-
+            if (specialtyId) schedule.specialties = specialtyId;
+            if (userId) schedule.userId = userId;
+            if (roomId) schedule.room = roomId;
+            if (shift) schedule.shift = shift;
+            if (date) schedule.date = date;
+            await schedule.save();
+            res.json({ message: 'Cập nhật lịch trình thành công.', schedule });
         } catch (error) {
-            console.error('Server error in updateSchedule:', error.stack);
-            res.status(500).json({ error: `Lỗi server: ${error.message}` });
+            res.status(500).json({ error: error.message });
         }
     }
 
+    // Xóa lịch trình
     async deleteSchedule(req, res) {
         try {
-            // Removed admin check since this is an admin-only route
-
             const { id } = req.params;
-
             const schedule = await Schedule.findByIdAndDelete(id);
-            if (!schedule) {
-                return res.status(404).json({ error: 'Không tìm thấy lịch trình.' });
-            }
-
+            if (!schedule) return res.status(404).json({ error: 'Không tìm thấy lịch trình.' });
             res.json({ message: 'Xóa lịch trình thành công.' });
-
         } catch (error) {
-            console.error('Server error in deleteSchedule:', error.stack);
-            res.status(500).json({ error: `Lỗi server: ${error.message}` });
+            res.status(500).json({ error: error.message });
         }
     }
 

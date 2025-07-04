@@ -9,7 +9,7 @@ export const DoctorService = {
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
-        return null; // Trả về null nếu không tìm thấy
+        return null; 
       }
       console.error("Error fetching doctor profile:", error);
       throw error;
