@@ -1,5 +1,6 @@
 const MedicalProcess = require('../models/MedicalProcess');
 const ProcessStep = require('../models/ProcessStep');
+const Room = require('../models/Room');
 
 class medicalProcessController {
 
@@ -139,7 +140,9 @@ class medicalProcessController {
                     path: 'processSteps',
                     populate: {
                         path: 'serviceId',
-                        model: 'ParaclinicalService'
+                        populate: {
+                            path: 'room',
+                        }
                     }
                 });
             if (!medicalProcess) {

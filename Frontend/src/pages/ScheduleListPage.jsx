@@ -248,7 +248,7 @@ function ScheduleListPage() {
                                     <th className="text-left font-semibold py-5 px-6 w-[18%] cursor-pointer" onClick={handleSortClick}>
                                         Dịch vụ {sortOrder === 'asc' ? <i className="fas fa-arrow-up"></i> : <i className="fas fa-arrow-down"></i>}
                                     </th>
-                                    <th className="text-center font-semibold py-5 px-6 w-[10%]">Hành động</th>
+                                    <th className="text-center font-semibold py-5 px-6 w-[15%]">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
