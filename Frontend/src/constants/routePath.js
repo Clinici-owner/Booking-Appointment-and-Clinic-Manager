@@ -38,7 +38,7 @@ export const ROUTE_PATH = {
   //Specialty manager
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
-  UPDATE_SPECIALTY: '/admin/specialties/update',
+  UPDATE_SPECIALTY: '/admin/specialties/update/:id',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
   //Schedule manager

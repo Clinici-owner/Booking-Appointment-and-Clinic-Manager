@@ -40,3 +40,13 @@ export const lockSpecialty = async (id, status) => {
     throw error;
   }
 }
+
+export const updateSpecialty = async (id, specialtyData) => {
+  try {
+    const response = await axios.put(`${API_URL}/update/${id}`, { dataSpecialty: specialtyData });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating specialty:", error);
+    throw error;
+  }
+}
