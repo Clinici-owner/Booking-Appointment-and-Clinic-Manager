@@ -38,9 +38,16 @@ export const ROUTE_PATH = {
   //Specialty manager
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
-  UPDATE_SPECIALTY: '/admin/specialties/update',
+  UPDATE_SPECIALTY: '/admin/specialties/update/:id',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
+  //Schedule manager
+  SCHEDULE_LIST: '/admin/schedules',
+  ADD_SCHEDULE: '/admin/schedules/add',
+  UPDATE_SCHEDULE: '/admin/schedules/update',
+  SCHEDULE_DETAIL: '/admin/schedules/detail',
+  OWN_SCHEDULE: '/schedules/own',
+  
 
   //Doctor
   DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
@@ -51,6 +58,16 @@ export const ROUTE_PATH = {
   //News manager
   CREATE_NEWS: '/admin/news',
 
+  //Health package manager
+  HEALTH_PACKAGE_MANAGER: '/admin/health-packages',
+  HEALTH_PACKAGE_CREATE: '/admin/health-packages/create',
+  HEALTH_PACKAGE_UPDATE: '/admin/health-packages/update/:id',
+  HEALTH_PACKAGE_DETAIL: '/admin/health-packages/detail/:id',
+  HEALTH_PACKAGE_lOCK_STATUS: '/admin/health-packages/lockstatus/:id',
+
+  // Health package for user
+  HEALTH_PACKAGE_USER: '/health-packages',
+  PACKAGE_LIST: '/health-package/list',
   // 404
   NOT_FOUND: '*',
 };

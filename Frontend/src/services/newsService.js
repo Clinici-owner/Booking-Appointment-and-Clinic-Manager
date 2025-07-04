@@ -1,5 +1,5 @@
 import axios from "axios";
-
+const API_URL = "http://localhost:3000/api/news";
 export const uploadToCloudinary = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -20,16 +20,16 @@ export const uploadToCloudinary = async (file) => {
 };
 
 export const createNews = async (data) => {
-  const res = await axios.post("/api/news", data);
+  const res = await axios.post(API_URL, data);
   return res.data;
 };
-
+  
 export const getNewsById = async (id) => {
-  const res = await axios.get(`/api/news/${id}`);
+  const res = await axios.get(`${API_URL}/${id}`);
   return res.data;
 };
 
 export const listNews = async () => {
-  const res = await axios.get("/api/news");
+  const res = await axios.get(API_URL);
   return res.data;
 };
