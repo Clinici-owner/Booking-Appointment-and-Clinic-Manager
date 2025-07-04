@@ -8,6 +8,7 @@ const Specialty = new Schema({
     documentId: [{ type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true }],
     room: [{ type: Schema.Types.ObjectId, ref: 'Room', required: true }],
     masterRoom: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
+    chiefPhysician: { type: Schema.Types.ObjectId, ref: 'Staff', required: true },
     status: { type: Boolean, default: true },
     logo: { type: String, required: true },
 }, { timestamps: true });

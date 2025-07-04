@@ -12,6 +12,8 @@ import {
   getSpecialtyById,
 } from "../services/specialtyService";
 
+import { UserService } from "../services/userService";
+
 import { uploadDocument } from "../services/documentUploadService";
 
 import { useParams, useNavigate } from "react-router-dom";
@@ -20,9 +22,22 @@ function SpecialtyAddPage() {
   const { id } = useParams();
   const navigator = useNavigate();
 
+  const [user, setUser] = useState([]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await UserService.getAllDoctors();
+        setUser(userData);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const [checkUpdate, setCheckUpdate] = useState(false);
 
-  console.log(checkUpdate);
   const [images, setImages] = useState([]);
   const [logo, setLogo] = useState(null);
   const [dataSpecialty, setDataSpecialty] = useState({
@@ -30,6 +45,9 @@ function SpecialtyAddPage() {
     descspecialty: "",
     medicalFee: "",
     documentId: [],
+    room: [],
+    masterRoom: "",
+    chiefPhysician: "",
     logo: "",
   });
 
@@ -277,6 +295,30 @@ function SpecialtyAddPage() {
               placeholder: "Nhập mô tả dịch vụ...",
             }}
           />
+        </div>
+        { /* Chọn bác sĩ trưởng khoa */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Bác sĩ trưởng khoa
+          </label>
+          <select
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            value={dataSpecialty.chiefPhysician}
+            onChange={(e) =>
+              setDataSpecialty((prev) => ({
+                ...prev,
+                chiefPhysician: e.target.value,
+              }))
+            }
+          >
+            <option value="">Chọn bác sĩ trưởng khoa</option>
+            {user &&
+              user.map((doctor) => (
+                <option key={doctor._id} value={doctor._id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+          </select>
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
