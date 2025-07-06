@@ -10,7 +10,6 @@ function ScheduleListPage() {
     const [allSchedules, setAllSchedules] = useState([]);
     const [specialties, setSpecialties] = useState([]);
     const [searchName, setSearchName] = useState('');
-    const [filterSpecialty, setFilterSpecialty] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [schedulesPerPage] = useState(10);
     const [loading, setLoading] = useState(true);
@@ -108,16 +107,10 @@ function ScheduleListPage() {
         );
     }
 
-    // Lọc theo chuyên khoa
-    if (filterSpecialty) {
-        filtered = filtered.filter(schedule => {
-            const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
-            return specialty?.specialtyName?.toLowerCase().includes(filterSpecialty.toLowerCase());
-        });
-    }
+    
 
     return filtered;
-}, [allSchedules, searchName, filterSpecialty, specialties]);
+}, [allSchedules, searchName, specialties]);
 
     const totalPages = Math.ceil(processedSchedules.length / schedulesPerPage);
     const indexOfLastSchedule = currentPage * schedulesPerPage;
