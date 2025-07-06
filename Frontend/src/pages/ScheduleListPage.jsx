@@ -99,22 +99,25 @@ function ScheduleListPage() {
 
     // Lọc theo chuyên khoa, tên bác sĩ (không sort)
     const processedSchedules = useMemo(() => {
-        let filtered = allSchedules;
+    let filtered = allSchedules;
 
-        if (searchName) {
-            filtered = filtered.filter(schedule =>
-                schedule.userId?.fullName?.toLowerCase().includes(searchName.toLowerCase())
-            );
-        }
+    // Tìm kiếm theo tên bác sĩ
+    if (searchName) {
+        filtered = filtered.filter(schedule =>
+            schedule.userId?.fullName?.toLowerCase().includes(searchName.toLowerCase())
+        );
+    }
 
-        if (filterSpecialty) {
-            filtered = filtered.filter(schedule => {
-                const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
-                return specialty?.specialtyName?.toLowerCase().includes(filterSpecialty.toLowerCase());
-            });
-        }
-        return filtered;
-    }, [allSchedules, searchName, filterSpecialty, specialties]);
+    // Lọc theo chuyên khoa
+    if (filterSpecialty) {
+        filtered = filtered.filter(schedule => {
+            const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
+            return specialty?.specialtyName?.toLowerCase().includes(filterSpecialty.toLowerCase());
+        });
+    }
+
+    return filtered;
+}, [allSchedules, searchName, filterSpecialty, specialties]);
 
     const totalPages = Math.ceil(processedSchedules.length / schedulesPerPage);
     const indexOfLastSchedule = currentPage * schedulesPerPage;
@@ -214,7 +217,6 @@ function ScheduleListPage() {
                                 <tr className="border-b border-[#D9D9D9]">
                                     <th className="text-left font-semibold py-5 px-6 w-[5%]">STT</th>
                                     <th className="text-left font-semibold py-5 px-6 w-[18%]">Bác sĩ</th>
-                                    <th className="text-left font-semibold py-5 px-6 w-[18%]">Chuyên khoa</th>
                                     <th className="text-left font-semibold py-5 px-6 w-[12%]">Phòng</th>
                                     <th className="text-left font-semibold py-5 px-6 w-[12%]">Ngày</th>
                                     <th className="text-left font-semibold py-5 px-6 w-[12%]">Ca làm</th>
@@ -225,17 +227,9 @@ function ScheduleListPage() {
                                 {currentSchedules.length > 0 ? (
                                     currentSchedules.map((schedule, index) => {
                                         // Lấy chuyên khoa
-                                        const specialty = specialties.find(spec => spec._id.toString() === schedule.specialties?.toString());
-                                        const specialtyName = specialty?.specialtyName || '-';
-                                        // Lấy phòng (ưu tiên masterRoom nếu không tìm thấy)
-                                        let roomNumber = '-';
-                                        if (specialty && schedule.room) {
-                                            const roomObj = (specialty.room || []).find(r => r._id?.toString() === schedule.room?.toString());
-                                            roomNumber = roomObj?.roomNumber || specialty.masterRoom?.roomNumber || '-';
-                                        }
-                                        // Format ngày
+                                        const doctorFullName = schedule.userId?.fullName || '-';
+                                        const roomNumber = schedule.room?.roomNumber || '-';
                                         const dateStr = schedule.date ? new Date(schedule.date).toLocaleDateString('vi-VN') : '-';
-                                        // Format ca làm
                                         let shiftStr = '-';
                                         switch (schedule.shift) {
                                             case 'MORNING': shiftStr = 'Sáng'; break;
@@ -243,54 +237,25 @@ function ScheduleListPage() {
                                             case 'EVENING': shiftStr = 'Tối'; break;
                                             default: shiftStr = '-';
                                         }
-                                        return (
-                                            <tr
-                                                key={schedule._id}
-                                                className="border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50"
-                                            >
-                                                <td
-                                                    className="py-6 px-6 font-normal w-[5%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
+                                         return (
+                                            <tr key={schedule._id} className="border-t border-[#D9D9D9] cursor-pointer hover:bg-gray-50">
+                                                <td className="py-6 px-6 font-normal w-[5%]" onClick={() => handleRowClick(schedule._id)}>
                                                     {indexOfFirstSchedule + index + 1}
                                                 </td>
-                                                <td
-                                                    className="py-6 px-6 w-[18%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
-                                                    {schedule.userId?.fullName || '-'}
+                                                <td className="py-6 px-6 w-[18%]" onClick={() => handleRowClick(schedule._id)}>
+                                                    {doctorFullName}
                                                 </td>
-                                                <td
-                                                    className="py-6 px-6 w-[18%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
-                                                    {specialtyName}
-                                                </td>
-                                                <td
-                                                    className="py-6 px-6 w-[12%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
+                                                <td className="py-6 px-6 w-[12%]" onClick={() => handleRowClick(schedule._id)}>
                                                     {roomNumber}
                                                 </td>
-                                                <td
-                                                    className="py-6 px-6 w-[12%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
+                                                <td className="py-6 px-6 w-[12%]" onClick={() => handleRowClick(schedule._id)}>
                                                     {dateStr}
                                                 </td>
-                                                <td
-                                                    className="py-6 px-6 w-[12%]"
-                                                    onClick={() => handleRowClick(schedule._id)}
-                                                >
+                                                <td className="py-6 px-6 w-[12%]" onClick={() => handleRowClick(schedule._id)}>
                                                     {shiftStr}
                                                 </td>
                                                 <td className="py-6 px-6 text-center w-[10%]">
-                                                    <button
-                                                        onClick={(event) => confirmDelete(schedule._id, event)}
-                                                        className="text-red-600 hover:text-red-800 text-lg"
-                                                        aria-label="Delete schedule"
-                                                        title="Xóa lịch trình"
-                                                    >
+                                                    <button onClick={(event) => confirmDelete(schedule._id, event)} className="text-red-600 hover:text-red-800 text-lg">
                                                         <i className="fas fa-trash-alt"></i>
                                                     </button>
                                                 </td>

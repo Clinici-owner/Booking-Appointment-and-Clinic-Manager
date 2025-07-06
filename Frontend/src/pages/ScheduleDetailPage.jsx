@@ -91,37 +91,27 @@ function ScheduleDetailPage() {
             <div className="bg-white rounded-lg border border-[#D9D9D9] p-8">
               <form className="w-full max-w-5xl mx-auto grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="grid grid-cols-[120px_1fr] items-start">
-                  <span className="text-sm text-gray-500">Nhân viên:</span>
+                  <span className="text-sm text-gray-500">Bác sĩ:</span>
                   <span className="font-medium text-gray-800">
                     {schedule.userId?.fullName || "-"}
                   </span>
                 </div>
                 <div className="grid grid-cols-[120px_1fr] items-start">
-                  <span className="text-sm text-gray-500">Dịch vụ:</span>
+                  <span className="text-sm text-gray-500">Ca làm việc:</span>
                   <span className="font-medium text-gray-800">
-                    {schedule.paraclinicalId?.paraclinalName || "-"}
+                    {schedule.shift === 'MORNING' ? 'Sáng (07:00 - 12:00)' : schedule.shift === 'AFTERNOON' ? 'Chiều (13:00 - 17:00)' : schedule.shift === 'EVENING' ? 'Tối (18:00 - 21:00)' : '-'}
                   </span>
                 </div>
                 <div className="grid grid-cols-[120px_1fr] items-start">
-                  <span className="text-sm text-gray-500">Thời gian bắt đầu:</span>
+                  <span className="text-sm text-gray-500">Ngày làm việc:</span>
                   <span className="font-medium text-gray-800">
-                    {schedule.startTime
-                      ? new Date(schedule.startTime).toLocaleString("vi-VN")
-                      : "-"}
+                    {schedule.date ? new Date(schedule.date).toLocaleDateString('vi-VN') : "-"}
                   </span>
                 </div>
                 <div className="grid grid-cols-[120px_1fr] items-start">
-                  <span className="text-sm text-gray-500">Thời gian kết thúc:</span>
+                  <span className="text-sm text-gray-500">Phòng:</span>
                   <span className="font-medium text-gray-800">
-                    {schedule.endTime
-                      ? new Date(schedule.endTime).toLocaleString("vi-VN")
-                      : "-"}
-                  </span>
-                </div>
-                <div className="grid grid-cols-[120px_1fr] items-start">
-                  <span className="text-sm text-gray-500">Số phòng:</span>
-                  <span className="font-medium text-gray-800">
-                    {schedule.roomNumber || "-"}
+                    {schedule.room?.roomName || schedule.room?.roomNumber || "-"}
                   </span>
                 </div>
 

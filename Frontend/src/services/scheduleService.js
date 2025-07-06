@@ -4,6 +4,7 @@ const API_URL = 'http://localhost:3000/api/schedules';
 
 export const createSchedule = async (data) => {
     try {
+        // Nếu data.date là mảng, gửi như hiện tại, backend sẽ xử lý tạo nhiều lịch trình
         const res = await axios.post(API_URL, data);
         return res.data;
     } catch (error) {

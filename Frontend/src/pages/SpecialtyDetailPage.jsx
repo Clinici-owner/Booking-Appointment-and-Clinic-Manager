@@ -56,7 +56,8 @@ function SpecialtyDetailPage() {
           specialty.status === false ? "text-custom-red" : "text-custom-blue"
         }`}
       >
-        Khoa {specialty.specialtyName} {specialty.status === false ? "(Đã đóng)" : ""}
+        Khoa {specialty.specialtyName}{" "}
+        {specialty.status === false ? "(Đã đóng)" : ""}
       </h1>
 
       <div className="flex flex-col md:flex-row items-start justify-between p-4 gap-8">
@@ -77,6 +78,29 @@ function SpecialtyDetailPage() {
               />
             </div>
           ))}
+
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold mb-2">Thông tin khác</h3>
+            <p className="text-gray-700 mb-1">
+              <strong>Phí khám:</strong> {specialty.medicalFee} VNĐ
+            </p>
+            {/* Phòng khám chính */}
+            <p className="text-gray-700 mb-1">
+              <strong>Phòng khám chính:</strong> Phòng khám số{" "}
+              {specialty.masterRoom.roomNumber}
+            </p>
+            {/* Danh sách phòng khám */}
+            <p className="text-gray-700 mb-1">
+              <strong>Phòng khám:</strong>
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {specialty.room.map((room) => (
+                <div key={room._id} className="text-gray-700">
+                  Phòng khám {room.roomNumber}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Cột phải: Bác sĩ trưởng khoa */}
@@ -86,12 +110,14 @@ function SpecialtyDetailPage() {
               Bác sĩ trưởng khoa
             </h3>
             <img
-              src="https://thiennhanhospital.com/wp-content/uploads/2023/02/Avatar-2.png"
+              src={specialty.chiefPhysician.avatar || "default-avatar.png"}
               alt=""
               className=" rounded-lg mb-4"
             />
             <p className="text-gray-700 mb-2">Bác sĩ trưởng khoa</p>
-            <p className="mb-4 font-bold">Nguyễn Kim Cúc</p>
+            <p className="mb-4 font-bold">
+              {specialty.chiefPhysician.fullName}
+            </p>
           </div>
           <div className="flex flex-col gap-4 mt-6 justify-center items-center">
             <button>

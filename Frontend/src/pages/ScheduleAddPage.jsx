@@ -2,22 +2,18 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import AdminNavSidebar from '../components/AdminNavSidebar';
+import { DoctorService } from '../services/doctorService';
 import { listService } from '../services/medicalService';
 import { createSchedule } from '../services/scheduleService';
 
 function ScheduleAddPage() {
     const [formData, setFormData] = useState({
         userId: '',
-        startTime: '',
-        endTime: '',
-        roomNumber: '',
-        paraclinicalId: '',
-        department: '',
+        room: '',
         shift: '',
-        day: ''
+        date: '',
     });
-    // const [users, setUsers] = useState([]); // Đã thay thế bằng doctors, không còn dùng users
-    const [paraclinicalServices, setParaclinicalServices] = useState([]);
+
     const [specialties, setSpecialties] = useState([{ value: '', label: 'Chọn chuyên khoa' }]);
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
@@ -34,6 +30,24 @@ function ScheduleAddPage() {
         { value: 'Chủ nhật', label: 'Chủ nhật (07/05)' }
     ];
 
+    // Set giờ mặc định khi chọn ca làm việc
+    const handleShiftChange = (e) => {
+        const shift = e.target.value;
+        setFormData((prev) => ({ ...prev, shift }));
+        // Nếu modal đang mở thì set giờ mặc định luôn
+        if (modalOpen) {
+            if (shift === 'MORNING') {
+                setModalForm((prev) => ({ ...prev, startTime: '07:00', endTime: '12:00' }));
+            } else if (shift === 'AFTERNOON') {
+                setModalForm((prev) => ({ ...prev, startTime: '13:00', endTime: '17:00' }));
+            } else if (shift === 'EVENING') {
+                setModalForm((prev) => ({ ...prev, startTime: '18:00', endTime: '21:00' }));
+            } else {
+                setModalForm((prev) => ({ ...prev, startTime: '', endTime: '' }));
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoadingServices(true);
@@ -41,7 +55,6 @@ function ScheduleAddPage() {
                 const data = await listService();
                 const services = data.services || data;
                 if (!Array.isArray(services)) throw new Error('Dữ liệu dịch vụ cận lâm sàng không hợp lệ.');
-                setParaclinicalServices(services);
             } catch (error) {
                 setFetchError(`Không thể tải danh sách dịch vụ cận lâm sàng. Lỗi: ${error.message}`);
                 toast.error('Không thể tải danh sách dịch vụ cận lâm sàng.', { style: { background: '#EF4444', color: '#fff' } });
@@ -70,65 +83,141 @@ function ScheduleAddPage() {
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalCell, setModalCell] = useState({ room: '', day: '' });
     const [modalForm, setModalForm] = useState({
-        userId: '',
-        startTime: '',
-        endTime: '',
-        paraclinicalId: ''
-    });
+    userId: '',
+    room: '',
+    shift: '',
+    date: [],  // Initialize date as an empty array
+});
     const [modalErrors, setModalErrors] = useState({});
+    // State để lưu các lịch trình đã tạo và hiển thị trên bảng
+    const [localSchedules, setLocalSchedules] = useState([]);
+
+    const addNewSchedulesToLocal = (newSchedules) => {
+    setLocalSchedules((prevSchedules) => [...prevSchedules, ...newSchedules]);
+};
 
     // Open modal when click cell
     const handleCellClick = (room, day) => {
-        setModalCell({ room, day });
-        setModalForm({ userId: '', startTime: '', endTime: '', paraclinicalId: '' });
+        let date = '';
+        if (day && day !== '') {
+            // Giả sử tuần này, lấy ngày gần nhất ứng với thứ đã chọn
+            const today = new Date();
+            const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+            const idx = weekdays.findIndex(w => day.includes(w));
+            if (idx !== -1) {
+                const nowDay = today.getDay();
+                let diff = idx - nowDay;
+                if (diff < 0) diff += 7;
+                const d = new Date(today);
+                d.setDate(today.getDate() + diff);
+                date = d.toISOString().slice(0, 10);
+            }
+        }
+        setModalForm({
+            userId: '',
+            room,
+            shift: formData.shift,
+            date,
+        });
         setModalErrors({});
         setModalOpen(true);
     };
     const handleModalClose = () => setModalOpen(false);
     const handleModalFormChange = (e) => {
-        const { name, value } = e.target;
+    const { name, value } = e.target; 
+    if (name === "date") {
+        const newDates = value ? value.split(",").map(d => d.trim()) : []; 
+        setModalForm((prev) => ({ ...prev, [name]: newDates }));
+    } else {
         setModalForm((prev) => ({ ...prev, [name]: value }));
-        setModalErrors((prev) => ({ ...prev, [name]: '' }));
-    };
+    }
+};
     const validateModalForm = () => {
         const errors = {};
         if (!modalForm.userId) errors.userId = 'Vui lòng chọn nhân viên';
-        if (!modalForm.startTime) errors.startTime = 'Vui lòng chọn giờ bắt đầu';
-        if (!modalForm.endTime) errors.endTime = 'Vui lòng chọn giờ kết thúc';
-        if (!modalForm.paraclinicalId) errors.paraclinicalId = 'Vui lòng chọn dịch vụ';
-        if (modalForm.startTime && modalForm.endTime && modalForm.endTime <= modalForm.startTime) {
-            errors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
-        }
+        if (!modalForm.room) errors.room = 'Vui lòng chọn phòng';
+        if (!modalForm.shift) errors.shift = 'Vui lòng chọn ca làm việc';
+        if (!modalForm.date) errors.date = 'Vui lòng chọn ngày';
         return errors;
     };
-    const handleModalSubmit = async (e) => {
+    
+    const handleModalSubmit = (e) => {
         e.preventDefault();
         const errors = validateModalForm();
+        // Validate ca làm việc (shift) khi lưu tạm thời
+        if (!formData.shift) {
+            errors.shift = 'Vui lòng chọn ca làm việc';
+        }
         if (Object.keys(errors).length > 0) {
             setModalErrors(errors);
             return;
         }
-        // Gửi dữ liệu tạo lịch trình
-        const schedulePayload = {
-            userId: modalForm.userId,
-            roomNumber: modalCell.room,
-            department: formData.department,
-            shift: formData.shift,
-            day: modalCell.day,
-            startTime: modalForm.startTime,
-            endTime: modalForm.endTime,
-            paraclinicalId: modalForm.paraclinicalId,
-        };
+
+        const doctor = doctors.find(d => d._id === modalForm.userId);
+        const specialty = specialties.find(s => s.value === formData.department)?.label || '';
+
+        // Đảm bảo modalForm.date là một mảng
+        const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date]; // Nếu không phải mảng, tạo mảng
+
+        const newSchedules = selectedDates.map(date => {
+            return {
+                userId: modalForm.userId,
+                room: modalForm.room,
+                shift: formData.shift,
+                date: date,
+                fullName: doctor?.fullName || '',
+                specialty,
+            };
+        });
+
+        // Gọi addNewSchedulesToLocal để thêm tất cả các lịch trình vào localSchedules
+        addNewSchedulesToLocal(newSchedules);
+
+        toast.success('Đã lưu tất cả lịch trình tạm thời (chưa gửi lên server)', {
+            style: { background: '#10B981', color: '#fff' },
+        });
+        setModalOpen(false);
+    };
+
+
+
+
+
+    const handleCreateSchedule = async () => {
+        // Lấy tất cả lịch trình tạm thời từ localSchedules, group theo userId, room, shift, date
+        if (!localSchedules.length) {
+            toast.error('Không có lịch trình nào để tạo!');
+            return;
+        }
+        // Chỉ gửi các trường cần thiết cho backend
+        const schedulesToCreate = localSchedules.map(s => ({
+            userId: s.userId,
+            room: rooms.find(r => r.roomNumber === s.room || r._id === s.room)?._id || s.room,
+            shift: s.shift,
+            date: s.date,
+        }));
         try {
-            await createSchedule(schedulePayload);
-            toast.success('Tạo lịch trình thành công!', { style: { background: '#10B981', color: '#fff' } });
-            setModalOpen(false);
-        } catch {
-            toast.error('Tạo lịch trình thất bại!', { style: { background: '#EF4444', color: '#fff' } });
+            const res = await createSchedule({
+                userId: schedulesToCreate[0].userId,
+                room: schedulesToCreate[0].room,
+                shift: schedulesToCreate[0].shift,
+                date: schedulesToCreate.map(s => s.date),
+            });
+            toast.success(res.message || 'Tạo lịch trình thành công!', {
+                style: { background: '#10B981', color: '#fff' },
+            });
+            setLocalSchedules([]);
+            navigate('/admin/schedules');
+        } catch (error) {
+            console.error('Lỗi khi tạo lịch trình:', error);
+            toast.error(error.response?.data?.error || 'Tạo lịch trình thất bại!', {
+                style: { background: '#EF4444', color: '#fff' },
+            });
         }
     };
+
+
 
 
 
@@ -151,7 +240,6 @@ function ScheduleAddPage() {
             setLoadingRooms(true);
             setLoadingDoctors(true);
             try {
-                // Lấy chi tiết chuyên khoa để lấy danh sách phòng
                 const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${formData.department}`);
                 if (!specialtyRes.ok) throw new Error('Không thể tải chuyên khoa.');
                 const specialty = await specialtyRes.json();
@@ -163,12 +251,12 @@ function ScheduleAddPage() {
                 setLoadingRooms(false);
             }
             try {
-                // Lấy danh sách bác sĩ thuộc chuyên khoa (đúng endpoint và đúng tên route, phân biệt hoa thường)
-                const doctorRes = await fetch(`http://localhost:3000/api/doctorProfile?specialtyId=${formData.department}`);
-                if (!doctorRes.ok) throw new Error('Không thể tải danh sách bác sĩ.');
-                const doctorProfiles = await doctorRes.json();
-                // Trả về mảng doctorProfile, mỗi phần tử có doctorId là object User
-                setDoctors(Array.isArray(doctorProfiles) ? doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId) : []);
+                const doctorProfiles = await DoctorService.getDoctorsBySpecialty(formData.department);
+                if (Array.isArray(doctorProfiles)) {
+                  setDoctors(doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId));
+                } else {
+                  setDoctors([]);
+                }
             } catch {
                 setDoctorError('Không thể tải danh sách bác sĩ.');
                 setDoctors([]);
@@ -236,7 +324,7 @@ function ScheduleAddPage() {
                             name="shift"
                             className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={formData.shift}
-                            onChange={e => setFormData({ ...formData, shift: e.target.value })}
+                            onChange={handleShiftChange}
                         >
                             <option value="">Chọn ca làm việc</option>
                             <option value="MORNING">Ca sáng (7h - 12h)</option>
@@ -264,19 +352,67 @@ function ScheduleAddPage() {
                                     <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
                                         {room.roomName || room.roomNumber}
                                     </td>
-                                    {days.slice(1).map((d) => (
-                                        <td
-                                            key={d.value}
-                                            className="border-r border-gray-300 py-5 cursor-pointer schedule-cell hover:bg-blue-50"
-                                            onClick={() => handleCellClick(room.roomNumber, d.value)}
-                                        >
-                                        </td>
-                                    ))}
+                                    {days.slice(1).map((d) => {
+                                        // Tìm lịch trình đã tạo cho phòng này, ngày này, ca này
+                                        const cellDate = (() => {
+                                            let date = '';
+                                            if (d.value && d.value !== '') {
+                                                const today = new Date();
+                                                const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                                                const idx = weekdays.findIndex(w => d.value.includes(w));
+                                                if (idx !== -1) {
+                                                    const nowDay = today.getDay();
+                                                    let diff = idx - nowDay;
+                                                    if (diff < 0) diff += 7;
+                                                    const dt = new Date(today);
+                                                    dt.setDate(today.getDate() + diff);
+                                                    date = dt.toISOString().slice(0, 10);
+                                                }
+                                            }
+                                            return date;
+                                        })();
+                                        const schedule = localSchedules.find(s =>
+                                            (s.room === (room._id || room.roomNumber) || s.room === room.roomNumber)
+                                            && s.date === cellDate
+                                            && s.shift === formData.shift
+                                        );
+                                        return (
+                                            <td
+                                                key={d.value}
+                                                className="border-r border-gray-300 py-5 cursor-pointer schedule-cell hover:bg-blue-50"
+                                                onClick={() => handleCellClick(room.roomNumber, d.value)}
+                                            >
+                                                {schedule && (
+                                                    <div className="text-xs text-blue-700 font-semibold">
+                                                        <div><span className="font-semibold">Bác sĩ:</span> {schedule.fullName}</div>
+                                                        <div><span className="font-semibold">Chuyên khoa:</span> {schedule.specialty}</div>
+                                                        <div><span className="font-semibold">Số phòng:</span> {room.roomNumber || room._id}</div>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </section>
+                <div className="flex justify-start space-x-4 pt-6">
+                                        <button
+                                        type="button"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2 rounded-md transition"
+                                        onClick={handleCreateSchedule}
+                                        >
+                                        Tạo mới
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-8 py-2 rounded-md transition"
+                                            onClick={() => { setModalOpen(false); navigate('/admin/schedules'); }}
+                                        >
+                                            Quay về danh sách
+                                        </button>
+                                    </div>
 
                 
                 {modalOpen && (
@@ -296,7 +432,8 @@ function ScheduleAddPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Phòng</label>
                                     <input
                                         type="text"
-                                        value={modalCell.room}
+                                        name="room"
+                                        value={modalForm.room}
                                         readOnly
                                         className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
                                     />
@@ -304,11 +441,14 @@ function ScheduleAddPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Ngày</label>
                                     <input
-                                        type="text"
-                                        value={modalCell.day}
-                                        readOnly
-                                        className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
+                                    type="text"
+                                    name="date"
+                                    value={Array.isArray(modalForm.date) ? modalForm.date.join(", ") : modalForm.date}
+                                    onChange={handleModalFormChange}
+                                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
+
+                                    {modalErrors.date && <p className="text-xs text-red-600 mt-1">{modalErrors.date}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
@@ -326,46 +466,10 @@ function ScheduleAddPage() {
                                     </select>
                                     {modalErrors.userId && <p className="text-xs text-red-600 mt-1">{modalErrors.userId}</p>}
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Giờ bắt đầu</label>
-                                    <input
-                                        type="time"
-                                        name="startTime"
-                                        required
-                                        value={modalForm.startTime}
-                                        onChange={handleModalFormChange}
-                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    {modalErrors.startTime && <p className="text-xs text-red-600 mt-1">{modalErrors.startTime}</p>}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Giờ kết thúc</label>
-                                    <input
-                                        type="time"
-                                        name="endTime"
-                                        required
-                                        value={modalForm.endTime}
-                                        onChange={handleModalFormChange}
-                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    {modalErrors.endTime && <p className="text-xs text-red-600 mt-1">{modalErrors.endTime}</p>}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Dịch vụ cận lâm sàng</label>
-                                    <select
-                                        name="paraclinicalId"
-                                        required
-                                        value={modalForm.paraclinicalId}
-                                        onChange={handleModalFormChange}
-                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Chọn dịch vụ</option>
-                                        {paraclinicalServices.map((service) => (
-                                            <option key={service._id} value={service._id}>{service.paraclinalName || service.name}</option>
-                                        ))}
-                                    </select>
-                                    {modalErrors.paraclinicalId && <p className="text-xs text-red-600 mt-1">{modalErrors.paraclinicalId}</p>}
-                                </div>
+                                {modalErrors.shift && (
+                                    <div className="text-xs text-red-600 mt-1">{modalErrors.shift}</div>
+                                )}
+
                                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
                                     <button
                                         type="button"
