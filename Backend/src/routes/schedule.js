@@ -17,5 +17,6 @@ router.delete('/:id', scheduleController.deleteSchedule);
 router.get('/own/:userId', scheduleController.viewOwnSchedule);
 router.get('/view-all', scheduleController.viewAllSchedules);
 router.get('/:id', scheduleController.viewScheduleDetail);
+router.get('/schedule/:roomId/:day', scheduleController.getSchedulesForRoomAndDay);
 
 module.exports = router;

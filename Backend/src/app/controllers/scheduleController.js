@@ -188,6 +188,27 @@ class ScheduleController {
             res.status(500).json({ error: 'Lỗi server khi lấy chi tiết lịch trình. Vui lòng thử lại sau.' });
         }
     }
+    async getSchedulesForRoomAndDay(req, res) {
+    try {
+        const { roomId, day } = req.params; // Nhận dữ liệu từ URL
+        if (!roomId || !day) {
+            return res.status(400).json({ error: 'Thiếu thông tin phòng hoặc ngày.' });
+        }
+
+        // Tìm lịch trình cho phòng và ngày
+        const schedules = await Schedule.find({
+            room: roomId,
+            date: day
+        })
+        .populate('userId', 'fullName role')  // Để lấy thông tin bác sĩ
+        .populate('room', 'roomName roomNumber'); // Để lấy thông tin phòng
+
+        // Trả về kết quả tìm được
+        res.status(200).json(schedules);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 }
 
 module.exports = new ScheduleController();

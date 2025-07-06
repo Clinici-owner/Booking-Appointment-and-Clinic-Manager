@@ -114,22 +114,6 @@ function ScheduleDetailPage() {
                     {schedule.room?.roomName || schedule.room?.roomNumber || "-"}
                   </span>
                 </div>
-
-                {/* Action buttons */}
-                <div className="col-span-1 sm:col-span-1 flex justify-start mt-8">
-                  <div className="flex space-x-4">
-                    <button
-                      type="button"
-                      className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-36 h-12"
-                      onClick={() =>
-                        navigate('/admin/schedules/update', {state: { id: schedule._id },
-                        })
-                      }
-                    >
-                      Chỉnh sửa
-                    </button>
-                  </div>
-                </div>
                 <div className="col-span-1 sm:col-span-1 flex justify-end mt-8">
                   <button
                     type="button"

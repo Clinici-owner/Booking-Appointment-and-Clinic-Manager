@@ -53,10 +53,10 @@ function ScheduleListPage() {
         setCurrentPage(1);
     }, []);
 
-    const handleFilterChange = useCallback((e) => {
-        setFilterSpecialty(e.target.value);
-        setCurrentPage(1);
-    }, []);
+    // const handleFilterChange = useCallback((e) => {
+    //     setFilterSpecialty(e.target.value);
+    //     setCurrentPage(1);
+    // }, []);
 
 
     // Hàm mở modal xác nhận xóa
@@ -125,12 +125,12 @@ function ScheduleListPage() {
     const currentSchedules = processedSchedules.slice(indexOfFirstSchedule, indexOfLastSchedule);
 
     // Danh sách chuyên khoa duy nhất
-    const uniqueSpecialties = useMemo(() => {
-        const specialtyNames = specialties
-            .filter(spec => spec && spec.specialtyName)
-            .map(spec => spec.specialtyName);
-        return [...new Set(specialtyNames)].sort();
-    }, [specialties]);
+    // const uniqueSpecialties = useMemo(() => {
+    //     const specialtyNames = specialties
+    //         .filter(spec => spec && spec.specialtyName)
+    //         .map(spec => spec.specialtyName);
+    //     return [...new Set(specialtyNames)].sort();
+    // }, [specialties]);
 
     const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
 
@@ -199,7 +199,7 @@ function ScheduleListPage() {
                                 onChange={handleSearchChange}
                             />
                         </div>
-                        <select
+                        {/* <select
                             aria-label="Filter specialties"
                             className="bg-white border border-[#D9D9D9] rounded-lg text-base font-semibold text-[#212B36] py-4 px-6 w-full md:w-[250px] cursor-pointer"
                             value={filterSpecialty}
@@ -209,7 +209,7 @@ function ScheduleListPage() {
                             {uniqueSpecialties.map(specialtyName => (
                                 <option key={specialtyName} value={specialtyName}>{specialtyName}</option>
                             ))}
-                        </select>
+                        </select> */}
                     </div>
                     <div className="overflow-x-auto rounded-lg border border-[#D9D9D9] bg-white">
                         <table className="w-full text-base text-[#212B36] border-collapse rounded-lg table-fixed">
@@ -304,7 +304,7 @@ function ScheduleListPage() {
                         type="button"
                         onClick={() => navigate('/admin/schedules/add')}
                     >
-                        Thêm lịch trình mới
+                        Xem bảng lịch trình
                     </button>
                 </div>
             </div>

@@ -76,4 +76,15 @@ export const getScheduleById = async (id) => {
         console.error('Lỗi khi lấy chi tiết lịch trình:', error);
         throw error;
     }
+    
+};
+
+export const getSchedulesForRoomAndDay = async (roomId, day) => {
+    try {
+        const res = await axios.get(`${API_URL}/schedule/${roomId}/${day}`);
+        return res.data; 
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch trình cho phòng và ngày:', error);
+        throw error;
+    }
 };
