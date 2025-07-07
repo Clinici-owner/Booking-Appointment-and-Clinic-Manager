@@ -76,7 +76,7 @@ function Header() {
           </li>
           <li>
             <Link
-              to="/services"
+              to="/health-packages"
               className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
                 isActive("/services")
                   ? "text-white bg-custom-blue shadow-md"

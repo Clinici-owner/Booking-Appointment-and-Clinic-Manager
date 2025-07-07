@@ -1,34 +1,26 @@
 import { useState, useEffect } from "react"
 import { healthPackageService } from "../services/healthPackageService"
+import HealthPackageList from "../components/HealthPackageList"
 
- function AdminHealthPackagePage() {
+function AdminHealthPackagePage() {
   const [healthPackages, setHealthPackages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const fetchHealthPackages = async () => {
+  const fetchPackages = async () => {
     try {
       setLoading(true)
-      setError("")
-
-      const response = await healthPackageService.getAllHealthPackagesAdmin()
-
-      if (response?.success) {
-        setHealthPackages(Array.isArray(response.data) ? response.data : [])
-      } else {
-        setHealthPackages([])
-      }
+      const result = await healthPackageService.getAllHealthPackages()
+      setHealthPackages(result.data)
     } catch (err) {
-      console.error("Error fetching health packages:", err)
-      setError(err.message || "Không thể tải dữ liệu")
-      setHealthPackages([])
+      setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchHealthPackages()
+    fetchPackages()
   }, [])
 
   if (loading) {
@@ -50,7 +42,7 @@ import { healthPackageService } from "../services/healthPackageService"
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Có lỗi xảy ra</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={fetchHealthPackages}
+            onClick={fetchPackages}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200"
           >
             Thử lại
@@ -62,91 +54,125 @@ import { healthPackageService } from "../services/healthPackageService"
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">GÓI KHÁM SỨC KHỎE</h1>
-          <p className="text-xl text-white/90">Chăm sóc sức khỏe toàn diện cho bạn và gia đình</p>
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">Quản Lý Gói Khám Sức Khỏe</h1>
+              <p className="text-blue-100 mt-2">Quản lý và theo dõi các gói khám sức khỏe trong hệ thống</p>
+            </div>
+            <button
+              onClick={() => (window.location.href = "/admin/health-packages/create")}
+              className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center shadow-lg"
+            >
+              <span className="mr-2">➕</span>
+              Tạo gói khám bệnh
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {healthPackages.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📦</div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Chưa có gói khám nào</h3>
-            <p className="text-gray-600">Hiện tại chưa có gói khám sức khỏe nào được tạo</p>
+      {/* Stats Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {/* Tổng gói khám */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <span className="text-blue-600 text-2xl">📦</span>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tổng gói khám</p>
+                <p className="text-2xl font-bold text-gray-900">{healthPackages.length}</p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {healthPackages.map((pkg, index) => (
-              <div
-                key={pkg?._id || index}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200"
-              >
-                {/* Package Image */}
-                <div className="relative h-48 bg-gradient-to-br from-blue-50 to-blue-100">
-                  <img
-                    src={pkg?.packageImage || "https://via.placeholder.com/300x200?text=Gói+Khám"}
-                    alt={pkg?.packageName || "Package"}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/300x200?text=Gói+Khám"
-                    }}
-                  />
-                </div>
 
-                {/* Package Content */}
-                <div className="p-6">
-                  {/* Package Name */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                    {pkg?.packageName || "Tên gói khám"}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-gray-600 text-sm mb-6 line-clamp-4">
-                    {pkg?.description || "Mô tả gói khám sức khỏe"}
-                  </p>
-
-                  {/* Detail Button */}
-                  <button
-                    onClick={() => (window.location.href = `/admin/health-packages/detail/${pkg?._id}`)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
-                  >
-                    Chi tiết
-                  </button>
-                </div>
+          {/* Đang hoạt động */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <span className="text-green-600 text-2xl">✅</span>
               </div>
-            ))}
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Đang hoạt động</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {healthPackages.filter((pkg) => pkg?.status === "active").length}
+                </p>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Footer Stats */}
-      <div className="bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">{healthPackages.length}</div>
-              <div className="text-gray-600">Tổng gói khám</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {healthPackages.filter((pkg) => pkg?.status === "active").length}
+          {/* Giá cao nhất - Fixed */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <span className="text-red-600 text-2xl">🔥</span>
               </div>
-              <div className="text-gray-600">Đang hoạt động</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-yellow-600 mb-2">
-                {healthPackages.filter((pkg) => pkg?.status === "nonactive").length}
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Giá cao nhất</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {healthPackages.length > 0
+                    ? new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(Math.max(...healthPackages.map((pkg) => pkg?.packagePrice || 0)))
+                    : "0 ₫"}
+                </p>
               </div>
-              <div className="text-gray-600">Không hoạt động</div>
             </div>
+          </div>
+
+          {/* Giá trung bình */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <span className="text-yellow-600 text-2xl">💰</span>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Giá trung bình</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {healthPackages.length > 0
+                    ? new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(
+                        healthPackages.reduce((sum, pkg) => sum + (pkg?.packagePrice || 0), 0) / healthPackages.length,
+                      )
+                    : "0 ₫"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Danh sách Gói Khám</h2>
+                <p className="text-sm text-gray-600 mt-1">Hiển thị {healthPackages.length} gói khám trong hệ thống</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            {healthPackages.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">📦</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Chưa có gói khám nào</h3>
+                <p className="text-gray-600 mb-6">Bắt đầu bằng cách tạo gói khám sức khỏe đầu tiên</p>
+              </div>
+            ) : (
+              <HealthPackageList healthPackages={healthPackages} />
+            )}
           </div>
         </div>
       </div>
     </div>
   )
 }
+
 export default AdminHealthPackagePage

@@ -1,5 +1,4 @@
 const Service = require("../models/ParaclinicalService");
-
 class serviceController {
   async createService(req, res, next) {
     try {
@@ -170,5 +169,6 @@ class serviceController {
     }
   }
 }
+
 
 module.exports = new serviceController();

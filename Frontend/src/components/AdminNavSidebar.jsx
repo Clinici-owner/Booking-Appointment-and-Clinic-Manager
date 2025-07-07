@@ -35,6 +35,7 @@ const navItems = [
   { label: "Tạo bài đăng", icon: <NewspaperIcon />, path: "/admin/news" },
   { label: "Tài chính & thanh toán", icon: <MonetizationOnIcon />, path: "/admin/billing" },
   { label: "Cài đặt hệ thống", icon: <SettingsIcon />, path: "/admin/settings" },
+  { label: "Quản lý gói khám sức khỏe", icon: <MedicalServicesIcon />, path: "/admin/health-packages" },
 ];
 
 export default function AdminNavSidebar({ children }) {
@@ -46,7 +47,7 @@ export default function AdminNavSidebar({ children }) {
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          marginTop: "64px",
+          marginTop: "66px",
 
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,

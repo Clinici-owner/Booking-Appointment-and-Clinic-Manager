@@ -28,6 +28,7 @@ const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
 const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
+const HealthPackageList = React.lazy(() => import("../components/HealthPackageList"));
 
 const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
@@ -43,7 +44,7 @@ const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
 const CreateHealthPackagePage = React.lazy(() => import("../pages/CreateHealthPackagePage"));
-const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/AdminHealthPackageDetailPage"));
+const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/HealthPackageDetailPage"));
 const UpdateHealthPackagePage = React.lazy(() => import("../pages/UpdateHealthPackagePage"));
 const LockHealthPackagePage = React.lazy(() => import("../pages/LockHealthPackagePage"));
 const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
@@ -61,7 +62,6 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
-const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
 // Cấu hình route
 const AppRoute = [
@@ -103,6 +103,8 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout},
+  //Health package component
+  {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
   {path: ROUTE_PATH.HEALTH_PACKAGE_USER, page: HealthPackagePage, layout: MainLayout},
   //Service Manager
@@ -123,7 +125,6 @@ const AppRoute = [
 
   //Booking from package
 
-  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
  
 
