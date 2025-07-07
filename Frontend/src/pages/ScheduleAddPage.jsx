@@ -380,7 +380,7 @@ function ScheduleAddPage() {
             {rooms.map((room) => (
                 <tr key={room._id || room.roomNumber} className="border-t border-gray-300">
                     <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
-                        {room.roomName || room.roomNumber}
+                        {room.roomNumber}
                     </td>
                     {days.slice(1).map((d) => {
                         // Tính ngày tương ứng với ô
