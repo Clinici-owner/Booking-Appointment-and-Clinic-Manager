@@ -84,15 +84,13 @@ function ScheduleAddPage() {
                     label: s.name || s.label || s.specialtyName || 'Chuyên khoa',
                 }));
                 setSpecialties(specialtiesOptions);
-                // Nếu có ít nhất 2 chuyên khoa, mặc định chọn cả 2 (hoặc tất cả)
-               if (specialtiesOptions.length > 0) {
-                setFormData(prev => ({
-                    ...prev,
-                    department: specialtiesOptions.length > 1
-                        ? specialtiesOptions.map(s => s.value)
-                        : [specialtiesOptions[0].value]
-                }));
-            }
+                // Mặc định chọn chuyên khoa "Khoa nội" nếu có, nếu không thì chọn chuyên khoa đầu tiên
+                const noiKhoa = specialtiesOptions.find(s => s.label.toLowerCase().includes('nội'));
+                if (noiKhoa) {
+                    setFormData(prev => ({ ...prev, department: [noiKhoa.value] }));
+                } else if (specialtiesOptions.length > 0) {
+                    setFormData(prev => ({ ...prev, department: [specialtiesOptions[0].value] }));
+                }
             } catch {
                 toast.error('Không thể tải danh sách chuyên khoa.', { style: { background: '#EF4444', color: '#fff' } });
             }
@@ -111,7 +109,7 @@ function ScheduleAddPage() {
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
     const [modalForm, setModalForm] = useState({
-        userId: '',
+        userId: [], // allow multiple
         room: '',
         shift: '',
         date: [],  // Initialize date as an empty array
@@ -164,7 +162,7 @@ function ScheduleAddPage() {
     };
     const validateModalForm = () => {
         const errors = {};
-        if (!modalForm.userId) errors.userId = 'Vui lòng chọn nhân viên';
+        if (!modalForm.userId || (Array.isArray(modalForm.userId) && modalForm.userId.length === 0)) errors.userId = 'Vui lòng chọn nhân viên';
         if (!modalForm.room) errors.room = 'Vui lòng chọn phòng';
         if (!modalForm.shift) errors.shift = 'Vui lòng chọn ca làm việc';
         if (!modalForm.date) errors.date = 'Vui lòng chọn ngày';
@@ -172,6 +170,7 @@ function ScheduleAddPage() {
     };
 
     // Sửa: Xử lý submit cho cả thêm mới và chỉnh sửa (tạo luôn trên backend khi bấm Lưu)
+
     const handleModalSubmit = async (e) => {
         e.preventDefault();
         const errors = validateModalForm();
@@ -184,10 +183,10 @@ function ScheduleAddPage() {
         }
 
         if (modalForm._id) {
-            // Edit mode: update schedule
+            // Edit mode: update schedule (chỉ cho phép sửa 1 lịch trình 1 bác sĩ)
             try {
                 const updateData = {
-                    userId: modalForm.userId,
+                    userId: Array.isArray(modalForm.userId) ? modalForm.userId[0] : modalForm.userId,
                     room: modalForm.room,
                     shift: modalForm.shift,
                     date: modalForm.date
@@ -206,19 +205,24 @@ function ScheduleAddPage() {
                 });
             }
         } else {
-            // Tạo mới: gọi API tạo lịch trình luôn
+            // Tạo mới: gọi API tạo lịch trình cho nhiều bác sĩ
             try {
                 const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
-                const res = await createSchedule({
-                    userId: modalForm.userId,
-                    room: rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room)?._id || modalForm.room,
-                    shift: formData.shift,
-                    date: selectedDates,
-                });
+                const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
+                // Gọi API tạo nhiều lịch trình cho từng bác sĩ
+                const createPromises = userIds.map(uid =>
+                    createSchedule({
+                        userId: uid,
+                        room: rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room)?._id || modalForm.room,
+                        shift: formData.shift,
+                        date: selectedDates,
+                    })
+                );
+                await Promise.all(createPromises);
                 // Refresh server schedules
                 const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
                 setServerSchedules(updated);
-                toast.success(res.message || 'Tạo lịch trình thành công!', {
+                toast.success('Tạo lịch trình thành công!', {
                     style: { background: '#10B981', color: '#fff' },
                 });
                 setModalOpen(false);
@@ -244,6 +248,7 @@ function ScheduleAddPage() {
     const [doctors, setDoctors] = useState([]);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
     const [doctorError, setDoctorError] = useState(null);
+    const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
 
     // Fetch rooms and doctors when department (specialty) changes
     useEffect(() => {
@@ -329,32 +334,19 @@ function ScheduleAddPage() {
             <main className="flex-1 p-8 flex flex-col gap-6">
                 <div className="flex justify-between items-center max-w-6xl w-full">
                     <h1 className="text-4xl font-bold">Tạo lịch trình làm việc mới</h1>
-                    <div className="w-72">
+                    <div className="w-64">
                         <label htmlFor="department" className="block mb-1 font-semibold text-gray-700">Chọn chuyên khoa</label>
-                        <div className="relative">
-                            <select
-                                id="department"
-                                name="department"
-                                className="w-full rounded-lg border border-blue-400 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all duration-150 hover:border-blue-600"
-                                value={formData.department}
-                                onChange={e => {
-                                    const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-                                    setFormData({ ...formData, department: selected });
-                                }}
-                                multiple
-                                size={Math.min(6, specialties.length)}
-                            >
-                                {specialties.map((s) => (
-                                    <option key={s.value} value={s.value} className="py-2 px-2 rounded hover:bg-blue-100">
-                                        {s.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
-                            </span>
-                        </div>
-
+                        <select
+                            id="department"
+                            name="department"
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={Array.isArray(formData.department) ? formData.department[0] : formData.department}
+                            onChange={e => setFormData({ ...formData, department: [e.target.value] })}
+                        >
+                            {specialties.map((s) => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="w-64">
                         <label htmlFor="shift" className="block mb-1 font-semibold text-gray-700">Chọn ca làm việc</label>
@@ -454,7 +446,7 @@ function ScheduleAddPage() {
 
 
                 {modalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(4px)' }}>
                         <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
                             <button
                                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -505,24 +497,79 @@ function ScheduleAddPage() {
                                 )}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
-                                    <select
-                                        name="userId"
-                                        required
-                                        value={modalForm.userId}
-                                        onChange={handleModalFormChange}
-                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Chọn bác sĩ</option>
-                                        {doctors.map((user) => (
-                                            <option key={user._id} value={user._id}>{user.fullName}</option>
-                                        ))}
-                                    </select>
+                                    <div className="relative doctor-dropdown-multiselect">
+                                        <button
+                                            type="button"
+                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px]"
+                                            onClick={() => setShowDoctorDropdown(v => !v)}
+                                            tabIndex={0}
+                                        >
+                                            {modalForm.userId && modalForm.userId.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {doctors.filter(d => modalForm.userId.includes(d._id)).map(d => (
+                                                        <span key={d._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-block">
+                                                            {d.fullName}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : <span className="text-gray-400">Chọn bác sĩ</span>}
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
+                                            </span>
+                                        </button>
+                                        {showDoctorDropdown && (
+                                            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
+                                                {doctors.length === 0 && (
+                                                    <div className="px-3 py-2 text-gray-400 text-sm">Không có bác sĩ</div>
+                                                )}
+                                                {doctors.map((user) => (
+                                                    <label key={user._id} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2 accent-blue-600"
+                                                            checked={modalForm.userId.includes(user._id)}
+                                                            onChange={e => {
+                                                                let newSelected = Array.isArray(modalForm.userId) ? [...modalForm.userId] : [];
+                                                                if (e.target.checked) {
+                                                                    if (!newSelected.includes(user._id)) newSelected.push(user._id);
+                                                                } else {
+                                                                    newSelected = newSelected.filter(id => id !== user._id);
+                                                                }
+                                                                setModalForm(prev => ({ ...prev, userId: newSelected }));
+                                                            }}
+                                                        />
+                                                        {user.fullName}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">Có thể chọn nhiều bác sĩ cho ca làm này</div>
                                     {modalErrors.userId && <p className="text-xs text-red-600 mt-1">{modalErrors.userId}</p>}
                                 </div>
                                 {modalErrors.shift && (
                                     <div className="text-xs text-red-600 mt-1">{modalErrors.shift}</div>
                                 )}
                                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                                    {modalForm._id && (
+                                        <button
+                                            type="button"
+                                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-md transition"
+                                            onClick={async () => {
+                                                try {
+                                                    await import('../services/scheduleService').then(m => m.deleteSchedule(modalForm._id));
+                                                    const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+                                                    setServerSchedules(updated);
+                                                    toast.success('Đã xóa lịch trình!', { style: { background: '#EF4444', color: '#fff' } });
+                                                    setModalOpen(false);
+                                                } catch (error) {
+                                                    toast.error(error.response?.data?.error || 'Xóa lịch trình thất bại!', { style: { background: '#EF4444', color: '#fff' } });
+                                                }
+                                            }}
+                                        >
+                                            Xóa
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-md transition"
