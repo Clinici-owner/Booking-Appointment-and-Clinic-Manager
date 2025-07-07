@@ -22,7 +22,7 @@ function SpecialtiesPage() {
   return (
     <div>
       <div>
-        <h1 className="text-3xl text-custom-blue font-bold mb-4">Danh sách chuyên khoa</h1>
+        <h1 className="text-3xl text-custom-blue font-bold mb-4">DANH SÁCH CHUYÊN KHOA</h1>
       </div>
       <Divider className="!mb-6 " />
 
