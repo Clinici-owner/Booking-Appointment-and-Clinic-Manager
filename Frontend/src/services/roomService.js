@@ -21,5 +21,15 @@ export const roomService = {
       console.error("Error fetching unused rooms:", error);
       throw error;
     }
+  },
+
+  toggleRoomStatus: async (roomId) => {
+    try {
+      const response = await axios.put(`${API_URL}/${roomId}/toggle-status`);
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling room status:", error);
+      throw error;
+    }
   }
 };

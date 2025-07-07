@@ -56,7 +56,7 @@ function SpecialtyDetailPage() {
           specialty.status === false ? "text-custom-red" : "text-custom-blue"
         }`}
       >
-        Khoa {specialty.specialtyName}{" "}
+        KHOA {specialty.specialtyName}{" "}
         {specialty.status === false ? "(Đã đóng)" : ""}
       </h1>
 
@@ -87,7 +87,7 @@ function SpecialtyDetailPage() {
             {/* Phòng khám chính */}
             <p className="text-gray-700 mb-1">
               <strong>Phòng khám chính:</strong> Phòng khám số{" "}
-              {specialty.masterRoom.roomNumber}
+              {specialty.masterRoom?.roomNumber}
             </p>
             {/* Danh sách phòng khám */}
             <p className="text-gray-700 mb-1">
@@ -96,7 +96,7 @@ function SpecialtyDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {specialty.room.map((room) => (
                 <div key={room._id} className="text-gray-700">
-                  Phòng khám {room.roomNumber}
+                  Phòng khám {room?.roomNumber}
                 </div>
               ))}
             </div>
@@ -110,13 +110,13 @@ function SpecialtyDetailPage() {
               Bác sĩ trưởng khoa
             </h3>
             <img
-              src={specialty.chiefPhysician.avatar || "default-avatar.png"}
+              src={specialty.chiefPhysician?.avatar || "default-avatar.png"}
               alt=""
               className=" rounded-lg mb-4"
             />
             <p className="text-gray-700 mb-2">Bác sĩ trưởng khoa</p>
             <p className="mb-4 font-bold">
-              {specialty.chiefPhysician.fullName}
+              {specialty.chiefPhysician?.fullName}
             </p>
           </div>
           <div className="flex flex-col gap-4 mt-6 justify-center items-center">

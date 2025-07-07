@@ -8,11 +8,11 @@ function SpecialtiesCard({id, name, description, logo }) {
       <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-[#9B7E3F] flex items-center justify-center">
         <img
           alt="Detailed illustration of a human heart anatomical icon in white on brown circular background"
-          className="w-10 h-10"
+          className="w-10 h-10  rounded-full object-cover"
           src={logo}
         />
       </div>
-      <h2 className="text-lg font-semibold text-slate-800 mb-2">Khoa {name}</h2>
+      <h2 className="text-lg font-semibold text-custom-blue mb-2">KHOA {name}</h2>
       <p
         className="text-slate-600 text-base text-sm leading-relaxed mb-3 px-2 font-inter  overflow-hidden text-ellipsis line-clamp-3"
         dangerouslySetInnerHTML={{ __html: cleanedDescription }}
