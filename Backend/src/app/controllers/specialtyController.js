@@ -7,7 +7,7 @@ class SpecialtyController {
         try {
             const { dataSpecialty } = req.body;
 
-            const { specialtyName, descspeciality, medicalFee, documentId, logo } = dataSpecialty;
+            const { specialtyName, descspecialty, medicalFee, documentId, logo } = dataSpecialty;
 
             if (!specialtyName) {
                 return res.status(400).json({ error: 'Tên chuyên khoa là bắt buộc.' });
@@ -18,7 +18,7 @@ class SpecialtyController {
                 return res.status(409).json({ error: 'Chuyên khoa đã tồn tại.' });
             }
 
-            const specialty = new Specialty({ specialtyName, descspeciality, medicalFee, documentId, logo });
+            const specialty = new Specialty({ specialtyName, descspecialty, medicalFee, documentId, logo });
             await specialty.save();
             res.status(201).json({ message: 'Chuyên khoa đã được tạo thành công.', specialty });
 
@@ -119,6 +119,32 @@ class SpecialtyController {
         } catch (error) {
             console.error("Lỗi khi khóa chuyên khoa:", error);
             res.status(500).json({ error: 'Lỗi khi khóa chuyên khoa.' });
+        }
+    }
+
+    async updateSpecialty(req, res) {
+        try {
+            const { id } = req.params;
+            const { dataSpecialty } = req.body;
+            const { specialtyName, descspecialty, medicalFee, documentId, logo } = dataSpecialty;
+
+            const specialty = await Specialty.findById(id);
+            if (!specialty) {
+                return res.status(404).json({ error: 'Chuyên khoa không tồn tại.' });
+            }
+
+            specialty.specialtyName = specialtyName || specialty.specialtyName;
+            specialty.descspecialty = descspecialty || specialty.descspecialty;
+            specialty.medicalFee = medicalFee || specialty.medicalFee;
+            specialty.documentId = documentId || specialty.documentId;
+            specialty.logo = logo || specialty.logo;
+
+            await specialty.save();
+            res.status(200).json({ message: 'Chuyên khoa đã được cập nhật thành công.', specialty });
+
+        } catch (error) {
+            console.error("Lỗi khi cập nhật chuyên khoa:", error);
+            res.status(500).json({ error: 'Lỗi khi cập nhật chuyên khoa.' });
         }
     }
 }

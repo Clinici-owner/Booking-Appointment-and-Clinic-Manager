@@ -38,7 +38,7 @@ export const ROUTE_PATH = {
   //Specialty manager
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
-  UPDATE_SPECIALTY: '/admin/specialties/update',
+  UPDATE_SPECIALTY: '/admin/specialties/update/:id',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
 
   //Schedule manager
@@ -52,6 +52,8 @@ export const ROUTE_PATH = {
   //Doctor
   DOCTOR_PROFILE_CREATE: '/doctor/createDoctorProfile',
   DOCTOR_CREATE_MEDICAL_PROCESS: '/doctor/createMedicalProcess',
+  DOCTOR_ALL_MEDICAL_PROCESS: '/doctor/medicalProcess',
+  DOCTOR_MEDICAL_PROCESS_DETAIL: '/doctor/medicalProcess/:processId',
 
   //News manager
   CREATE_NEWS: '/admin/news',
@@ -65,6 +67,7 @@ export const ROUTE_PATH = {
 
   // Health package for user
   HEALTH_PACKAGE_USER: '/health-packages',
+  PACKAGE_LIST: '/health-package/list',
   // 404
   NOT_FOUND: '*',
 };

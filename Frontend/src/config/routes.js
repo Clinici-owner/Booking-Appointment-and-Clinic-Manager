@@ -2,6 +2,7 @@ import React from "react";
 import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
+import DoctorLayout from "../layouts/doctor-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -36,6 +37,7 @@ const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
 const SpecialtiesListPage = React.lazy(() => import("../pages/SpecialtyListPage"));
 const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPage"));
 const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
+const UpdateSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage")); 
 
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
@@ -48,6 +50,8 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
+const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
@@ -57,6 +61,7 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
 // Cấu hình route
 const AppRoute = [
@@ -106,18 +111,36 @@ const AppRoute = [
   // Specialty Manager
   { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout },
-  // { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
+  { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
   // Doctor
-  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage },
-  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage },
+  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
+
+
+  //Booking from package
+
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
+
+ 
+
+
+  //Booking from package
+
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
+
+ 
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
 
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
+
+  
 ];
 
 export default AppRoute;

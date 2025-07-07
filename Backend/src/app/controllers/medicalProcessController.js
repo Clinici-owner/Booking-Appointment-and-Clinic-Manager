@@ -20,11 +20,11 @@ class medicalProcessController {
 
     async updateProcessStep(req, res) {
         const { stepId } = req.params;
-        const { isCompleted, notes } = req.body;
+        const { isCompleted } = req.body;
         try {
             const processStep = await ProcessStep.findByIdAndUpdate(
                 stepId,
-                { isCompleted, notes },
+                { isCompleted },
                 { new: true }
             );
             if (!processStep) {
@@ -91,6 +91,66 @@ class medicalProcessController {
         }
     }
 
+    async updateMedicalProcessStatus(req, res) {
+        const { processId } = req.params;
+        const { status } = req.body;
+        try {
+            const medicalProcess = await MedicalProcess.findByIdAndUpdate(
+                processId,
+                { status },
+                { new: true }
+            );
+            if (!medicalProcess) {
+                return res.status(404).json({ message: "Medical process not found" });
+            }
+            res.status(200).json(medicalProcess);
+        } catch (error) {
+            console.error("Error updating medical process status:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
 
+    updateMedicalProcessCurrentStep = async (req, res) => {
+        const { processId } = req.params;
+        const { currentStep } = req.body;
+        try {
+            const medicalProcess = await MedicalProcess.findByIdAndUpdate(
+                processId,
+                { currentStep },
+                { new: true }
+            );
+            if (!medicalProcess) {
+                return res.status(404).json({ message: "Medical process not found" });
+            }
+            res.status(200).json(medicalProcess);
+        } catch (error) {
+            console.error("Error updating medical process current step:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    getMedicalProcessById = async (req, res) => {
+        const { processId } = req.params;
+        try {
+            const medicalProcess = await MedicalProcess.findById(processId)
+                .populate('patientId')
+                .populate('doctorId')
+                .populate({
+                    path: 'processSteps',
+                    populate: {
+                        path: 'serviceId',
+                        model: 'ParaclinicalService'
+                    }
+                });
+            if (!medicalProcess) {
+                return res.status(404).json({ message: "Medical process not found" });
+            }
+            res.status(200).json(medicalProcess);
+        } catch (error) {
+            console.error("Error fetching medical process:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
 }
+
 module.exports = new medicalProcessController();

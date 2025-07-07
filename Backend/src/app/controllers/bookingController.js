@@ -88,9 +88,9 @@ class BookingController {
         .populate('service', 'name description')
         .populate('userId', 'name email');
 
-      res.status(200).json(packages);
+      res.status(200).json({ success: true, data: packages });
     } catch (error) {
-      res.status(500).json({ message: 'Lỗi khi lấy gói khám', error });
+      res.status(500).json({ success: false, message: 'Lỗi khi lấy gói khám', error });
     }
   }
 }
