@@ -1,56 +1,48 @@
 const Service = require("../models/ParaclinicalService");
-
 const Room = require("../models/Room");
-
 
 class serviceController {
   async createService(req, res, next) {
     try {
       const { name, price, room, specialty } = req.body;
 
-      // Kiểm tra các trường bắt buộc
       if (!name || !price || !room) {
         return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
       }
 
-      // Kiểm tra phòng có tồn tại không
       const existingRoom = await Room.findById(room); 
       if (!existingRoom) {
         return res.status(400).json({ message: "Phòng không tồn tại" });
       }
 
-      // Kiểm tra nếu phòng đã được sử dụng cho một dịch vụ khác
       const existingService = await Service.findOne({ room: room });
       if (existingService) {
         return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
       }
 
-      // Kiểm tra giá trị của price
       if (price <= 0) {
         return res.status(400).json({ message: "Giá phải lớn hơn 0!" });
       }
 
-      // Tạo dịch vụ mới
       const service = new Service({
         paraclinalName: name,
         paraPrice: price,
         room: room,
-        specialty: specialty || null,  // Nếu không có specialty thì để null
+        specialty: specialty || null,  
       });
 
-      await service.save();  // Lưu dịch vụ vào cơ sở dữ liệu
+      await service.save(); 
 
-      // Cập nhật trạng thái phòng thành 'used' sau khi tạo dịch vụ
       existingRoom.status = 'used';  
-      await existingRoom.save();  // Lưu lại trạng thái phòng
+      await existingRoom.save();  
 
       return res.status(201).json({
         message: "Tạo dịch vụ thành công và phòng đã được đánh dấu là 'used'",
         service,
       });
     } catch (error) {
-      console.error("Lỗi trong tạo dịch vụ:", error);  // Log chi tiết lỗi
-      next(error);  // Chuyển lỗi tới middleware xử lý lỗi
+      console.error("Lỗi trong tạo dịch vụ:", error);  
+      next(error);  
     }
   }
 
@@ -81,7 +73,7 @@ class serviceController {
         return res.status(400).json({ error: "Chưa có serviceId" });
       }
 
-      const service = await Service.findById(serviceId).populate('room'); // Lấy thông tin phòng
+      const service = await Service.findById(serviceId).populate('room');
 
       if (!service) {
         return res.status(404).json({ error: "Không tìm thấy dịch vụ" });

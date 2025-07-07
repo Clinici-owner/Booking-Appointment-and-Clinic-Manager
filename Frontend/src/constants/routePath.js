@@ -34,8 +34,8 @@ export const ROUTE_PATH = {
   UPDATE_PASSWORD: '/user-profile/update-password',
 
   //Service manager
-  SERVICES_LIST: '/createMedical',  
-
+  SERVICES_CREATE: '/createMedical',  
+  SERVICES_LIST: '/medical-services/list',
   //Specialty manager
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
