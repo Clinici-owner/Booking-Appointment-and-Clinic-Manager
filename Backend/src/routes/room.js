@@ -6,5 +6,7 @@ const router = express.Router();
 router.get("/", RoomController.getAllRooms);
 //get unused rooms
 router.get("/unused", RoomController.getUnusedRooms);
+//toggle room status
+router.put("/:roomId/toggle-status", RoomController.toggleRoomStatus);
 
 module.exports = router;

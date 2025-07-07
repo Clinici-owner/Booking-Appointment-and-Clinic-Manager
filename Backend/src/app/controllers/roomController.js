@@ -23,6 +23,28 @@ class RoomController {
     }
   }
 
+
+  async toggleRoomStatus(req, res) {
+    const { roomId } = req.params;
+
+    try {
+      const room = await Room.findById(roomId);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      room.status = room.status === "unprocessed" ? "used" : "unprocessed";
+      await room.save();
+
+      res.status(200).json({
+        message: "Room status updated successfully",
+        room,
+      });
+    } catch (error) {
+      console.error("Error toggling room status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 }
 
 module.exports = new RoomController();
