@@ -45,7 +45,7 @@ function SpecialtyAddPage() {
       }
     };
     fetchRooms();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const fetchUser = async () => {

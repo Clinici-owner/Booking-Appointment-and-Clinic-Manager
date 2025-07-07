@@ -141,6 +141,19 @@ class SpecialtyController {
       res.status(500).json({ error: "Lỗi khi cập nhật chuyên khoa." });
     }
   }
+
+  //lấy chuyên khoa đang mở
+  async getOpenSpecialties(req, res) {
+    try {
+      const specialties = await Specialty.find({ status: true }).populate(
+        "documentId room chiefPhysician"
+      );
+      res.status(200).json(specialties);
+    } catch (error) {
+      console.error("Lỗi khi lấy chuyên khoa đang mở:", error);
+      res.status(500).json({ error: "Lỗi khi lấy chuyên khoa đang mở." });
+    }
+  }
 }
 
 module.exports = new SpecialtyController();
