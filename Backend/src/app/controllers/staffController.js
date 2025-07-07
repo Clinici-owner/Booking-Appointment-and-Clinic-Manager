@@ -101,7 +101,8 @@ class StaffController {
             if (role === 'lễ tân') role = 'receptionist';
             else if (role === 'bác sĩ') role = 'doctor';
             else if (role === 'kỹ thuật viên') role = 'technician';
-            else if (!['receptionist', 'doctor', 'technician'].includes(role)) {
+            else if (role === 'điều dưỡng') role = 'nursing';
+            else if (!['receptionist', 'doctor', 'technician', 'nursing'].includes(role)) {
                 invalidRows.push({ row: index + 2, error: `Vai trò '${role}' không hợp lệ` });
                 return null;
             }

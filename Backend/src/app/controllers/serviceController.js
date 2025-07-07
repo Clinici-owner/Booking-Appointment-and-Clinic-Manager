@@ -35,9 +35,11 @@ class serviceController {
     }
   }
 
+  // Hoang Anh dang dung
   async listService(req, res) {
     try {
-      const servicelist = await Service.find();
+      const servicelist = await Service.find()
+        .populate("room")
 
       return res.status(200).json({
         message: "Lấy danh sách dịch vụ thành công",

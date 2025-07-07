@@ -28,7 +28,7 @@ const navItems = [
   { label: "Quản lý nhân viên", icon: <PeopleIcon />, path: "/admin/staffs" },
   { label: "Quản lý bệnh nhân", icon: <PersonalInjuryIcon />, path: "/admin/patients" },
   { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },
-  { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedules" },
+  { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedules/add" },
   { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointments" },
   { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/createMedical" },
   { label: "Hồ sơ bệnh án", icon: <AssignmentIcon />, path: "/admin/records" },
