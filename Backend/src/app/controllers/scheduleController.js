@@ -31,9 +31,6 @@ class ScheduleController {
             if (!Array.isArray(date)) {
                 return res.status(400).json({ error: 'Ngày không hợp lệ.' });
             }
-            // Kiểm tra user
-            const user = await User.findById(userId);
-            if (!user || user.role !== 'doctor') return res.status(404).json({ error: 'Không tìm thấy bác sĩ.' });
             // Kiểm tra phòng
             const roomObj = await Room.findById(room);
             if (!roomObj) return res.status(404).json({ error: 'Không tìm thấy phòng.' });
