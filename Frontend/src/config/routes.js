@@ -33,6 +33,7 @@ const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
 
 const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
+const listMedical = React.lazy(() => import("../pages/MedicListPage"))
 
 const SpecialtiesListPage = React.lazy(() => import("../pages/SpecialtyListPage"));
 const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPage"));
@@ -106,7 +107,8 @@ const AppRoute = [
   //Health package for user
   {path: ROUTE_PATH.HEALTH_PACKAGE_USER, page: HealthPackagePage, layout: MainLayout},
   //Service Manager
-  {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
+  {path: ROUTE_PATH.SERVICES_CREATE, page: CreateMedical, layout: AdminLayout},
+  {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout},
 
   // Specialty Manager
   { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
