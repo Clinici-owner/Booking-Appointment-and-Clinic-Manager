@@ -9,7 +9,6 @@ const MedicalProcessDetailPage = () => {
     const [process, setProcess] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeStep, setActiveStep] = useState(0);
 
     // Fetch medical process details
     useEffect(() => {
@@ -18,7 +17,6 @@ const MedicalProcessDetailPage = () => {
                 setIsLoading(true);
                 const data = await MedicalProcessService.getMedicalProcessById(id);
                 setProcess(data);
-                setActiveStep(data.currentStep - 1);
             } catch (err) {
                 console.error('Error fetching medical process:', err);
                 setError('Không thể tải chi tiết tiến trình khám');
@@ -50,64 +48,6 @@ const MedicalProcessDetailPage = () => {
             default:
                 return { color: 'bg-gray-100 text-gray-800', text: status };
         }
-    };
-
-    // Toggle step completion status
-    const markStepCompleted = async (stepId) => {
-        try {
-            // 1. Optimistic update - cập nhật UI ngay lập tức
-            setProcess(prev => ({
-                ...prev,
-                processSteps: prev.processSteps.map(step =>
-                    step._id === stepId ? { ...step, isCompleted: true } : step
-                )
-            }));
-
-            // 2. Gọi API
-            await MedicalProcessService.updateMedicalStep(stepId, { isCompleted: true });
-
-        } catch (err) {
-            console.error('Error completing step:', err);
-            setError('Đánh dấu hoàn thành thất bại');
-
-            // 3. Rollback nếu có lỗi
-            setProcess(prev => ({
-                ...prev,
-                processSteps: prev.processSteps.map(step =>
-                    step._id === stepId ? { ...step, isCompleted: false } : step
-                )
-            }));
-        }
-    };
-
-    const markStepIncomplete = async (stepId) => {
-        try {
-            // Optimistic update
-            setProcess(prev => ({
-                ...prev,
-                processSteps: prev.processSteps.map(step =>
-                    step._id === stepId ? { ...step, isCompleted: false } : step
-                )
-            }));
-
-            await MedicalProcessService.updateMedicalStep(stepId, { isCompleted: false });
-
-        } catch (err) {
-            console.error('Error marking step incomplete:', err);
-            setError('Đánh dấu chưa hoàn thành thất bại');
-
-            // Rollback
-            setProcess(prev => ({
-                ...prev,
-                processSteps: prev.processSteps.map(step =>
-                    step._id === stepId ? { ...step, isCompleted: true } : step
-                )
-            }));
-        }
-    };
-    // Navigate to patient or doctor profile
-    const navigateToProfile = (userId, role) => {
-        navigate(`/${role}s/${userId}`);
     };
 
     if (isLoading) {
@@ -188,12 +128,10 @@ const MedicalProcessDetailPage = () => {
                                 src={process.patientId.avatar}
                                 alt={process.patientId.fullName}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
-                                onClick={() => navigateToProfile(process.patientId._id, 'patient')}
                             />
                             <div className="ml-4">
                                 <h3
-                                    className="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
-                                    onClick={() => navigateToProfile(process.patientId._id, 'patient')}
+                                    className="text-lg font-semibold text-gray-800 "
                                 >
                                     {process.patientId.fullName}
                                 </h3>
@@ -213,12 +151,10 @@ const MedicalProcessDetailPage = () => {
                                 src={process.doctorId.avatar}
                                 alt={process.doctorId.fullName}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
-                                onClick={() => navigateToProfile(process.doctorId._id, 'doctor')}
                             />
                             <div className="ml-4">
                                 <h3
-                                    className="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
-                                    onClick={() => navigateToProfile(process.doctorId._id, 'doctor')}
+                                    className="text-lg font-semibold text-gray-800"
                                 >
                                     {process.doctorId.fullName}
                                 </h3>
@@ -238,7 +174,7 @@ const MedicalProcessDetailPage = () => {
                         {process.processSteps.map((step, index) => (
                             <div
                                 key={step._id}
-                                className={`border rounded-lg p-4 ${index === activeStep ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                                className={`border rounded-lg p-4 ${step.isCompleted ? 'bg-green-50' : 'bg-white'} shadow-sm hover:shadow-md transition-shadow duration-200`}
                             >
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -246,7 +182,7 @@ const MedicalProcessDetailPage = () => {
                                             Bước {index + 1}: {step.serviceId.paraclinalName}
                                         </h3>
                                         <p className="text-sm text-gray-600 mt-1">
-                                            Phòng: {step.serviceId.roomNumber}
+                                            Phòng: {step.serviceId.room.roomNumber} - {step.serviceId.room.roomName}
                                         </p>
                                         <p className="text-sm text-gray-600">
                                             Giá: {step.serviceId.paraPrice.toLocaleString()} VND
@@ -259,32 +195,15 @@ const MedicalProcessDetailPage = () => {
                                         )}
                                     </div>
                                     <div className="flex items-center">
-                                        <span className={`px-2 py-1 rounded text-xs font-medium ${step.isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                                            }`}>
+                                        <span className={`px-2 py-1 rounded text-xs font-medium 'bg-gray-100 text-gray-800'`}>
                                             {step.isCompleted ? 'Đã hoàn thành' : 'Chưa hoàn thành'}
                                         </span>
-
-                                        {step.isCompleted ? (
-                                            <button
-                                                onClick={() => markStepIncomplete(step._id)}
-                                                className="ml-3 px-3 py-1 rounded text-sm bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                                            >
-                                                Đánh dấu chưa hoàn thành
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => markStepCompleted(step._id)}
-                                                className="ml-3 px-3 py-1 rounded text-sm bg-green-100 text-green-800 hover:bg-green-200"
-                                            >
-                                                Đánh dấu hoàn thành
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                                 <div className="mt-2 text-xs text-gray-500">
                                     Cập nhật lần cuối: {formatDate(step.updatedAt)}
+                                    </div>
                                 </div>
-                            </div>
                         ))}
                     </div>
                 </div>
@@ -292,10 +211,6 @@ const MedicalProcessDetailPage = () => {
                 {/* Process Metadata */}
                 <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <p className="text-gray-500">Bước hiện tại:</p>
-                            <p className="text-gray-800">{process.currentStep}/{process.processSteps.length}</p>
-                        </div>
                         <div>
                             <p className="text-gray-500">Cập nhật lần cuối:</p>
                             <p className="text-gray-800">{formatDate(process.updatedAt)}</p>

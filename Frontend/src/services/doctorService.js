@@ -9,7 +9,7 @@ export const DoctorService = {
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
-        return null; // Trả về null nếu không tìm thấy
+        return null; 
       }
       console.error("Error fetching doctor profile:", error);
       throw error;
@@ -24,6 +24,35 @@ export const DoctorService = {
       throw new Error(
         error.response?.data?.message || "Failed to create doctor profile"
       );
+    }
+  },
+   getDoctorsBySpecialty: async (specialtyId) => {
+    try {
+      console.log('DoctorService.getDoctorsBySpecialty specialtyId:', specialtyId);
+      
+      if (!specialtyId || typeof specialtyId !== 'string' || specialtyId.trim() === '') {
+        throw new Error('Invalid specialtyId');
+      }
+
+      const encodedId = specialtyId.trim();
+      const url = `${API_URL}/specialties/${encodedId}`;
+      console.log('DoctorService.getDoctorsBySpecialty url:', url);
+
+      const response = await axios.get(url);
+      // Kiểm tra dữ liệu trả về
+      if (!response.data || response.data.length === 0) {
+        console.error('Không tìm thấy bác sĩ cho chuyên khoa:', specialtyId);
+        return []; // Trả về mảng rỗng nếu không có bác sĩ
+      }
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.error(`Không tìm thấy bác sĩ cho chuyên khoa: ${specialtyId}`);
+        return []; // Trả về mảng rỗng khi không tìm thấy bác sĩ
+      } else {
+        console.error('Error fetching doctors by specialty:', error);
+        throw error; // Ném lỗi khi có lỗi khác ngoài 404
+      }
     }
   },
 };

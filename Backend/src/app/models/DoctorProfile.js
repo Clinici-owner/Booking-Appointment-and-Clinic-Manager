@@ -6,7 +6,7 @@ const DoctorProfile = new Schema({
     certificateId: [{ type: Schema.Types.ObjectId, ref: 'DocumentUpload', required: true }],
     description: { type: String, default: '' },
     yearsOfExperience: { type: Number, default: 0 },
-    specialties: [{ type: Schema.Types.ObjectId, ref: 'Specialty', required: true }],
+    specialties: [{ type: Schema.Types.ObjectId, ref: 'Specialty', required: false }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('DoctorProfile', DoctorProfile);

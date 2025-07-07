@@ -32,6 +32,7 @@ export const ROUTE_PATH = {
   USER_PROFILE: '/user-profile',
   USER_PROFILE_UPDATE: '/user-profile/update',
   UPDATE_PASSWORD: '/user-profile/update-password',
+
   //Service manager
   SERVICES_LIST: '/createMedical',  
 
@@ -40,6 +41,9 @@ export const ROUTE_PATH = {
   ADD_SPECIALTY: '/admin/specialties/add',
   UPDATE_SPECIALTY: '/admin/specialties/update/:id',
   SPECIALTY_DETAIL: '/admin/specialties/:id',
+
+  //Specialty for user
+  SPECIALTY_DETAIL_PATIENT: '/specialties/:id',
 
   //Schedule manager
   SCHEDULE_LIST: '/admin/schedules',
@@ -70,4 +74,7 @@ export const ROUTE_PATH = {
   HEALTH_PACKAGE_LIST: '/health-packages-list',
   // 404
   NOT_FOUND: '*',
+
+  //Technician
+  TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
 };

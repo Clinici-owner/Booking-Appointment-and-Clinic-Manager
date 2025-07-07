@@ -101,7 +101,8 @@ class StaffController {
             if (role === 'lễ tân') role = 'receptionist';
             else if (role === 'bác sĩ') role = 'doctor';
             else if (role === 'kỹ thuật viên') role = 'technician';
-            else if (!['receptionist', 'doctor', 'technician'].includes(role)) {
+            else if (role === 'điều dưỡng') role = 'nursing';
+            else if (!['receptionist', 'doctor', 'technician', 'nursing'].includes(role)) {
                 invalidRows.push({ row: index + 2, error: `Vai trò '${role}' không hợp lệ` });
                 return null;
             }
@@ -316,6 +317,17 @@ class StaffController {
             if (!user || user.role === 'patient') return res.status(404).json({ error: 'Không tìm thấy nhân viên' });
             res.json(user);
         } catch (error) { 
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    // Lấy bác sĩ theo chuyên khoa
+    async getDoctorsBySpecialty(req, res) {
+        try {
+            const { specialtyId } = req.params;
+            const doctors = await User.find({ role: 'doctor', specialties: specialtyId });
+            res.json(doctors);
+        } catch (error) {
             res.status(500).json({ error: error.message });
         }
     }

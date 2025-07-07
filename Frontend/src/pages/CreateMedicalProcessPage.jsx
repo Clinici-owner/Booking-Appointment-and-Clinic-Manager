@@ -121,7 +121,8 @@ const CreateMedicalProcessPage = () => {
       const processStepPromises = processStepsForm.map(step => 
         MedicalProcessService.createProcessStep({
           serviceId: step.serviceId,
-          notes: step.notes
+          notes: step.notes,
+          patientId: selectedPatient._id
         })
       );
 
@@ -286,7 +287,7 @@ const CreateMedicalProcessPage = () => {
                                   </MenuItem>
                                   {services.map(service => (
                                     <MenuItem key={service._id} value={service._id}>
-                                      {service.paraclinalName} (Phòng: {service.roomNumber})
+                                      {service.paraclinalName} (Phòng: {service.room.roomNumber})
                                     </MenuItem>
                                   ))}
                                 </Select>
