@@ -11,6 +11,8 @@ import {
   updateSpecialty,
   getSpecialtyById,
 } from "../services/specialtyService";
+import { UserService } from "../services/userService";
+import { roomService } from "../services/roomService";
 
 import { uploadDocument } from "../services/documentUploadService";
 
@@ -20,9 +22,45 @@ function SpecialtyAddPage() {
   const { id } = useParams();
   const navigator = useNavigate();
 
+  const [user, setUser] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
+  const [prevRooms, setPrevRooms] = useState([]);
+
+  // Lấy danh sách phòng từ backend
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        if (id) {
+          // Nếu có id, lấy danh sách phòng đã sử dụng trong chuyên khoa
+          const roomData = await roomService.getAllRooms();
+          setRooms(roomData);
+        } else {
+          // Nếu không có id, lấy danh sách phòng chưa sử dụng
+          const roomData = await roomService.getUnusedRooms();
+          setRooms(roomData);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách phòng:", error);
+      }
+    };
+    fetchRooms();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await UserService.getAllDoctors();
+        setUser(userData);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const [checkUpdate, setCheckUpdate] = useState(false);
 
-  console.log(checkUpdate);
   const [images, setImages] = useState([]);
   const [logo, setLogo] = useState(null);
   const [dataSpecialty, setDataSpecialty] = useState({
@@ -30,6 +68,8 @@ function SpecialtyAddPage() {
     descspecialty: "",
     medicalFee: "",
     documentId: [],
+    room: [],
+    chiefPhysician: "",
     logo: "",
   });
 
@@ -37,13 +77,18 @@ function SpecialtyAddPage() {
     const fetchSpecialty = async () => {
       try {
         const data = await getSpecialtyById(id);
+
         setDataSpecialty({
           specialtyName: data.specialtyName || "",
           descspecialty: data.descspecialty || "",
           medicalFee: data.medicalFee || "",
+          chiefPhysician: data.chiefPhysician?._id || "",
+          room: data.room.map((r) => r._id) || [],
           documentId: data.documentId || [],
           logo: data.logo || "",
         });
+        setPrevRooms(data.room || []);
+        // Lưu lại các phòng đã chọn trước đó để so sánh sau này
         setLogo(data.logo || null);
         setCheckUpdate(true);
       } catch (error) {
@@ -62,7 +107,6 @@ function SpecialtyAddPage() {
         src: url.file_path,
         isLocal: false,
       }));
-      console.log("Normalized images:", normalized);
 
       setImages(normalized);
     }
@@ -78,11 +122,12 @@ function SpecialtyAddPage() {
     let documentIds = [];
 
     // Chuẩn bị dữ liệu để gửi
-
     if (
       !dataSpecialty.specialtyName.trim() ||
       !dataSpecialty.descspecialty.trim() ||
       !dataSpecialty.medicalFee ||
+      // !dataSpecialty.chiefPhysician ||
+      dataSpecialty.room.length === 0 ||
       images.length === 0 ||
       !logo
     ) {
@@ -107,10 +152,19 @@ function SpecialtyAddPage() {
       documentIds = insertedDocuments.map((doc) => doc.document._id);
     }
 
+    // Thay đổi status của các phòng đã chọn
+    await Promise.all(
+      dataSpecialty.room.map(async (roomId) => {
+        return roomService.toggleRoomStatus(roomId);
+      })
+    );
+
     const payload = {
       specialtyName: dataSpecialty.specialtyName,
       descspecialty: dataSpecialty.descspecialty,
       medicalFee: dataSpecialty.medicalFee,
+      chiefPhysician: dataSpecialty.chiefPhysician,
+      room: dataSpecialty.room,
       documentId: documentIds,
       logo: logoUrl,
     };
@@ -121,6 +175,8 @@ function SpecialtyAddPage() {
         descspecialty: "",
         medicalFee: "",
         documentId: [],
+        room: [],
+        chiefPhysician: "",
         logo: "",
       });
       setImages([]);
@@ -155,6 +211,8 @@ function SpecialtyAddPage() {
     const file = e.target.files[0];
     setLogo(file);
   };
+
+  // Hàm xử lý cập nhật chuyên khoa
   const handleUpdate = async (e) => {
     e.preventDefault();
     let logoUrl = "";
@@ -165,6 +223,8 @@ function SpecialtyAddPage() {
       !dataSpecialty.specialtyName.trim() ||
       !dataSpecialty.descspecialty.trim() ||
       !dataSpecialty.medicalFee ||
+      // !dataSpecialty.chiefPhysician ||
+      dataSpecialty.room.length === 0 ||
       images.length === 0 ||
       !logo
     ) {
@@ -196,10 +256,37 @@ function SpecialtyAddPage() {
       documentIds = insertedDocuments.map((doc) => doc.document._id);
     }
 
+    // Nếu không có ảnh mới thì giữ nguyên ảnh cũ
+    if (documentIds.length === 0 && dataSpecialty.documentId.length > 0) {
+      documentIds = dataSpecialty.documentId.map((doc) => doc._id);
+    }
+
+    // lấy danh sách các id không trùng lặp giữa prevRooms và dataSpecialty.room
+    const prevRoomIds = prevRooms.map((room) => room._id.toString());
+    const currentRoomIds = dataSpecialty.room.map((id) => id.toString());
+
+    const removedRoomIds = prevRoomIds.filter(
+      (id) => !currentRoomIds.includes(id)
+    );
+    const addedRoomIds = currentRoomIds.filter(
+      (id) => !prevRoomIds.includes(id)
+    );
+
+    //Gôp cả 2 mảng để lấy ra các id phòng đã thay đổi
+    const symmetricDiff = [...removedRoomIds, ...addedRoomIds];  
+
+    // Thay đổi status của các phòng mới được chọn
+    await Promise.all(
+      symmetricDiff.map(async (roomId) => {
+        return roomService.toggleRoomStatus(roomId);
+      })
+    );
     const payload = {
       specialtyName: dataSpecialty.specialtyName,
       descspecialty: dataSpecialty.descspecialty,
       medicalFee: dataSpecialty.medicalFee,
+      chiefPhysician: dataSpecialty.chiefPhysician,
+      room: dataSpecialty.room,
       documentId: documentIds, // ← chỉ ảnh mới
       logo: logoUrl,
     };
@@ -237,7 +324,7 @@ function SpecialtyAddPage() {
       >
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Tên chuyên khoa
+            <strong>Tên chuyên khoa</strong>
           </label>
           <input
             type="text"
@@ -254,7 +341,7 @@ function SpecialtyAddPage() {
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Mô tả chuyên khoa
+            <strong>Mô tả chuyên khoa</strong>
           </label>
           <CKEditor
             editor={ClassicEditor}
@@ -278,15 +365,40 @@ function SpecialtyAddPage() {
             }}
           />
         </div>
+        {/* Chọn bác sĩ trưởng khoa */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Phí khám bệnh
+            <strong>Bác sĩ trưởng khoa</strong>
+          </label>
+          <select
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            value={dataSpecialty.chiefPhysician}
+            onChange={(e) =>
+              setDataSpecialty((prev) => ({
+                ...prev,
+                chiefPhysician: e.target.value,
+              }))
+            }
+          >
+            <option value="">Chọn bác sĩ trưởng khoa</option>
+            {user &&
+              user.map((doctor) => (
+                <option key={doctor._id} value={doctor._id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            <strong>Phí khám bệnh</strong>
           </label>
           <input
             type="number"
             className="border border-gray-300 rounded-lg p-2 w-full"
             placeholder="Nhập phí khám bệnh"
             value={dataSpecialty.medicalFee}
+            min={1000}
             onChange={(e) =>
               setDataSpecialty((prev) => ({
                 ...prev,
@@ -295,9 +407,47 @@ function SpecialtyAddPage() {
             }
           />
         </div>
+
+        {/* Chọn phòng khám theo check box */}
+
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Hình ảnh về chuyên khoa
+            <strong>Chọn phòng khám</strong>
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {rooms.map((room) => (
+              <div key={room._id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={
+                    Array.isArray(dataSpecialty.room) &&
+                    dataSpecialty.room.includes(room._id)
+                  }
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    setDataSpecialty((prev) => {
+                      const updatedRooms = isChecked
+                        ? [...(prev.room || []), room._id]
+                        : (prev.room || []).filter((r) => r !== room._id);
+                      return {
+                        ...prev,
+                        room: updatedRooms,
+                      };
+                    });
+                  }}
+                />
+
+                <label className="text-sm">{room.roomNumber}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Chọn hình ảnh chuyên khoa */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            <strong>Hình ảnh về chuyên khoa</strong>
           </label>
           <input
             type="file"
@@ -323,7 +473,7 @@ function SpecialtyAddPage() {
         </div>
         <div className="mb-4 ">
           <label className="block text-sm font-medium mb-2">
-            Logo chuyên khoa
+            <strong>Logo chuyên khoa</strong>
           </label>
           <input
             type="file"

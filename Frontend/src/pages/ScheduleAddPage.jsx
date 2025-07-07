@@ -2,144 +2,303 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import AdminNavSidebar from '../components/AdminNavSidebar';
+import { DoctorService } from '../services/doctorService';
 import { listService } from '../services/medicalService';
-import { createSchedule } from '../services/scheduleService';
+import { createSchedule, getAllSchedules } from '../services/scheduleService';
 
 function ScheduleAddPage() {
+    // Giá trị mặc định: ca làm việc đầu tiên và tất cả chuyên khoa (nếu có)
+    const defaultShifts = ['MORNING', 'AFTERNOON', 'EVENING'];
     const [formData, setFormData] = useState({
         userId: '',
-        startTime: '',
-        endTime: '',
-        roomNumber: '',
-        paraclinicalId: ''
+        room: '',
+        shift: defaultShifts[0],
+        date: '',
+        department: '', // sẽ set sau khi fetch specialties
     });
 
-    const [errors, setErrors] = useState({});
-    const [users, setUsers] = useState([]);
-    const [paraclinicalServices, setParaclinicalServices] = useState([]);
+    // Chuyên khoa mặc định: sẽ set sau khi fetch
+    const [specialties, setSpecialties] = useState([]);
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
-    const [loadingUsers, setLoadingUsers] = useState(false);
     const navigate = useNavigate();
+    // Hiển thị tuần cố định từ 07/07 đến 13/07/2025
+    const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    // const fixedMonday = new Date(2025, 6, 7); // Không cần dùng biến này
+    const days = [
+        { value: '', label: 'Chọn ngày' },
+        ...Array.from({ length: 7 }).map((_, i) => {
+            // Tạo ngày chính xác không bị lệch múi giờ
+            const d = new Date(Date.UTC(2025, 6, 7 + i)); // Luôn dùng UTC để không bị lùi ngày
+            const weekday = weekdays[d.getUTCDay()];
+            const dayStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+            return {
+                value: d.toISOString().slice(0, 10),
+                label: `${weekday} (${dayStr})`,
+                date: d.toISOString().slice(0, 10)
+            };
+        })
+    ];
+
+
+
+    // Set giờ mặc định khi chọn ca làm việc
+    const handleShiftChange = (e) => {
+        const shift = e.target.value;
+        setFormData((prev) => ({ ...prev, shift }));
+        // Nếu modal đang mở thì set giờ mặc định luôn
+        if (modalOpen) {
+            if (shift === 'MORNING') {
+                setModalForm((prev) => ({ ...prev, startTime: '07:00', endTime: '12:00' }));
+            } else if (shift === 'AFTERNOON') {
+                setModalForm((prev) => ({ ...prev, startTime: '13:00', endTime: '17:00' }));
+            } else if (shift === 'EVENING') {
+                setModalForm((prev) => ({ ...prev, startTime: '18:00', endTime: '21:00' }));
+            } else {
+                setModalForm((prev) => ({ ...prev, startTime: '', endTime: '' }));
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoadingUsers(true);
-            try {
-                const usersData = await fetch('http://localhost:3000/api/staff').then(res => {
-                    if (!res.ok) throw new Error('Không thể tải danh sách nhân viên.');
-                    return res.json();
-                });
-                if (!Array.isArray(usersData)) throw new Error('Dữ liệu nhân viên không hợp lệ.');
-                setUsers(usersData);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                setFetchError(`Không thể tải danh sách nhân viên. Lỗi: ${error.message}`);
-                toast.error('Không thể tải danh sách nhân viên.', { style: { background: '#EF4444', color: '#fff' } });
-            } finally {
-                setLoadingUsers(false);
-            }
-
             setIsLoadingServices(true);
             try {
                 const data = await listService();
                 const services = data.services || data;
                 if (!Array.isArray(services)) throw new Error('Dữ liệu dịch vụ cận lâm sàng không hợp lệ.');
-                setParaclinicalServices(services);
             } catch (error) {
-                console.error('Error fetching paraclinical services:', error);
                 setFetchError(`Không thể tải danh sách dịch vụ cận lâm sàng. Lỗi: ${error.message}`);
                 toast.error('Không thể tải danh sách dịch vụ cận lâm sàng.', { style: { background: '#EF4444', color: '#fff' } });
             } finally {
                 setIsLoadingServices(false);
             }
+
+            try {
+                const specialtiesData = await fetch('http://localhost:3000/api/specialty').then(res => {
+                    if (!res.ok) throw new Error('Không thể tải danh sách chuyên khoa.');
+                    return res.json();
+                });
+                const specialtiesOptions = (Array.isArray(specialtiesData) ? specialtiesData : []).map(s => ({
+                    value: s._id || s.id || s.value,
+                    label: s.name || s.label || s.specialtyName || 'Chuyên khoa',
+                }));
+                setSpecialties(specialtiesOptions);
+                // Mặc định chọn chuyên khoa "Khoa nội" nếu có, nếu không thì chọn chuyên khoa đầu tiên
+                const noiKhoa = specialtiesOptions.find(s => s.label.toLowerCase().includes('nội'));
+                if (noiKhoa) {
+                    setFormData(prev => ({ ...prev, department: [noiKhoa.value] }));
+                } else if (specialtiesOptions.length > 0) {
+                    setFormData(prev => ({ ...prev, department: [specialtiesOptions[0].value] }));
+                }
+            } catch {
+                toast.error('Không thể tải danh sách chuyên khoa.', { style: { background: '#EF4444', color: '#fff' } });
+            }
+
+            // Fetch all schedules from server
+            try {
+                const allSchedules = await getAllSchedules();
+                setServerSchedules(Array.isArray(allSchedules) ? allSchedules : []);
+            } catch {
+                toast.error('Không thể tải danh sách lịch trình từ server.', { style: { background: '#EF4444', color: '#fff' } });
+            }
         };
         fetchData();
     }, []);
 
-    const validateField = (name, value) => {
-        switch (name) {
-            case 'userId':
-                return value ? '' : 'Vui lòng chọn nhân viên.';
-            case 'startTime':
-                return value ? '' : 'Vui lòng chọn thời gian bắt đầu.';
-            case 'endTime':
-                if (!value) return 'Vui lòng chọn thời gian kết thúc.';
-                if (formData.startTime && new Date(value) <= new Date(formData.startTime)) {
-                    return 'Thời gian kết thúc phải sau thời gian bắt đầu.';
-                }
-                return '';
-            case 'roomNumber':
-                if (!value) return 'Vui lòng chọn dịch vụ để tự động điền số phòng.';
-                return '';
-            case 'paraclinicalId':
-                return value ? '' : 'Vui lòng chọn dịch vụ cận lâm sàng.';
-            default:
-                return '';
-        }
-    };
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalForm, setModalForm] = useState({
+        userId: [], // allow multiple
+        room: '',
+        shift: '',
+        date: [],  // Initialize date as an empty array
+    });
+    const [modalErrors, setModalErrors] = useState({});
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        const updatedFormData = { ...formData, [name]: value };
 
-        if (name === 'paraclinicalId' && value) {
-            const selectedService = paraclinicalServices.find(service => service._id === value);
-            updatedFormData.roomNumber = selectedService?.roomNumber || '';
-        }
+    const [serverSchedules, setServerSchedules] = useState([]);
 
-        setFormData(updatedFormData);
-
-        const errorMessage = validateField(name, updatedFormData[name]);
-        setErrors(prev => ({ ...prev, [name]: errorMessage }));
-    };
-
-    const isValidForm = () => {
-        const newErrors = {};
-        Object.keys(formData).forEach(key => {
-            const error = validateField(key, formData[key]);
-            if (error) newErrors[key] = error;
-        });
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!isValidForm()) {
-        toast.error('Vui lòng kiểm tra lại các trường thông tin.', {
-            style: { background: '#EF4444', color: '#fff' },
-        });
-        return;
-    }
-
-    try {
-        console.log('Form data being sent:', formData);
-        const response = await createSchedule(formData);
-
-        if (response && response.message) {
-            toast.success('Tạo lịch trình thành công!', {
-                style: { background: '#10B981', color: '#fff' },
+    // Sửa: Cho phép click vào ô đã có lịch để chỉnh sửa
+    const handleCellClick = (room, day, schedule) => {
+        if (schedule) {
+            setModalForm({
+                userId: schedule.userId?._id || schedule.userId,
+                room: schedule.room?._id || schedule.room,
+                shift: schedule.shift,
+                date: schedule.date,
+                _id: schedule._id // Để biết là edit mode
             });
-            setTimeout(() => navigate('/admin/schedules'), 3000);
+            setModalErrors({});
+            setModalOpen(true);
         } else {
-            toast.error('Tạo lịch trình thất bại: Phản hồi không hợp lệ.', {
-                style: { background: '#EF4444', color: '#fff' },
+            // day ở đây là ISO string (yyyy-mm-dd) truyền từ cell
+            setModalForm({
+                userId: '',
+                room,
+                shift: formData.shift,
+                date: day, // Gán đúng ngày của ô
             });
+            setModalErrors({});
+            setModalOpen(true);
         }
-    } catch (error) {
-        console.error('Lỗi tạo lịch trình:', error);
-        const errorMessage =
-            error?.response?.data?.error || error.message || 'Tạo lịch trình thất bại!';
+    };
+    const handleModalClose = () => setModalOpen(false);
+    const handleModalFormChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "date") {
+            // Chỉ cho phép chọn ngày trong tuần 07/07 - 13/07/2025 (UTC)
+            const allowedDates = Array.from({ length: 7 }).map((_, i) => {
+                const d = new Date(Date.UTC(2025, 6, 7 + i));
+                return d.toISOString().slice(0, 10);
+            });
+            const newDates = value
+                ? value.split(",").map(d => d.trim()).filter(d => allowedDates.includes(d))
+                : [];
+            setModalForm((prev) => ({ ...prev, [name]: newDates }));
+        } else {
+            setModalForm((prev) => ({ ...prev, [name]: value }));
+        }
+    };
+    const validateModalForm = () => {
+        const errors = {};
+        if (!modalForm.userId || (Array.isArray(modalForm.userId) && modalForm.userId.length === 0)) errors.userId = 'Vui lòng chọn nhân viên';
+        if (!modalForm.room) errors.room = 'Vui lòng chọn phòng';
+        if (!modalForm.shift) errors.shift = 'Vui lòng chọn ca làm việc';
+        if (!modalForm.date) errors.date = 'Vui lòng chọn ngày';
+        return errors;
+    };
 
-        toast.error(`Tạo thất bại: ${errorMessage}`, {
-            style: { background: '#EF4444', color: '#fff' },
-        });
-    }
-};
+    // Sửa: Xử lý submit cho cả thêm mới và chỉnh sửa (tạo luôn trên backend khi bấm Lưu)
 
-    if (fetchError) {
+    const handleModalSubmit = async (e) => {
+        e.preventDefault();
+        const errors = validateModalForm();
+        if (!formData.shift) {
+            errors.shift = 'Vui lòng chọn ca làm việc';
+        }
+        if (Object.keys(errors).length > 0) {
+            setModalErrors(errors);
+            return;
+        }
+
+        if (modalForm._id) {
+            // Edit mode: update schedule (chỉ cho phép sửa 1 lịch trình 1 bác sĩ)
+            try {
+                const updateData = {
+                    userId: Array.isArray(modalForm.userId) ? modalForm.userId[0] : modalForm.userId,
+                    room: modalForm.room,
+                    shift: modalForm.shift,
+                    date: modalForm.date
+                };
+                await import('../services/scheduleService').then(m => m.updateSchedule(modalForm._id, updateData));
+                // Refresh server schedules
+                const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+                setServerSchedules(updated);
+                toast.success('Cập nhật lịch trình thành công!', {
+                    style: { background: '#10B981', color: '#fff' },
+                });
+                setModalOpen(false);
+            } catch (error) {
+                toast.error(error.response?.data?.error || 'Cập nhật lịch trình thất bại!', {
+                    style: { background: '#EF4444', color: '#fff' },
+                });
+            }
+        } else {
+            // Tạo mới: gọi API tạo lịch trình cho nhiều bác sĩ
+            try {
+                const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
+                const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
+                // Gọi API tạo nhiều lịch trình cho từng bác sĩ
+                const createPromises = userIds.map(uid =>
+                    createSchedule({
+                        userId: uid,
+                        room: rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room)?._id || modalForm.room,
+                        shift: formData.shift,
+                        date: selectedDates,
+                    })
+                );
+                await Promise.all(createPromises);
+                // Refresh server schedules
+                const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+                setServerSchedules(updated);
+                toast.success('Tạo lịch trình thành công!', {
+                    style: { background: '#10B981', color: '#fff' },
+                });
+                setModalOpen(false);
+            } catch (error) {
+                toast.error(error.response?.data?.error || 'Tạo lịch trình thất bại!', {
+                    style: { background: '#EF4444', color: '#fff' },
+                });
+            }
+        }
+    };
+
+
+
+
+
+
+    // Đã bỏ nút tạo mới, không còn lưu tạm localSchedules
+
+
+    const [rooms, setRooms] = useState([]);
+    const [loadingRooms, setLoadingRooms] = useState(false);
+    const [roomError, setRoomError] = useState(null);
+    const [doctors, setDoctors] = useState([]);
+    const [loadingDoctors, setLoadingDoctors] = useState(false);
+    const [doctorError, setDoctorError] = useState(null);
+    const [showDoctorDropdown, setShowDoctorDropdown] = useState(false);
+
+    // Fetch rooms and doctors when department (specialty) changes
+    useEffect(() => {
+    const fetchRoomsAndDoctors = async () => {
+        if (!formData.department || formData.department.length === 0) {
+            setRooms([]);
+            setDoctors([]);
+            return;
+        }
+        setLoadingRooms(true);
+        setLoadingDoctors(true);
+        const departmentArr = formData.department;
+        try {
+            let allRooms = [];
+            for (const dep of departmentArr) {
+                const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${dep}`);
+                if (specialtyRes.ok) {
+                    const specialty = await specialtyRes.json();
+                    if (Array.isArray(specialty.room)) {
+                        allRooms = allRooms.concat(specialty.room);
+                    }
+                }
+            }
+            setRooms(allRooms);
+        } catch {
+            setRoomError('Không thể tải danh sách phòng.');
+            setRooms([]);
+        } finally {
+            setLoadingRooms(false);
+        }
+        try {
+            let allDoctors = [];
+            for (const dep of departmentArr) {
+                const doctorProfiles = await DoctorService.getDoctorsBySpecialty(dep);
+                if (Array.isArray(doctorProfiles)) {
+                    allDoctors = allDoctors.concat(doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId));
+                }
+            }
+            setDoctors(allDoctors);
+        } catch {
+            setDoctorError('Không thể tải danh sách bác sĩ.');
+            setDoctors([]);
+        } finally {
+            setLoadingDoctors(false);
+        }
+    };
+    fetchRoomsAndDoctors();
+}, [formData.department]);
+
+    if (fetchError || roomError || doctorError) {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
@@ -157,7 +316,7 @@ function ScheduleAddPage() {
         );
     }
 
-    if (loadingUsers || isLoadingServices) {
+    if (isLoadingServices || loadingRooms || loadingDoctors) {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
@@ -170,116 +329,266 @@ function ScheduleAddPage() {
     }
 
     return (
-        <div className="flex text-[1.75rem] leading-[1.75]">
+        <div className="flex min-h-screen">
             <Toaster />
-            <div className="flex-1 flex flex-col">
-                <div className="flex">
-                    <div className="w-full max-w-[1600px] mx-auto p-10">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                            <h2 className="text-[#212123] font-bold text-4xl leading-6">
-                                Tạo lịch trình mới
-                            </h2>
-                        </div>
+            <main className="flex-1 p-8 flex flex-col gap-6">
+                <div className="flex justify-between items-center max-w-6xl w-full">
+                    <h1 className="text-4xl font-bold">Tạo lịch trình làm việc mới</h1>
+                    <div className="w-64">
+                        <label htmlFor="department" className="block mb-1 font-semibold text-gray-700">Chọn chuyên khoa</label>
+                        <select
+                            id="department"
+                            name="department"
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={Array.isArray(formData.department) ? formData.department[0] : formData.department}
+                            onChange={e => setFormData({ ...formData, department: [e.target.value] })}
+                        >
+                            {specialties.map((s) => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="w-64">
+                        <label htmlFor="shift" className="block mb-1 font-semibold text-gray-700">Chọn ca làm việc</label>
+                        <select
+                            id="shift"
+                            name="shift"
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={formData.shift}
+                            onChange={handleShiftChange}
+                        >
+                            <option value="MORNING">Ca sáng (7h - 12h)</option>
+                            <option value="AFTERNOON">Ca chiều (13h - 17h)</option>
+                            <option value="EVENING">Ca tối (18h - 21h)</option>
+                        </select>
+                    </div>
+                </div>
 
-                        <div className="bg-white rounded-lg border border-[#D9D9D9] p-6">
-                            <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
-                                <div>
-                                    <label htmlFor="userId" className="block text-sm text-gray-700 mb-1">Nhân viên</label>
-                                    <select
-                                        id="userId"
-                                        name="userId"
-                                        onChange={handleChange}
-                                        value={formData.userId}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    >
-                                        <option value="">Chọn nhân viên</option>
-                                        {users.map(user => (
-                                            <option key={user._id} value={user._id}>{user.fullName}</option>
+                <section className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm max-w-8xl w-full overflow-x-auto">
+    <table className="w-full border border-gray-300 rounded-lg table-fixed text-center">
+        <thead>
+            <tr className="bg-gray-100 border-b border-gray-300">
+                <th className="border-r border-gray-300 py-3 font-semibold text-sm bg-white max-w-[140px]">Phòng</th>
+                {days.slice(1).map((d) => (
+                    <th key={d.value} className="border-r border-gray-300 py-3 font-semibold text-sm">
+                        {d.label}<br /><span className="text-xs font-normal">{d.label.match(/\((.*?)\)/)?.[1]}</span>
+                    </th>
+                ))}
+            </tr>
+        </thead>
+        <tbody>
+            {rooms.map((room) => (
+                <tr key={room._id || room.roomNumber} className="border-t border-gray-300">
+                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
+                        {room.roomName || room.roomNumber}
+                    </td>
+                    {days.slice(1).map((d) => {
+                        // Tính ngày tương ứng với ô
+                        // Lấy đúng ngày ISO cho từng cột
+                        const cellDate = d.date;
+
+                        const normalizeDate = (iso) => new Date(iso).toISOString().slice(0, 10);
+                        const roomId = room._id || room.roomNumber;
+
+                        const schedules = [
+                            ...serverSchedules.filter(s =>
+                                (s.room?._id === roomId || s.room?.roomNumber === room.roomNumber || s.room === roomId)
+                                && normalizeDate(s.date) === cellDate
+                                && s.shift === formData.shift
+                            ).map(s => ({
+                                ...s,
+                                fullName: s.userId?.fullName || '',
+                                specialty: s.userId?.specialtyName || '',
+                            }))
+                        ];
+
+                        // Nếu có nhiều lịch trình, chỉ cho phép sửa lịch trình đầu tiên (ưu tiên server)
+                        const editSchedule = schedules.length > 0 ? schedules[0] : null;
+                        const isScheduled = schedules.length > 0;
+
+                        return (
+                            <td
+                                key={d.value}
+                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-red-500 cursor-pointer hover:bg-red-400' : 'cursor-pointer hover:bg-blue-50'}`}
+                                onClick={() => handleCellClick(room.roomNumber, d.date, editSchedule)}
+                            >
+                                {isScheduled ? (
+                                    <div className="text-xs text-white font-semibold text-center">
+                                        {schedules.map((s, idx) => (
+                                            <div key={idx}>
+                                                {s.fullName && <div>{s.fullName}</div>}
+                                                {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
+                                                <div className="italic text-white text-xs">Đã có lịch</div>
+                                                {idx !== schedules.length - 1 && <hr className="my-1" />}
+                                            </div>
                                         ))}
-                                    </select>
-                                    {errors.userId && <p className="text-sm text-red-600">{errors.userId}</p>}
-                                </div>
+                                    </div>
+                                ) : null}
+                            </td>
+                        );
+                    })}
+                </tr>
+            ))}
+        </tbody>
+    </table>
+</section>
+
+
+                <div className="flex justify-start space-x-4 pt-6">
+                    <button
+                        type="button"
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-8 py-2 rounded-md transition"
+                        onClick={() => { setModalOpen(false); navigate('/admin/schedules'); }}
+                    >
+                        Quay về danh sách
+                    </button>
+                </div>
+
+
+                {modalOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(4px)' }}>
+                        <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+                            <button
+                                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                                aria-label="Close modal"
+                                type="button"
+                                onClick={handleModalClose}
+                            >
+                                <span className="text-xl">×</span>
+                            </button>
+                            <h3 className="text-xl font-semibold mb-4">{modalForm._id ? 'Chỉnh sửa lịch trình' : 'Tạo lịch trình'}</h3>
+                            <form className="space-y-4" onSubmit={handleModalSubmit}>
                                 <div>
-                                    <label htmlFor="paraclinicalId" className="block text-sm text-gray-700 mb-1">Dịch vụ cận lâm sàng</label>
-                                    <select
-                                        id="paraclinicalId"
-                                        name="paraclinicalId"
-                                        onChange={handleChange}
-                                        value={formData.paraclinicalId}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                        disabled={isLoadingServices}
-                                    >
-                                        <option value="">{isLoadingServices ? 'Đang tải...' : 'Chọn dịch vụ'}</option>
-                                        {Array.isArray(paraclinicalServices) && paraclinicalServices.map(service => (
-                                            <option key={service._id} value={service._id}>{service.paraclinalName}</option>
-                                        ))}
-                                    </select>
-                                    {errors.paraclinicalId && <p className="text-sm text-red-600">{errors.paraclinicalId}</p>}
-                                </div>
-                                <div>
-                                    <label htmlFor="startTime" className="block text-sm text-gray-700 mb-1">Thời gian bắt đầu</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phòng</label>
                                     <input
-                                        id="startTime"
-                                        name="startTime"
-                                        type="datetime-local"
-                                        onChange={handleChange}
-                                        value={formData.startTime}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    />
-                                    {errors.startTime && <p className="text-sm text-red-600">{errors.startTime}</p>}
-                                </div>
-                                <div>
-                                    <label htmlFor="endTime" className="block text-sm text-gray-700 mb-1">Thời gian kết thúc</label>
-                                    <input
-                                        id="endTime"
-                                        name="endTime"
-                                        type="datetime-local"
-                                        onChange={handleChange}
-                                        value={formData.endTime}
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
-                                    />
-                                    {errors.endTime && <p className="text-sm text-red-600">{errors.endTime}</p>}
-                                </div>
-                                <div>
-                                    <label htmlFor="roomNumber" className="block text-sm text-gray-700 mb-1">Số phòng</label>
-                                    <input
-                                        id="roomNumber"
-                                        name="roomNumber"
                                         type="text"
-                                        placeholder="Tự động điền khi chọn dịch vụ"
-                                        value={formData.roomNumber}
-                                        disabled
-                                        className="w-full rounded-md border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                        required
+                                        name="room"
+                                        value={modalForm.room}
+                                        readOnly
+                                        className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
                                     />
-                                    {errors.roomNumber && <p className="text-sm text-red-600">{errors.roomNumber}</p>}
                                 </div>
-                                <div className="col-span-full flex justify-between items-center mt-8">
-                                    <div className="flex space-x-4">
-                                        <button
-                                            type="submit"
-                                            className="bg-custom-blue hover:bg-custom-bluehover2 text-white font-semibold text-sm rounded-lg w-28 h-12"
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày</label>
+                                    <input
+                                        type="text"
+                                        name="date"
+                                        value={Array.isArray(modalForm.date) ? modalForm.date.join(", ") : modalForm.date}
+                                        readOnly={!(!modalForm._id)}
+                                        onChange={modalForm._id ? handleModalFormChange : undefined}
+                                        className={`w-full rounded-md border border-gray-300 ${modalForm._id ? 'bg-white' : 'bg-gray-100'} px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${modalForm._id ? '' : 'cursor-not-allowed'}`}
+                                    />
+                                    {modalErrors.date && <p className="text-xs text-red-600 mt-1">{modalErrors.date}</p>}
+                                </div>
+                                {modalForm._id && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Ca làm việc</label>
+                                        <select
+                                            name="shift"
+                                            value={modalForm.shift}
+                                            onChange={handleModalFormChange}
+                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            Tạo mới
-                                        </button>
+                                            <option value="MORNING">Ca sáng (7h - 12h)</option>
+                                            <option value="AFTERNOON">Ca chiều (13h - 17h)</option>
+                                            <option value="EVENING">Ca tối (18h - 21h)</option>
+                                        </select>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nhân viên</label>
+                                    <div className="relative doctor-dropdown-multiselect">
                                         <button
                                             type="button"
-                                            onClick={() => navigate('/admin/schedules')}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm rounded-lg w-36 h-12"
+                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px]"
+                                            onClick={() => setShowDoctorDropdown(v => !v)}
+                                            tabIndex={0}
                                         >
-                                            Quay về danh sách
+                                            {modalForm.userId && modalForm.userId.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {doctors.filter(d => modalForm.userId.includes(d._id)).map(d => (
+                                                        <span key={d._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-block">
+                                                            {d.fullName}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : <span className="text-gray-400">Chọn bác sĩ</span>}
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
+                                            </span>
                                         </button>
+                                        {showDoctorDropdown && (
+                                            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
+                                                {doctors.length === 0 && (
+                                                    <div className="px-3 py-2 text-gray-400 text-sm">Không có bác sĩ</div>
+                                                )}
+                                                {doctors.map((user) => (
+                                                    <label key={user._id} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2 accent-blue-600"
+                                                            checked={modalForm.userId.includes(user._id)}
+                                                            onChange={e => {
+                                                                let newSelected = Array.isArray(modalForm.userId) ? [...modalForm.userId] : [];
+                                                                if (e.target.checked) {
+                                                                    if (!newSelected.includes(user._id)) newSelected.push(user._id);
+                                                                } else {
+                                                                    newSelected = newSelected.filter(id => id !== user._id);
+                                                                }
+                                                                setModalForm(prev => ({ ...prev, userId: newSelected }));
+                                                            }}
+                                                        />
+                                                        {user.fullName}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
+                                    <div className="text-xs text-gray-500 mt-1">Có thể chọn nhiều bác sĩ cho ca làm này</div>
+                                    {modalErrors.userId && <p className="text-xs text-red-600 mt-1">{modalErrors.userId}</p>}
+                                </div>
+                                {modalErrors.shift && (
+                                    <div className="text-xs text-red-600 mt-1">{modalErrors.shift}</div>
+                                )}
+                                <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                                    {modalForm._id && (
+                                        <button
+                                            type="button"
+                                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-md transition"
+                                            onClick={async () => {
+                                                try {
+                                                    await import('../services/scheduleService').then(m => m.deleteSchedule(modalForm._id));
+                                                    const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+                                                    setServerSchedules(updated);
+                                                    toast.success('Đã xóa lịch trình!', { style: { background: '#EF4444', color: '#fff' } });
+                                                    setModalOpen(false);
+                                                } catch (error) {
+                                                    toast.error(error.response?.data?.error || 'Xóa lịch trình thất bại!', { style: { background: '#EF4444', color: '#fff' } });
+                                                }
+                                            }}
+                                        >
+                                            Xóa
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-md transition"
+                                        onClick={handleModalClose}
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition"
+                                    >
+                                        Lưu
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
+                )}
+            </main>
         </div>
     );
 }

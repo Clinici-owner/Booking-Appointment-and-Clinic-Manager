@@ -3,6 +3,7 @@ import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
 import DoctorLayout from "../layouts/doctor-layout";
+import TechnicianLayout from "../layouts/technician-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -40,6 +41,8 @@ const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPag
 const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
 const UpdateSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage")); 
 
+const SpecialtyDetailPatientPage = React.lazy(() => import("../pages/SpecialtyDetailPatientPage"));
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
@@ -62,6 +65,8 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+
+const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
 // Cấu hình route
 const AppRoute = [
@@ -116,12 +121,24 @@ const AppRoute = [
   { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
+  // Specialty for user
+  { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
+  
+  // Schedule Manager
+  { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
+  { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
+  { path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
+
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
 
+  // Technician
+  { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
 
   //Booking from package
 

@@ -24,9 +24,9 @@ function AdminHeader() {
             className="w-16 h-16 rounded-full"
           />
           <div className="leading-tight">
-            <p className="text-custom-blue font-semibold text-lg">Phòng khám</p>
+            <p className="text-custom-blue font-semibold text-lg">PHÒNG KHÁM</p>
             <p className="text-custom-red font-bold text-[32px] -mt-1">
-              Phúc Hưng
+              PHÚC HƯNG
             </p>
           </div>
         </div>

@@ -40,6 +40,19 @@ export const UserService = {
             window.location.href = "/doctor/createDoctorProfile";
           }
           break;
+        case "technician":
+          try {
+            const technicianProfile = await DoctorService.getDoctorProfileById(
+              res.data.user._id
+            );
+            window.location.href = technicianProfile
+              ? "/"
+              : "/technician/createTechnicianProfile";
+          } catch (error) {
+            console.error("Lỗi khi kiểm tra hồ sơ kỹ thuật viên:", error);
+            window.location.href = "/technician/createTechnicianProfile";
+          }
+          break;
         default:
           window.location.href = "/doctor/createMedicalProcess";
       }
@@ -132,9 +145,6 @@ export const UserService = {
         },
       });
 
-      console.log("Response status:", response.status); // Debug log
-      console.log("Response ok:", response.ok); // Debug log
-
       // Kiểm tra response status
       if (!response.ok) {
         const errorText = await response.text();
@@ -145,7 +155,6 @@ export const UserService = {
       }
 
       const result = await response.json();
-      console.log("API Response:", result); // Debug log - Kiểm tra structure của response
 
       return result;
     } catch (error) {
@@ -156,10 +165,6 @@ export const UserService = {
   // userService.js
   updateUserProfile: async (userId, profileData) => {
     try {
-      console.log("=== SERVICE DEBUG ===");
-      console.log("Service received userId:", userId);
-      console.log("Service received profileData:", profileData);
-      console.log("Avatar in service:", profileData.avatar);
 
       // 🚨 QUAN TRỌNG: Đảm bảo avatar được include
       const requestBody = {
@@ -173,9 +178,6 @@ export const UserService = {
         cidNumber: profileData.cidNumber,
       };
 
-      console.log("Request body to send:", requestBody);
-      console.log("Avatar in request body:", requestBody.avatar);
-
       const response = await fetch(`${API_URL}/updateprofile`, {
         method: "PUT",
         headers: {
@@ -183,8 +185,6 @@ export const UserService = {
         },
         body: JSON.stringify(requestBody),
       });
-
-      console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -194,7 +194,6 @@ export const UserService = {
       }
 
       const result = await response.json();
-      console.log("Service response:", result);
       return result;
     } catch (error) {
       console.error("Service error:", error);
@@ -215,6 +214,17 @@ export const UserService = {
     } catch (error) {
       throw new Error(
         error.response?.data?.message || "Thay đổi mật khẩu thất bại"
+      );
+    }
+  },
+  //get all doctors
+  getAllDoctors: async () => {
+    try {
+      const res = await axios.get(`${API_URL}/get-all-doctors`);
+      return res.data.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Lấy danh sách bác sĩ thất bại"
       );
     }
   },

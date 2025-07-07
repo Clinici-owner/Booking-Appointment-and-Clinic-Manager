@@ -4,6 +4,7 @@ const API_URL = 'http://localhost:3000/api/schedules';
 
 export const createSchedule = async (data) => {
     try {
+        // Nếu data.date là mảng, gửi như hiện tại, backend sẽ xử lý tạo nhiều lịch trình
         const res = await axios.post(API_URL, data);
         return res.data;
     } catch (error) {
@@ -49,11 +50,12 @@ export const getOwnSchedules = async (userId) => {
     }
 };
 
-export const viewAllSchedules = async (page = 1, limit = 10, roomNumber = '', searchName = '') => {
+
+// Lấy tất cả lịch trình (logic mới: trả về mảng schedule đã populate userId, room, specialties)
+export const getAllSchedules = async () => {
     try {
-        const params = { page, limit, roomNumber, searchName };
-        const res = await axios.get(`${API_URL}/all`, { params });
-        if (!Array.isArray(res.data.schedules)) {
+        const res = await axios.get(`${API_URL}/all`);
+        if (!Array.isArray(res.data)) {
             throw new Error('Dữ liệu lịch trình không hợp lệ.');
         }
         return res.data;
@@ -72,6 +74,17 @@ export const getScheduleById = async (id) => {
         return res.data.schedule;
     } catch (error) {
         console.error('Lỗi khi lấy chi tiết lịch trình:', error);
+        throw error;
+    }
+    
+};
+
+export const getSchedulesForRoomAndDay = async (roomId, day) => {
+    try {
+        const res = await axios.get(`${API_URL}/schedule/${roomId}/${day}`);
+        return res.data; 
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch trình cho phòng và ngày:', error);
         throw error;
     }
 };
