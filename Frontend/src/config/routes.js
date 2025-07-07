@@ -3,6 +3,7 @@ import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
 import DoctorLayout from "../layouts/doctor-layout";
+import TechnicianLayout from "../layouts/technician-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -63,6 +64,8 @@ const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"
 
 const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
+const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
+
 // Cấu hình route
 const AppRoute = [
   // Public
@@ -120,6 +123,8 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
 
+  // Technician
+  { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
 
   //Booking from package
 

@@ -70,4 +70,7 @@ export const ROUTE_PATH = {
   PACKAGE_LIST: '/health-package/list',
   // 404
   NOT_FOUND: '*',
+
+  //Technician
+  TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
 };

@@ -69,5 +69,19 @@ class doctorController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+
+  async deleteDoctorProfile(req, res) {
+    const { id } = req.params;
+    try {
+      const doctorProfile = await DoctorProfile.findOneAndDelete({ doctorId: id });
+      if (!doctorProfile) {
+        return res.status(404).json({ message: "Doctor profile not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting doctor profile:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 }
 module.exports = new doctorController();

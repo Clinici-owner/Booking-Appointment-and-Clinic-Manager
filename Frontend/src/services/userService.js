@@ -40,6 +40,19 @@ export const UserService = {
             window.location.href = "/doctor/createDoctorProfile";
           }
           break;
+        case "technician":
+          try {
+            const technicianProfile = await DoctorService.getDoctorProfileById(
+              res.data.user._id
+            );
+            window.location.href = technicianProfile
+              ? "/"
+              : "/technician/createTechnicianProfile";
+          } catch (error) {
+            console.error("Lỗi khi kiểm tra hồ sơ kỹ thuật viên:", error);
+            window.location.href = "/technician/createTechnicianProfile";
+          }
+          break;
         default:
           window.location.href = "/doctor/createMedicalProcess";
       }
