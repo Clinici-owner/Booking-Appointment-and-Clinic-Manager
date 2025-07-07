@@ -409,5 +409,18 @@ async updateUserProfile(req, res, next) {
       res.status(500).json({ message: "Lỗi server", error });
     }
   }
+  //get all user by doctor role
+  async getAllDoctors(req, res) {
+    try {
+      const doctors = await User.find({ role: "doctor" }).select("-password -otp -otpExpires");
+      if (doctors.length === 0) {
+        return res.status(404).json({ message: "Không tìm thấy bác sĩ nào" });
+      }
+      res.status(200).json({ message: "Lấy danh sách bác sĩ thành công", data: doctors });
+    } catch (error) {
+      console.error("Lỗi lấy danh sách bác sĩ:", error);
+      res.status(500).json({ message: "Lỗi server", error });
+    }
+  }
 }
 module.exports = new userController();

@@ -20,6 +20,7 @@ const navItems = [
   { label: "Tạo hồ sơ bác sĩ", icon: <AssignmentIcon />, path: "/doctor/createDoctorProfile" },
   { label: "Tạo quy trình khám bệnh", icon: <MedicalServicesIcon />, path: "/doctor/createMedicalProcess" },
   { label: "Danh sách quy trình khám bệnh", icon: <MedicalServicesIcon />, path: "/doctor/medicalProcess" },
+  { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
 ];
 
 export default function DoctorNavSidebar({ children }) {

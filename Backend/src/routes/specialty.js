@@ -3,6 +3,7 @@ const router = express.Router();
 const specialtyController = require('../app/controllers/specialtyController');
 
 router.get('/', specialtyController.getAllSpecialties);
+router.get('/open', specialtyController.getOpenSpecialties);
 router.get('/:id', specialtyController.getSpecialtyById);
 router.put('/lock/:id', specialtyController.lockSpecialty);
 router.put('/update/:id', specialtyController.updateSpecialty);

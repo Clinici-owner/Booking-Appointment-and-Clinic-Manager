@@ -6,7 +6,7 @@ const User = new Schema({
     password: { type: String, required: true },
     fullName: { type: String, default: 'Người dùng mới' },
     dob: { type: Date },
-    role: { type: String, enum: ['patient', 'doctor', 'admin', 'technician', 'receptionist'], default: 'patient' },
+    role: { type: String, enum: ['patient', 'doctor', 'admin', 'technician', 'receptionist', 'nursing'], default: 'patient' },
     avatar: { type: String, default: 'https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg' },
     address: { type: String, default: '' },
     phone: { type: String },
