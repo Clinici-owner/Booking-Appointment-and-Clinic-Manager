@@ -39,6 +39,8 @@ const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPag
 const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
 const UpdateSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage")); 
 
+const SpecialtyDetailPatientPage = React.lazy(() => import("../pages/SpecialtyDetailPatientPage"));
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
@@ -114,6 +116,9 @@ const AppRoute = [
   { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
+  // Specialty for user
+  { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
+  
   // Schedule Manager
   { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
   { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },

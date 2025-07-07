@@ -319,5 +319,16 @@ class StaffController {
             res.status(500).json({ error: error.message });
         }
     }
+
+    // Lấy bác sĩ theo chuyên khoa
+    async getDoctorsBySpecialty(req, res) {
+        try {
+            const { specialtyId } = req.params;
+            const doctors = await User.find({ role: 'doctor', specialties: specialtyId });
+            res.json(doctors);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 module.exports = new StaffController();
