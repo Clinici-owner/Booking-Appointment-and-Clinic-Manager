@@ -42,6 +42,17 @@ const GoogleAuthCallback = () => {
               });
             }
             break;
+          case 'technician':
+            try {
+              const technicianProfile = await DoctorService.getDoctorProfileById(userData._id);
+              navigate(technicianProfile ? '/' : '/technician/createTechnicianProfile');
+            } catch (error) {
+              console.error('Error checking technician profile:', error);
+              navigate('/technician/createTechnicianProfile', {
+                state: { error: 'Failed to verify technician profile' }
+              });
+            }
+            break;
           default:
             navigate('/');
         }

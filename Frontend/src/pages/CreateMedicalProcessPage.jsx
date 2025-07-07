@@ -287,7 +287,7 @@ const CreateMedicalProcessPage = () => {
                                   </MenuItem>
                                   {services.map(service => (
                                     <MenuItem key={service._id} value={service._id}>
-                                      {service.paraclinalName} (Phòng: {service.roomNumber})
+                                      {service.paraclinalName} (Phòng: {service.room.roomNumber})
                                     </MenuItem>
                                   ))}
                                 </Select>

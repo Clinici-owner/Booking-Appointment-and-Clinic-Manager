@@ -83,6 +83,7 @@ function StaffList() {
                                 <option value="doctor">Bác sĩ</option>
                                 <option value="technician">Kỹ thuật viên</option>
                                 <option value="receptionist">Lễ tân</option>
+                                <option value="nursing">Điều dưỡng</option>
                             </select>
                         </div>
                         <div className="overflow-x-auto rounded-lg border border-[#D9D9D9] bg-white">
@@ -121,7 +122,8 @@ function StaffList() {
                                                 <td className="py-6 px-6 w-[15%] capitalize">
                                                     {staff.role === 'doctor' ? 'Bác sĩ' :
                                                     staff.role === 'technician' ? 'Kỹ thuật viên' :
-                                                    staff.role === 'receptionist' ? 'Lễ tân' : staff.role}
+                                                    staff.role === 'receptionist' ? 'Lễ tân' :
+                                                    staff.role === 'nursing' ? 'Điều dưỡng' : staff.role}
                                                 </td>
                                                 <td className="py-6 px-6 w-[30%]">{staff.email}</td>
                                             </tr>

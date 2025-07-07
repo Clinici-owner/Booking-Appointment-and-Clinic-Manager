@@ -256,5 +256,35 @@ async getAllHealthPackages (req, res) {
       })
     }
   }
+  async getParaclinicalNamesOnly(req, res)
+{
+  try {
+    const { id } = req.params
+    const healthPackage = await HealthPackage.findById(id).populate("service", "paraclinalName").select("service")
+
+    if (!healthPackage) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy gói khám",
+      });
+    }
+
+    // Chỉ lấy mảng tên dịch vụ
+    const serviceNames = healthPackage.service.map((service) => service.paraclinalName)
+
+    res.status(200).json({
+      success: true,
+      data: serviceNames,
+      count: serviceNames.length,
+      message: "Lấy danh sách tên dịch vụ thành công",
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server: " + error.message,
+    })
+  }
 }
+}
+
 module.exports = new HealthPackageController();

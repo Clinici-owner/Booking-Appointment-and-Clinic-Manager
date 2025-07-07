@@ -3,6 +3,7 @@ import { ROUTE_PATH } from "../constants/routePath";
 import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
 import DoctorLayout from "../layouts/doctor-layout";
+import TechnicianLayout from "../layouts/technician-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -28,6 +29,7 @@ const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
 const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
+const HealthPackageList = React.lazy(() => import("../components/HealthPackageList"));
 
 const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
@@ -40,11 +42,13 @@ const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPag
 const AddSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage"));
 const UpdateSpecialtyPage = React.lazy(() => import("../pages/SpecialtyAddPage")); 
 
+const SpecialtyDetailPatientPage = React.lazy(() => import("../pages/SpecialtyDetailPatientPage"));
+
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
 const CreateHealthPackagePage = React.lazy(() => import("../pages/CreateHealthPackagePage"));
-const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/AdminHealthPackageDetailPage"));
+const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/HealthPackageDetailPage"));
 const UpdateHealthPackagePage = React.lazy(() => import("../pages/UpdateHealthPackagePage"));
 const LockHealthPackagePage = React.lazy(() => import("../pages/LockHealthPackagePage"));
 const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"));
@@ -62,7 +66,8 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
-const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
+
+const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
 // Cấu hình route
 const AppRoute = [
@@ -104,6 +109,8 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout},
+  //Health package component
+  {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
   {path: ROUTE_PATH.HEALTH_PACKAGE_USER, page: HealthPackagePage, layout: MainLayout},
   //Service Manager
@@ -116,6 +123,9 @@ const AppRoute = [
   { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
   { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
 
+  // Specialty for user
+  { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
+  
   // Schedule Manager
   { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
   { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
@@ -129,10 +139,11 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
 
+  // Technician
+  { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
 
   //Booking from package
 
-  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
  
 
