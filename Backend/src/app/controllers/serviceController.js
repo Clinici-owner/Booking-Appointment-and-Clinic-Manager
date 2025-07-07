@@ -1,20 +1,25 @@
 const Service = require("../models/ParaclinicalService");
+const Room = require("../models/Room");
 
 class serviceController {
   async createService(req, res, next) {
     try {
-      const { name, price, room } = req.body;
+      const { name, price, room, specialty } = req.body;
 
       if (!name || !price || !room) {
         return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
       }
 
-      const existingRoom = await Service.findOne({ roomNumber: room });
-      if (existingRoom) {
-        return res
-          .status(400)
-          .json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
+      const existingRoom = await Room.findById(room); 
+      if (!existingRoom) {
+        return res.status(400).json({ message: "Phòng không tồn tại" });
       }
+
+      const existingService = await Service.findOne({ room: room });
+      if (existingService) {
+        return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
+      }
+
       if (price <= 0) {
         return res.status(400).json({ message: "Giá phải lớn hơn 0!" });
       }
@@ -22,18 +27,25 @@ class serviceController {
       const service = new Service({
         paraclinalName: name,
         paraPrice: price,
-        roomNumber: room,
+        room: room,
+        specialty: specialty || null,  
       });
-      await service.save();
+
+      await service.save(); 
+
+      existingRoom.status = 'used';  
+      await existingRoom.save();  
 
       return res.status(201).json({
-        message: "Tạo dịch vụ thành công",
+        message: "Tạo dịch vụ thành công và phòng đã được đánh dấu là 'used'",
         service,
       });
     } catch (error) {
-      next(error);
+      console.error("Lỗi trong tạo dịch vụ:", error);  
+      next(error);  
     }
   }
+
 
   // Hoang Anh dang dung
   async listService(req, res) {
@@ -41,37 +53,40 @@ class serviceController {
       const servicelist = await Service.find()
         .populate("room")
 
+
       return res.status(200).json({
         message: "Lấy danh sách dịch vụ thành công",
         services: servicelist,
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Loi he thong" });
+      return res.status(500).json({ error: "Lỗi hệ thống" });
     }
   }
 
+  // Lấy chi tiết dịch vụ
   async detailService(req, res) {
     try {
-      const { serviceId } = req.body;
+      const { serviceId } = req.params;
 
       if (!serviceId) {
-        return res.status(404).json({ error: "Chua co service" });
+        return res.status(400).json({ error: "Chưa có serviceId" });
       }
 
-      const service = await Service.findById(serviceId);
+      const service = await Service.findById(serviceId).populate('room');
 
       if (!service) {
-        return res.status(404).json({ error: "Loi" });
+        return res.status(404).json({ error: "Không tìm thấy dịch vụ" });
       }
 
       return res.json({ service: service });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Loi he thong" });
+      return res.status(500).json({ error: "Lỗi hệ thống" });
     }
   }
 
+  // Cập nhật dịch vụ
   async editService(req, res, next) {
     try {
       const { name, price, room, status } = req.body;
@@ -85,17 +100,21 @@ class serviceController {
         return res.status(400).json({ message: "Trạng thái không hợp lệ" });
       }
 
+      const existingRoom = await Room.findById(room); // Kiểm tra phòng tồn tại
+      if (!existingRoom) {
+        return res.status(400).json({ message: "Phòng không tồn tại" });
+      }
+
       const duplicateRoom = await Service.findOne({
-        roomNumber: room,
+        room: room,
         _id: { $ne: serviceId },
       });
       if (duplicateRoom) {
-        return res
-          .status(400)
-          .json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
+        return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
       }
+
       if (price <= 0) {
-        return res.status(400).json({ message: "Giá phải phải lớn hơn 0!" });
+        return res.status(400).json({ message: "Giá phải lớn hơn 0!" });
       }
 
       const updatedService = await Service.findByIdAndUpdate(
@@ -103,7 +122,7 @@ class serviceController {
         {
           paraclinalName: name,
           paraPrice: price,
-          roomNumber: room,
+          room: room,
           status,
         },
         { new: true }
@@ -122,6 +141,7 @@ class serviceController {
     }
   }
 
+  // Thay đổi trạng thái dịch vụ
   async changeStatus(req, res) {
     const { id } = req.params;
     const { status } = req.body;
@@ -131,7 +151,7 @@ class serviceController {
     }
 
     try {
-      const updatedService = await ParaclinicalService.findByIdAndUpdate(
+      const updatedService = await Service.findByIdAndUpdate(
         id,
         { status },
         { new: true }
@@ -146,12 +166,11 @@ class serviceController {
         service: updatedService,
       });
     } catch (err) {
-      return res
-        .status(500)
-        .json({ message: "Lỗi server.", error: err.message });
+      return res.status(500).json({ message: "Lỗi hệ thống.", error: err.message });
     }
   }
 
+  // Tìm kiếm dịch vụ theo tên
   async searchServiceByName(req, res) {
     try {
       const { name } = req.query;
@@ -160,7 +179,7 @@ class serviceController {
         ? { paraclinalName: { $regex: name, $options: "i" } }
         : {};
 
-      const services = await Service.find(query);
+      const services = await Service.find(query).populate('room'); // Lấy thông tin phòng
 
       return res.status(200).json({
         message: "Tìm kiếm thành công",
@@ -172,5 +191,6 @@ class serviceController {
     }
   }
 }
+
 
 module.exports = new serviceController();
