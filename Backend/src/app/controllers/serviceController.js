@@ -1,5 +1,7 @@
 const Service = require("../models/ParaclinicalService");
+
 const Room = require("../models/Room");
+
 
 class serviceController {
   async createService(req, res, next) {
@@ -52,10 +54,13 @@ class serviceController {
     }
   }
 
-  // Lấy danh sách dịch vụ
+
+  // Hoang Anh dang dung
   async listService(req, res) {
     try {
-      const servicelist = await Service.find().populate('room'); // Hiển thị thông tin phòng
+      const servicelist = await Service.find()
+        .populate("room")
+
 
       return res.status(200).json({
         message: "Lấy danh sách dịch vụ thành công",
@@ -194,5 +199,6 @@ class serviceController {
     }
   }
 }
+
 
 module.exports = new serviceController();
