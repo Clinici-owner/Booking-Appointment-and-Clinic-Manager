@@ -11,14 +11,7 @@ export const healthPackageService = {
       throw new Error(error.response?.data?.message || "Lỗi khi lấy danh sách gói khám")
     }
   },
-   getAllHealthPackagesAdmin: async (params = {}) => {
-    try {
-      const response = await axios.get(`${API_URL}/admin/`, { params })
-      return response.data
-    } catch (error) {
-      throw new Error(error.response?.data?.message || "Lỗi khi lấy danh sách gói khám")
-    }
-  },
+   
 
   // Lấy chi tiết gói khám
   getHealthPackageById: async (id) => {
@@ -59,5 +52,13 @@ export const healthPackageService = {
       throw new Error(error.response?.data?.message || "Lỗi khi thay đổi trạng thái gói khám")
     }
   },
-
+  // Lấy chỉ tên dịch vụ cận lâm sàng theo package ID (mảng string đơn giản)
+  getParaclinicalNamesOnly: async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/admin/paraclinicalname/${id}`)
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Lỗi khi lấy tên dịch vụ cận lâm sàng")
+    }
+  },
 }
