@@ -13,6 +13,7 @@ import {
 } from "../services/specialtyService";
 import { UserService } from "../services/userService";
 import { roomService } from "../services/roomService";
+import { DoctorService } from "../services/doctorService";
 
 import { uploadDocument } from "../services/documentUploadService";
 
@@ -50,14 +51,21 @@ function SpecialtyAddPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await UserService.getAllDoctors();
-        setUser(userData);
+        if (!id) {
+          // Nếu không có id, lấy danh sách bác sĩ
+          const userData = await UserService.getAllDoctors();
+          setUser(userData);
+        } else {
+          // Nếu có id, lấy danh sách bác sĩ đã sử dụng trong chuyên khoa
+          const userData = await DoctorService.getDoctorsBySpecialty(id);
+          setUser(userData);
+        }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error);
       }
     };
     fetchUser();
-  }, []);
+  }, [id]);
 
   const [checkUpdate, setCheckUpdate] = useState(false);
 
@@ -273,7 +281,7 @@ function SpecialtyAddPage() {
     );
 
     //Gôp cả 2 mảng để lấy ra các id phòng đã thay đổi
-    const symmetricDiff = [...removedRoomIds, ...addedRoomIds];  
+    const symmetricDiff = [...removedRoomIds, ...addedRoomIds];
 
     // Thay đổi status của các phòng mới được chọn
     await Promise.all(
@@ -290,7 +298,6 @@ function SpecialtyAddPage() {
       documentId: documentIds, // ← chỉ ảnh mới
       logo: logoUrl,
     };
-
     try {
       await updateSpecialty(id, payload);
       // Reset
@@ -373,20 +380,28 @@ function SpecialtyAddPage() {
           <select
             className="border border-gray-300 rounded-lg p-2 w-full"
             value={dataSpecialty.chiefPhysician}
-            onChange={(e) =>
+            onChange={(e) => {
               setDataSpecialty((prev) => ({
                 ...prev,
                 chiefPhysician: e.target.value,
-              }))
-            }
+              }));
+              console.log("Selected chief physician:", e.target.value);
+            }}
           >
             <option value="">Chọn bác sĩ trưởng khoa</option>
             {user &&
-              user.map((doctor) => (
-                <option key={doctor._id} value={doctor._id}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              user.map((doctor) =>
+                // kiểm tra checkUpdate để hiển thị danh sách bác sĩ
+                checkUpdate ? (
+                  <option key={doctor.doctorId._id} value={doctor.doctorId._id}>
+                    {doctor.doctorId.fullName}
+                  </option>
+                ) : (
+                  <option key={doctor._id} value={doctor._id}>
+                    {doctor.fullName}
+                  </option>
+                )
+              )}
           </select>
         </div>
         <div className="mb-4">
