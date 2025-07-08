@@ -57,22 +57,6 @@ class ScheduleController {
         }
     }
 
-    // Lấy danh sách bác sĩ theo chuyên khoa
-    async getDoctorsBySpecialty(req, res) {
-        try {
-            const { specialtyId } = req.params;
-            if (!specialtyId) return res.status(400).json({ error: 'Thiếu chuyên khoa.' });
-            const doctors = await DoctorProfile.find({ specialties: specialtyId })
-                .populate({ path: 'doctorId', select: 'fullName role status' });
-            // Lọc ra chỉ những bác sĩ có role là 'doctor' và status là 'active'
-            const filteredDoctors = doctors
-                .map(d => d.doctorId)
-                .filter(u => u && u.role === 'doctor' && u.status === 'active');
-            res.status(200).json(filteredDoctors);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
 
     // Chỉnh sửa lịch trình
     async updateSchedule(req, res) {
