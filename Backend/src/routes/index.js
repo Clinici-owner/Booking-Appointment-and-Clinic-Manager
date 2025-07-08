@@ -13,6 +13,7 @@ const newsRouter = require('./news');
 const scheduleRouter = require('./schedule')
 const bookingRouter = require('./booking');
 const roomRouter = require('./room');
+// const stepProcessRouter = require('./stepProcess');
 
 function route(app) {
     app.use('/api/user', userRouter);
@@ -30,6 +31,7 @@ function route(app) {
     app.use('/api/schedules', scheduleRouter);
     app.use('/api/booking', bookingRouter);
     app.use('/api/room', roomRouter);
+    // app.use('/api/stepProcess', stepProcessRouter);
 }
 
 module.exports = route
