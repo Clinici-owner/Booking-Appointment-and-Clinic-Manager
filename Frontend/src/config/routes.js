@@ -66,6 +66,7 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -144,8 +145,10 @@ const AppRoute = [
 
   //Booking from package
 
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
- 
+  //Appointment for patient
+  { path: ROUTE_PATH.APPOINTMENT_SPECIALTY, page: AppointmentSpecialtyPage, layout: MainLayout },
 
 
   //Booking from package

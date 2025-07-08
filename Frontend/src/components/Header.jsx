@@ -135,7 +135,7 @@ function Header() {
                   <div className="py-1">
                     <MenuItem>
                       <a
-                        href="user-profile"
+                        href="/user-profile"
                         className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                       >
                         <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
