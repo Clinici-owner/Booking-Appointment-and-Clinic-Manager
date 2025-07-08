@@ -4,10 +4,11 @@ const heartPackageController = require('../app/controllers/healthPackageControll
 
 router.get("/", heartPackageController.getHealthPackagesByUser)
 
-
+router.get("/admin/paraclinicalname/:id", heartPackageController.getParaclinicalNamesOnly)
 router.get("/admin/", heartPackageController.getAllHealthPackages)
 router.get("/admin/detail/:id", heartPackageController.getHealthPackageById)
 router.post("/admin/create", heartPackageController.createHealthPackage)
 router.put("/admin/update/:id", heartPackageController.updateHealthPackage)
 router.put("/admin/lockstatus/:id", heartPackageController.LockPackageStatus)
+
 module.exports = router;

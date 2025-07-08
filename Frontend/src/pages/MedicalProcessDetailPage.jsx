@@ -50,11 +50,6 @@ const MedicalProcessDetailPage = () => {
         }
     };
 
-    // Navigate to patient or doctor profile
-    const navigateToProfile = (userId, role) => {
-        navigate(`/${role}s/${userId}`);
-    };
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -133,12 +128,10 @@ const MedicalProcessDetailPage = () => {
                                 src={process.patientId.avatar}
                                 alt={process.patientId.fullName}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
-                                onClick={() => navigateToProfile(process.patientId._id, 'patient')}
                             />
                             <div className="ml-4">
                                 <h3
-                                    className="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
-                                    onClick={() => navigateToProfile(process.patientId._id, 'patient')}
+                                    className="text-lg font-semibold text-gray-800 "
                                 >
                                     {process.patientId.fullName}
                                 </h3>
@@ -158,12 +151,10 @@ const MedicalProcessDetailPage = () => {
                                 src={process.doctorId.avatar}
                                 alt={process.doctorId.fullName}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
-                                onClick={() => navigateToProfile(process.doctorId._id, 'doctor')}
                             />
                             <div className="ml-4">
                                 <h3
-                                    className="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
-                                    onClick={() => navigateToProfile(process.doctorId._id, 'doctor')}
+                                    className="text-lg font-semibold text-gray-800"
                                 >
                                     {process.doctorId.fullName}
                                 </h3>
