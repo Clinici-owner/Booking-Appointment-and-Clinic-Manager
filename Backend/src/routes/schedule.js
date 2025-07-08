@@ -19,4 +19,7 @@ router.get('/view-all', scheduleController.viewAllSchedules);
 router.get('/:id', scheduleController.viewScheduleDetail);
 router.get('/schedule/:roomId/:day', scheduleController.getSchedulesForRoomAndDay);
 
+//Lấy lịch làm việc cho 1 userID
+router.get('/room', scheduleController.getTechnicianRoomServices);
+
 module.exports = router;
