@@ -63,6 +63,8 @@ const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 
+const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
+
 const HealthPackageList = React.lazy(() => import("../pages/HealthPackageList"));
 
 // Cấu hình route
@@ -137,7 +139,8 @@ const AppRoute = [
 
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
- 
+  //Appointment for patient
+  { path: ROUTE_PATH.APPOINTMENT_SPECIALTY, page: AppointmentSpecialtyPage, layout: MainLayout },
 
 
   //Booking from package
