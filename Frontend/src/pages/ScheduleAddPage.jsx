@@ -665,7 +665,11 @@ function HoverSingleName() {
                                     <MultiSelectDropdown
                                         users={doctors.filter(u => u.role === 'doctor')}
                                         selected={modalForm.userId}
-                                        onChange={newSelected => setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))}
+                                        onChange={newSelected =>
+                                            modalForm._id
+                                                ? setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))
+                                                : setModalForm(prev => ({ ...prev, userId: newSelected }))
+                                        }
                                         placeholder="Chọn bác sĩ"
                                         bookedUserIds={(() => {
                                             const currentRoom = modalForm.room;
