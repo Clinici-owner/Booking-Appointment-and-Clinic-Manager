@@ -7,7 +7,6 @@ router.get('/all', scheduleController.getAllSchedules);
 // Tạo lịch trình: chọn chuyên khoa, ca làm, bác sĩ
 router.post('/', scheduleController.createSchedule);
 // Lấy danh sách bác sĩ theo chuyên khoa
-router.get('/doctors/:specialtyId', scheduleController.getDoctorsBySpecialty);
 // Sửa lịch trình
 router.put('/:id', scheduleController.updateSchedule);
 // Xóa lịch trình
