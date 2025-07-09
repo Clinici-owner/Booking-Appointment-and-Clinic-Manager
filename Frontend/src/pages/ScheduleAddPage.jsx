@@ -133,6 +133,7 @@ function ScheduleAddPage() {
     const [serverSchedules, setServerSchedules] = useState([]);
 
     // Sửa: Cho phép click vào ô đã có lịch để chỉnh sửa
+    const [isEditMode, setIsEditMode] = useState(false);
     const handleCellClick = (room, day, schedule) => {
         if (schedule) {
             // Nếu có nhiều nhân viên trong 1 cell (nhiều lịch trình cùng phòng/ngày/ca), lấy tất cả userId
@@ -151,8 +152,9 @@ function ScheduleAddPage() {
                 room: currentRoom,
                 shift: currentShift,
                 date: schedule.date,
-                _id: schedule._id // Để biết là edit mode
+                _id: undefined // Khi click cả ô, cho phép chỉnh sửa nhiều bác sĩ, nhưng vẫn là edit mode
             });
+            setIsEditMode(true);
             setModalErrors({});
             setModalOpen(true);
         } else {
@@ -163,6 +165,7 @@ function ScheduleAddPage() {
                 shift: formData.shift,
                 date: day, // Gán đúng ngày của ô
             });
+            setIsEditMode(false);
             setModalErrors({});
             setModalOpen(true);
         }
@@ -190,6 +193,54 @@ function ScheduleAddPage() {
         if (!modalForm.room) errors.room = 'Vui lòng chọn phòng';
         if (!modalForm.shift) errors.shift = 'Vui lòng chọn ca làm việc';
         if (!modalForm.date) errors.date = 'Vui lòng chọn ngày';
+
+        // Lấy thông tin lịch trình hiện tại
+        const currentRoom = modalForm.room;
+        const currentDate = Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date;
+        const currentShift = modalForm.shift || formData.shift;
+        const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
+        const selectedUsers = doctors.filter(u => userIds.includes(u._id));
+
+        for (const user of selectedUsers) {
+            if (user.role === 'nursing') {
+                // Lấy chuyên khoa hiện tại
+                let currentSpecialty = formData.department;
+                if (Array.isArray(currentSpecialty)) currentSpecialty = currentSpecialty[0];
+                // 1. Nếu điều dưỡng đã có lịch ở chuyên khoa khác cùng ca (bất kỳ ngày nào), không cho chọn lại ở chuyên khoa khác cùng ca
+                const hasSpecialtyConflict = serverSchedules.some(s => {
+                    const sUserId = s.userId?._id || s.userId;
+                    if (sUserId !== user._id) return false;
+                    if (modalForm._id && s._id === modalForm._id) return false;
+                    // Lấy chuyên khoa của lịch trình đã có
+                    const sSpecialty = s.specialty || s.department || (s.room?.specialty || s.room?.department);
+                    // Nếu khác chuyên khoa và cùng ca (bất kỳ ngày nào)
+                    return s.shift === currentShift && sSpecialty && currentSpecialty && sSpecialty !== currentSpecialty;
+                });
+                if (hasSpecialtyConflict) {
+                    toast.error(`Điều dưỡng "${user.fullName}" đã có lịch ở chuyên khoa khác trong cùng ca!`, { style: { background: '#EF4444', color: '#fff' } });
+                    errors.userId = `Điều dưỡng "${user.fullName}" đã có lịch ở chuyên khoa khác trong cùng ca!`;
+                    break;
+                }
+                // 2. Nếu chọn điều dưỡng đó trong cùng 1 ca nhưng ở phòng khác trong ngày đó sẽ báo lỗi trùng lịch giống bác sĩ/kỹ thuật viên
+                const hasRoomConflict = serverSchedules.some(s => {
+                    const sUserId = s.userId?._id || s.userId;
+                    if (sUserId !== user._id) return false;
+                    if (modalForm._id && s._id === modalForm._id) return false;
+                    const sDate = new Date(s.date).toISOString().slice(0, 10);
+                    const modalDate = new Date(currentDate).toISOString().slice(0, 10);
+                    return (
+                        sDate === modalDate &&
+                        s.shift === currentShift &&
+                        (s.room?._id?.toString() || s.room?.toString() || s.room) !== currentRoom.toString()
+                    );
+                });
+                if (hasRoomConflict) {
+                    toast.error(`Điều dưỡng "${user.fullName}" đã có lịch ở phòng khác trong cùng ca/ngày!`, { style: { background: '#EF4444', color: '#fff' } });
+                    errors.userId = `Điều dưỡng "${user.fullName}" đã có lịch ở phòng khác trong cùng ca/ngày!`;
+                    break;
+                }
+            }
+        }
         return errors;
     };
 
@@ -228,33 +279,89 @@ function ScheduleAddPage() {
                     style: { background: '#EF4444', color: '#fff' },
                 });
             }
-        } else {
-            // Tạo mới: gọi API tạo lịch trình cho nhiều bác sĩ
+            return;
+        }
+
+        // Chỉnh sửa nhiều bác sĩ (click cả ô, không có _id, userId là mảng)
+        if (!modalForm._id && Array.isArray(modalForm.userId) && modalForm.userId.length > 0) {
             try {
-                const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
-                const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
-                // Gọi API tạo nhiều lịch trình cho từng bác sĩ
-                const createPromises = userIds.map(uid =>
-                    createSchedule({
-                        userId: uid,
-                        room: rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room)?._id || modalForm.room,
-                        shift: formData.shift,
-                        date: selectedDates,
-                    })
+                // Lấy ObjectId của phòng
+                const currentRoom = (() => {
+                    const found = rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room);
+                    return found ? found._id : modalForm.room;
+                })();
+                const currentDate = Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date;
+                const currentShift = modalForm.shift || formData.shift;
+                // Lấy danh sách lịch trình đã có ở phòng/ngày/ca này
+                const existedSchedules = serverSchedules.filter(s =>
+                    (s.room?._id === currentRoom || s.room === currentRoom || s.room?.roomNumber === currentRoom)
+                    && new Date(s.date).toISOString().slice(0, 10) === new Date(currentDate).toISOString().slice(0, 10)
+                    && s.shift === currentShift
                 );
-                await Promise.all(createPromises);
+                const existedUserIds = existedSchedules.map(s => s.userId?._id?.toString() || s.userId?.toString());
+                const newUserIds = modalForm.userId.map(id => id.toString()).filter(id => !existedUserIds.includes(id));
+                const removedUserIds = existedUserIds.filter(id => !modalForm.userId.map(x => x.toString()).includes(id));
+
+                // Tạo lịch cho bác sĩ mới
+                for (const uid of newUserIds) {
+                    await createSchedule({
+                        userId: uid,
+                        room: currentRoom,
+                        shift: currentShift,
+                        date: currentDate,
+                    });
+                }
+                // Xóa lịch cho bác sĩ bị bỏ chọn
+                for (const uid of removedUserIds) {
+                    const scheduleToDelete = existedSchedules.find(s => (s.userId?._id?.toString() || s.userId?.toString()) === uid);
+                    if (scheduleToDelete) {
+                        await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleToDelete._id));
+                    }
+                }
                 // Refresh server schedules
                 const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
                 setServerSchedules(updated);
-                toast.success('Tạo lịch trình thành công!', {
+                toast.success('Cập nhật lịch trình thành công!', {
                     style: { background: '#10B981', color: '#fff' },
                 });
                 setModalOpen(false);
             } catch (error) {
-                toast.error(error.response?.data?.error || 'Tạo lịch trình thất bại!', {
+                toast.error(error.response?.data?.error || 'Cập nhật lịch trình thất bại!', {
                     style: { background: '#EF4444', color: '#fff' },
                 });
             }
+            return;
+        }
+
+        // Tạo mới hoàn toàn (chưa có lịch nào ở phòng/ngày/ca này)
+        try {
+            // Lấy ObjectId của phòng
+            const currentRoom = (() => {
+                const found = rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room);
+                return found ? found._id : modalForm.room;
+            })();
+            const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
+            const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
+            const createPromises = userIds.map(uid =>
+                createSchedule({
+                    userId: uid,
+                    room: currentRoom,
+                    shift: formData.shift,
+                    date: selectedDates,
+                })
+            );
+            await Promise.all(createPromises);
+            // Refresh server schedules
+            const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+            setServerSchedules(updated);
+            toast.success('Tạo lịch trình thành công!', {
+                style: { background: '#10B981', color: '#fff' },
+            });
+            setModalOpen(false);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Tạo lịch trình thất bại!', {
+                style: { background: '#EF4444', color: '#fff' },
+            });
         }
     };
 
@@ -479,8 +586,8 @@ function HoverSingleName() {
                                 onChange={handleShiftChange}
                             >
                                 <option value="MORNING">Ca sáng (7h - 12h)</option>
-                                <option value="AFTERNOON">Ca chiều (13h - 17h)</option>
-                                <option value="EVENING">Ca tối (18h - 21h)</option>
+                                <option value="AFTERNOON">Ca trưa (13h - 17h)</option>
+                                <option value="EVENING">Ca chiều (18h - 21h)</option>
                             </select>
                         </div>
                     </div>
@@ -508,10 +615,8 @@ function HoverSingleName() {
                         // Tính ngày tương ứng với ô
                         // Lấy đúng ngày ISO cho từng cột
                         const cellDate = d.date;
-
                         const normalizeDate = (iso) => new Date(iso).toISOString().slice(0, 10);
                         const roomId = room._id || room.roomNumber;
-
                         const schedules = [
                             ...serverSchedules.filter(s =>
                                 (s.room?._id === roomId || s.room?.roomNumber === room.roomNumber || s.room === roomId)
@@ -523,17 +628,33 @@ function HoverSingleName() {
                                 specialty: s.userId?.specialtyName || '',
                             }))
                         ];
-
-                        // Nếu có nhiều lịch trình, chỉ cho phép sửa lịch trình đầu tiên (ưu tiên server)
-                        const editSchedule = schedules.length > 0 ? schedules[0] : null;
                         const isScheduled = schedules.length > 0;
 
                         
+                        const handleCellBoxClick = () => {
+                            if (!isScheduled) {
+                                setIsEditMode(false); 
+                                return handleCellClick(room.roomNumber, d.date, null);
+                            }
+                            
+                            const allUserIds = schedules.map(s => s.userId?._id || s.userId).filter(Boolean);
+                            setModalForm({
+                                userId: allUserIds,
+                                room: roomId,
+                                shift: formData.shift,
+                                date: cellDate,
+                                _id: undefined 
+                            });
+                            setModalErrors({});
+                            setIsEditMode(true); 
+                            setModalOpen(true);
+                        };
+
                         return (
                             <td
                                 key={d.value}
-                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-default hover:bg-green-400' : 'cursor-pointer hover:bg-blue-50'}`}
-                                onClick={isScheduled ? undefined : () => handleCellClick(room.roomNumber, d.date, editSchedule)}
+                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-pointer hover:bg-green-400' : 'cursor-pointer hover:bg-blue-50'}`}
+                                onClick={handleCellBoxClick}
                             >
                                 {isScheduled ? (
                                     <div className="text-xs text-white font-semibold text-center">
@@ -552,18 +673,19 @@ function HoverSingleName() {
                                                                         key={i}
                                                                         className={`hover:bg-white hover:text-black transition rounded cursor-pointer px-1`}
                                                                         title={name.trim()}
-                                                                        onClick={e => {
-                                                                            e.stopPropagation();
-                                                                            setModalForm({
-                                                                                userId: [userId],
-                                                                                room: s.room?._id || s.room,
-                                                                                shift: s.shift,
-                                                                                date: s.date,
-                                                                                _id: s._id
-                                                                            });
-                                                                            setModalErrors({});
-                                                                            setModalOpen(true);
-                                                                        }}
+                                                                    onClick={e => {
+                                                                        e.stopPropagation();
+                                                                        setIsEditMode(true);
+                                                                        setModalForm({
+                                                                            userId: [userId],
+                                                                            room: s.room?._id || s.room,
+                                                                            shift: s.shift,
+                                                                            date: s.date,
+                                                                            _id: s._id
+                                                                        });
+                                                                        setModalErrors({});
+                                                                        setModalOpen(true);
+                                                                    }}
                                                                     >
                                                                         {name.trim()}
                                                                     </div>
@@ -576,6 +698,7 @@ function HoverSingleName() {
                                                             title={s.fullName}
                                                             onClick={e => {
                                                                 e.stopPropagation();
+                                                                setIsEditMode(true);
                                                                 const userId = s.userId?._id || s.userId;
                                                                 setModalForm({
                                                                     userId: [userId],
@@ -592,7 +715,12 @@ function HoverSingleName() {
                                                         </div>
                                                     )}
                                                     {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
-                                                    <div className="italic text-white text-xs">Đã có lịch</div>
+                                                    <div className="italic text-white text-xs">
+                                                        {s.userId?.role === 'doctor' && 'Bác sĩ'}
+                                                        {s.userId?.role === 'technician' && 'Kỹ thuật viên'}
+                                                        {s.userId?.role === 'nursing' && 'Điều dưỡng'}
+                                                        {(!s.userId?.role || (s.userId?.role !== 'doctor' && s.userId?.role !== 'technician' && s.userId?.role !== 'nursing')) && 'Nhân viên'}
+                                                    </div>
                                                     {idx !== schedules.length - 1 && <hr className="my-1" />}
                                                 </div>
                                             );
@@ -621,7 +749,8 @@ function HoverSingleName() {
                             >
                                 <span className="text-xl">×</span>
                             </button>
-                            <h3 className="text-xl font-semibold mb-4">{modalForm._id ? 'Chỉnh sửa lịch trình' : 'Tạo lịch trình'}</h3>
+                            <h3 className="text-xl font-semibold mb-4">{isEditMode ? 'Chỉnh sửa lịch trình' : 'Tạo lịch trình'}</h3>
+
                             <form className="space-y-4" onSubmit={handleModalSubmit}>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Phòng</label>
@@ -645,7 +774,7 @@ function HoverSingleName() {
                                     />
                                     {modalErrors.date && <p className="text-xs text-red-600 mt-1">{modalErrors.date}</p>}
                                 </div>
-                                {modalForm._id && (
+                                {(modalForm._id || (isEditMode && !modalForm._id)) && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Ca làm việc</label>
                                         <select
@@ -655,8 +784,8 @@ function HoverSingleName() {
                                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
                                             <option value="MORNING">Ca sáng (7h - 12h)</option>
-                                            <option value="AFTERNOON">Ca chiều (13h - 17h)</option>
-                                            <option value="EVENING">Ca tối (18h - 21h)</option>
+                                            <option value="AFTERNOON">Ca trưa (13h - 17h)</option>
+                                            <option value="EVENING">Ca chiều (18h - 21h)</option>
                                         </select>
                                     </div>
                                 )}
@@ -741,6 +870,41 @@ function HoverSingleName() {
                                     <div className="text-xs text-red-600 mt-1">{modalErrors.shift}</div>
                                 )}
                                 <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                                    {/* Nút xóa nhiều lịch trình khi chỉnh sửa nhiều bác sĩ - nằm dưới cùng */}
+                                    {isEditMode && !modalForm._id && Array.isArray(modalForm.userId) && modalForm.userId.length > 0 && (
+                                        <button
+                                            type="button"
+                                            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-md transition"
+                                            onClick={async () => {
+                                                try {
+                                                    // Xóa tất cả lịch trình của các userId trong modalForm.userId ở phòng/ngày/ca này
+                                                    const currentRoom = (() => {
+                                                        const found = rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room);
+                                                        return found ? found._id : modalForm.room;
+                                                    })();
+                                                    const currentDate = Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date;
+                                                    const currentShift = modalForm.shift || formData.shift;
+                                                    const existedSchedules = serverSchedules.filter(s =>
+                                                        (s.room?._id === currentRoom || s.room === currentRoom || s.room?.roomNumber === currentRoom)
+                                                        && new Date(s.date).toISOString().slice(0, 10) === new Date(currentDate).toISOString().slice(0, 10)
+                                                        && s.shift === currentShift
+                                                        && modalForm.userId.includes(s.userId?._id?.toString() || s.userId?.toString())
+                                                    );
+                                                    for (const sch of existedSchedules) {
+                                                        await import('../services/scheduleService').then(m => m.deleteSchedule(sch._id));
+                                                    }
+                                                    const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
+                                                    setServerSchedules(updated);
+                                                    toast.success('Đã xóa tất cả lịch trình đã chọn!', { style: { background: '#EF4444', color: '#fff' } });
+                                                    setModalOpen(false);
+                                                } catch (error) {
+                                                    toast.error(error.response?.data?.error || 'Xóa lịch trình thất bại!', { style: { background: '#EF4444', color: '#fff' } });
+                                                }
+                                            }}
+                                        >
+                                            Xóa 
+                                        </button>
+                                    )}
                                     {modalForm._id && (
                                         <button
                                             type="button"
