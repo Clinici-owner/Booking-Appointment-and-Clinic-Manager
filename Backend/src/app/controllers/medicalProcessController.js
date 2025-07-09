@@ -4,25 +4,26 @@ const Room = require("../models/Room");
 const ParaclinicalService = require("../models/ParaclinicalService");
 
 class medicalProcessController {
-  async createProcessStep(req, res) {
-    const { serviceId, notes, patientId } = req.body;
-    try {
-      const processStep = new ProcessStep({
-        serviceId,
-        notes,
-      });
-      await processStep.save();
 
-      // Update the patient's queue in the room associated with the service
-      const service = await ParaclinicalService.findById(serviceId).populate(
-        "room"
-      );
-      if (service && service.room) {
-        await Room.updateOne(
-          { _id: service.room._id },
-          { $push: { patientQueue: patientId } }
-        );
-      }
+    async createProcessStep(req, res) {
+        const { serviceId, notes, patientId, isFirstStep } = req.body;
+        try {
+            const processStep = new ProcessStep({
+                serviceId,
+                notes
+            });
+            await processStep.save();
+
+            // Chỉ thêm vào hàng đợi nếu là bước đầu tiên
+            if (isFirstStep) {
+                const service = await ParaclinicalService.findById(serviceId).populate('room');
+                if (service && service.room) {
+                    await Room.updateOne(
+                        { _id: service.room._id },
+                        { $push: { patientQueue: patientId } }
+                    );
+                }
+            }
 
       res.status(201).json(processStep);
     } catch (error) {
