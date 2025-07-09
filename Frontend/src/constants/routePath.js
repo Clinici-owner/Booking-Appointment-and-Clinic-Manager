@@ -72,6 +72,10 @@ export const ROUTE_PATH = {
 
   // Health package for user
   HEALTH_PACKAGE_USER: '/health-packages',
+  PACKAGE_LIST: '/health-package/list',
+
+  //Appointment for patient
+  APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',
   HEALTH_PACKAGE_LIST: '/health-packages-list',
   // 404
   NOT_FOUND: '*',

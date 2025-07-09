@@ -63,7 +63,7 @@ function SpecialtyDetailPage() {
           </div>
           <div className="flex justify-center pt-4 items-center">
             <Link
-              to={`/admin/specialties/update/${id}`}
+              to={`/appointment-specialty/${id}`}
               className="bg-custom-blue text-white px-10 py-4 rounded-xl shadow-2xl hover:shadow-blue-300 hover:scale-105 transition-transform duration-300"
             >
               Đặt lịch khám ngay
