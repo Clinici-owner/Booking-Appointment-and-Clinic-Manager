@@ -4,6 +4,7 @@ const scheduleController = require('../app/controllers/scheduleController');
 
 router.get('/all', scheduleController.getAllSchedules);
 router.post('/', scheduleController.createSchedule);
+router.get('/schedule-by-specialty/:specialtyId', scheduleController.getSchedulesBySpecialtyAndDate);
 router.put('/:id', scheduleController.updateSchedule);
 router.delete('/:id', scheduleController.deleteSchedule);
 router.get('/own/:userId', scheduleController.viewOwnSchedule);
