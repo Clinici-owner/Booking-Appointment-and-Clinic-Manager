@@ -9,32 +9,38 @@ import {
   ListItemText,
   Divider,
   Button,
-  TextField,  // Import TextField để tạo ô tìm kiếm
+  TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const MedicListPage = () => {
   const [services, setServices] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // State lưu trữ từ khóa tìm kiếm
-  const [filteredServices, setFilteredServices] = useState([]); // State lưu trữ dịch vụ sau khi lọc
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredServices, setFilteredServices] = useState([]);
   const navigate = useNavigate();
+
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      toast.error("Bạn không có quyền truy cập trang này.");
+      navigate("/");
+    }
+  }, []);
 
   const fetchServices = async () => {
     try {
       const data = await listService();
       setServices(data.services);
-      setFilteredServices(data.services); // Mặc định hiển thị tất cả các dịch vụ
+      setFilteredServices(data.services);
     } catch (error) {
       toast.error("Không thể tải danh sách dịch vụ.", error);
     }
   };
 
-  // Hàm lọc dịch vụ theo từ khóa tìm kiếm
   const handleSearch = (e) => {
     const searchTerm = e.target.value.toLowerCase();
     setSearchTerm(searchTerm);
-
-    // Lọc dịch vụ dựa trên tên dịch vụ
     const filtered = services.filter((service) =>
       service.paraclinalName.toLowerCase().includes(searchTerm)
     );
@@ -42,8 +48,10 @@ const MedicListPage = () => {
   };
 
   useEffect(() => {
-    fetchServices();
-  }, []);
+    if (user?.role === "admin") {
+      fetchServices();
+    }
+  }, [user]);
 
   return (
     <div className="w-full">
@@ -53,17 +61,15 @@ const MedicListPage = () => {
           Danh sách dịch vụ cận lâm sàng
         </Typography>
 
-        {/* Trường tìm kiếm */}
         <TextField
           fullWidth
           label="Tìm kiếm dịch vụ"
           variant="outlined"
           value={searchTerm}
-          onChange={handleSearch} // Gọi hàm handleSearch khi người dùng nhập
+          onChange={handleSearch}
           sx={{ mb: 2 }}
         />
 
-        {/* Lối tắt quay lại trang tạo dịch vụ */}
         <Button
           variant="outlined"
           fullWidth
