@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
-import AdminNavSidebar from '../components/AdminNavSidebar';
 import { DoctorService } from '../services/doctorService';
 import { listService } from '../services/medicalService';
 import { createSchedule, getAllSchedules } from '../services/scheduleService';
@@ -10,7 +9,7 @@ function ScheduleAddPage() {
     // State lưu selectedName cho từng cell (key: roomId+date)
 
     // Giá trị mặc định: ca làm việc đầu tiên và tất cả chuyên khoa (nếu có)
-    const defaultShifts = ['MORNING', 'AFTERNOON', 'EVENING'];
+    const defaultShifts = ['MORNING', 'NOON', 'AFTERNOON'];
     const [formData, setFormData] = useState({
         userId: '',
         room: '',
@@ -30,13 +29,16 @@ function ScheduleAddPage() {
     function getMonday(d) {
         const date = new Date(d);
         const day = date.getDay();
-        // Nếu là Chủ nhật (0), lùi về thứ 2 tuần trước
+        // Nếu là Chủ nhật (0), thì lùi về thứ 2 tuần hiện tại (không lùi sang tuần trước)
+        // Đảm bảo luôn lấy thứ 2 của tuần hiện tại, kể cả khi là Chủ nhật
+        // Nếu là Chủ nhật, cần lùi về thứ 2 trước đó 6 ngày
         const diff = day === 0 ? -6 : 1 - day;
         date.setDate(date.getDate() + diff);
-        date.setHours(0,0,0,0);
+        date.setHours(0, 0, 0, 0);
         return date;
     }
     const today = new Date();
+    // Luôn lấy thứ 2 của tuần hiện tại, kể cả khi là Chủ nhật
     const monday = getMonday(today);
     const days = [
         { value: '', label: 'Chọn ngày' },
@@ -54,6 +56,13 @@ function ScheduleAddPage() {
     ];
 
 
+    const addOneDayToDateString = (dateString) => {
+        const date = new Date(dateString); 
+        date.setDate(date.getDate() + 1);  
+        return date.toISOString().slice(0, 10); 
+    };
+
+
 
     // Set giờ mặc định khi chọn ca làm việc
     const handleShiftChange = (e) => {
@@ -63,9 +72,9 @@ function ScheduleAddPage() {
         if (modalOpen) {
             if (shift === 'MORNING') {
                 setModalForm((prev) => ({ ...prev, startTime: '07:00', endTime: '11:30' }));
-            } else if (shift === 'AFTERNOON') {
+            } else if (shift === 'NOON') {
                 setModalForm((prev) => ({ ...prev, startTime: '11:30', endTime: '13:30' }));
-            } else if (shift === 'EVENING') {
+            } else if (shift === 'AFTERNOON') {
                 setModalForm((prev) => ({ ...prev, startTime: '13:30', endTime: '17:00' }));
             } else {
                 setModalForm((prev) => ({ ...prev, startTime: '', endTime: '' }));
@@ -138,7 +147,8 @@ function ScheduleAddPage() {
         if (schedule) {
             // Nếu có nhiều nhân viên trong 1 cell (nhiều lịch trình cùng phòng/ngày/ca), lấy tất cả userId
             const currentRoom = schedule.room?._id || schedule.room;
-            const currentDate = new Date(schedule.date).toISOString().slice(0, 10);
+            // Lấy ngày đúng từ cột giao diện (tham số day luôn là ISO yyyy-mm-dd đúng với bảng)
+            const currentDate = day;
             const currentShift = schedule.shift;
             // Lấy tất cả lịch trình cùng phòng/ngày/ca
             const allSchedules = serverSchedules.filter(s =>
@@ -151,7 +161,7 @@ function ScheduleAddPage() {
                 userId: allUserIds,
                 room: currentRoom,
                 shift: currentShift,
-                date: schedule.date,
+                date: currentDate, // Đảm bảo ngày trong modal luôn đúng với ngày của cột giao diện
                 _id: undefined // Khi click cả ô, cho phép chỉnh sửa nhiều bác sĩ, nhưng vẫn là edit mode
             });
             setIsEditMode(true);
@@ -174,9 +184,12 @@ function ScheduleAddPage() {
     const handleModalFormChange = (e) => {
         const { name, value } = e.target;
         if (name === "date") {
-            // Chỉ cho phép chọn ngày trong tuần 07/07 - 13/07/2025 (UTC)
+            // Lấy dải ngày tuần hiện tại giống như days ở ngoài giao diện
+            const today = new Date();
+            const monday = getMonday(today);
             const allowedDates = Array.from({ length: 7 }).map((_, i) => {
-                const d = new Date(Date.UTC(2025, 6, 7 + i));
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
                 return d.toISOString().slice(0, 10);
             });
             const newDates = value
@@ -382,61 +395,61 @@ function ScheduleAddPage() {
 
     // Fetch rooms and doctors when department (specialty) changes
     useEffect(() => {
-    const fetchRoomsAndDoctors = async () => {
-        if (!formData.department || formData.department.length === 0) {
-            setRooms([]);
-            setDoctors([]);
-            return;
-        }
-        setLoadingRooms(true);
-        setLoadingDoctors(true);
-        const departmentArr = formData.department;
-        try {
-            let allRooms = [];
-            for (const dep of departmentArr) {
-                const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${dep}`);
-                if (specialtyRes.ok) {
-                    const specialty = await specialtyRes.json();
-                    if (Array.isArray(specialty.room)) {
-                        allRooms = allRooms.concat(specialty.room);
+        const fetchRoomsAndDoctors = async () => {
+            if (!formData.department || formData.department.length === 0) {
+                setRooms([]);
+                setDoctors([]);
+                return;
+            }
+            setLoadingRooms(true);
+            setLoadingDoctors(true);
+            const departmentArr = formData.department;
+            try {
+                let allRooms = [];
+                for (const dep of departmentArr) {
+                    const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${dep}`);
+                    if (specialtyRes.ok) {
+                        const specialty = await specialtyRes.json();
+                        if (Array.isArray(specialty.room)) {
+                            allRooms = allRooms.concat(specialty.room);
+                        }
                     }
                 }
+                setRooms(allRooms);
+            } catch {
+                setRoomError('Không thể tải danh sách phòng.');
+                setRooms([]);
+            } finally {
+                setLoadingRooms(false);
             }
-            setRooms(allRooms);
-        } catch {
-            setRoomError('Không thể tải danh sách phòng.');
-            setRooms([]);
-        } finally {
-            setLoadingRooms(false);
-        }
-        try {
-            let allDoctors = [];
-            for (const dep of departmentArr) {
-                const doctorProfiles = await DoctorService.getDoctorsBySpecialty(dep);
-                if (Array.isArray(doctorProfiles)) {
-                    allDoctors = allDoctors.concat(doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId));
+            try {
+                let allDoctors = [];
+                for (const dep of departmentArr) {
+                    const doctorProfiles = await DoctorService.getDoctorsBySpecialty(dep);
+                    if (Array.isArray(doctorProfiles)) {
+                        allDoctors = allDoctors.concat(doctorProfiles.filter(d => d.doctorId && d.doctorId.fullName).map(d => d.doctorId));
+                    }
                 }
+                setDoctors(allDoctors);
+            } catch {
+                setDoctorError('Không thể tải danh sách bác sĩ.');
+                setDoctors([]);
+            } finally {
+                setLoadingDoctors(false);
             }
-            setDoctors(allDoctors);
-        } catch {
-            setDoctorError('Không thể tải danh sách bác sĩ.');
-            setDoctors([]);
-        } finally {
-            setLoadingDoctors(false);
-        }
-    };
-    fetchRoomsAndDoctors();
-}, [formData.department]);
+        };
+        fetchRoomsAndDoctors();
+    }, [formData.department]);
 
     if (fetchError || roomError || doctorError) {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
-                <AdminNavSidebar />
+
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="text-center py-15 text-xl text-red-500">{fetchError}</div>
                     <button
-                        onClick={() => navigate('/admin/schedules')}
+                        onClick={() => navigate('/admin/schedules/add')}
                         className="mt-5 bg-gray-500 hover:bg-gray-600 text-white font-semibold text-lg rounded-lg px-12 py-4"
                     >
                         Quay về danh sách
@@ -450,7 +463,7 @@ function ScheduleAddPage() {
         return (
             <div className="flex text-[1.75rem]">
                 <Toaster />
-                <AdminNavSidebar />
+
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="text-center py-15 text-xl text-gray-600">Đang tải dữ liệu...</div>
                 </div>
@@ -460,57 +473,86 @@ function ScheduleAddPage() {
 
     // MultiSelectDropdown component for user selection by role
     function MultiSelectDropdown({ users, selected, onChange, placeholder = [], bookedUserIds = [], editMode = false }) {
-    const [open, setOpen] = useState(false);
-    const [hovered, setHovered] = useState(null);
-    const [localSelected, setLocalSelected] = useState(selected);
+        const [open, setOpen] = useState(false);
+        const [hovered, setHovered] = useState(null);
+        const [localSelected, setLocalSelected] = useState(selected);
 
-    // Cập nhật localSelected khi prop selected thay đổi (đồng bộ hóa)
-    useEffect(() => {
-        setLocalSelected(selected);
-    }, [selected]);
+        // Cập nhật localSelected khi prop selected thay đổi (đồng bộ hóa)
+        useEffect(() => {
+            setLocalSelected(selected);
+        }, [selected]);
 
-    const handleToggle = () => setOpen(v => !v);
-    const handleBlur = (e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
-    };
+        const handleToggle = () => setOpen(v => !v);
+        const handleBlur = (e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+        };
 
-    const filteredUsers = users.filter(u =>
-        !(localSelected.includes(u._id) || bookedUserIds.includes(u._id))
-    );
+        const filteredUsers = users.filter(u =>
+            !(localSelected.includes(u._id) || bookedUserIds.includes(u._id))
+        );
 
-    // Hàm cập nhật database khi xóa/chọn nhân viên
-    const handleRemoveUser = async (userId) => {
-        const newSelected = localSelected.filter(id => id !== userId);
-        setLocalSelected(newSelected);
-        onChange(newSelected);
-        // Nếu đang ở edit mode (modalForm._id hoặc isEditMode), gọi API xóa schedule ngay
-        // (Chỉ xóa nếu đang chỉnh sửa, không xóa khi tạo mới)
-        if (editMode && typeof window !== 'undefined') {
-            try {
-                // Tìm scheduleId cần xóa (nếu có)
-                const scheduleId = window?.modalForm?._id;
-                if (scheduleId) {
-                    await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleId));
-                }
-            } catch (error) {
-                // Log lỗi ra console và hiển thị toast báo lỗi
-                console.error('Lỗi khi xóa lịch trình:', error);
-                if (typeof toast === 'function') {
-                    toast.error('Lỗi khi xóa lịch trình!');
+        // Hàm cập nhật database khi xóa/chọn nhân viên
+        const handleRemoveUser = async (userId) => {
+            const newSelected = localSelected.filter(id => id !== userId);
+            setLocalSelected(newSelected);
+            onChange(newSelected);
+            // Nếu đang ở edit mode (modalForm._id hoặc isEditMode), gọi API xóa schedule ngay
+            // (Chỉ xóa nếu đang chỉnh sửa, không xóa khi tạo mới)
+            if (editMode && typeof window !== 'undefined') {
+                try {
+                    // Tìm scheduleId cần xóa (nếu có)
+                    const scheduleId = window?.modalForm?._id;
+                    if (scheduleId) {
+                        await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleId));
+                    }
+                } catch (error) {
+                    // Log lỗi ra console và hiển thị toast báo lỗi
+                    console.error('Lỗi khi xóa lịch trình:', error);
+                    if (typeof toast === 'function') {
+                        toast.error('Lỗi khi xóa lịch trình!');
+                    }
                 }
             }
-        }
-    };
+        };
 
-    // Hiển thị tên đã chọn với dấu x để xóa từng nhân viên
-    const renderSelectedNames = () => {
-        const selectedUsers = users.filter(u => localSelected.includes(u._id));
-        if (!editMode) {
+        // Hiển thị tên đã chọn với dấu x để xóa từng nhân viên (rendered OUTSIDE the trigger button)
+        const renderSelectedNames = () => {
+            const selectedUsers = users.filter(u => localSelected.includes(u._id));
+            if (selectedUsers.length === 0) return null;
+            if (!editMode) {
+                return (
+                    <div className="flex flex-wrap gap-1 mb-1">
+                        {selectedUsers.map(u => (
+                            <span key={u._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center">
+                                {u.fullName}
+                                <button
+                                    type="button"
+                                    className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
+                                    style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
+                                    aria-label={`Xóa ${u.fullName}`}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        handleRemoveUser(u._id);
+                                    }}
+                                >
+                                    ×
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                );
+            }
+            // Edit mode: hover từng tên chỉ hiện đúng tên đó, vẫn cho xóa từng người
             return (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 mb-1">
                     {selectedUsers.map(u => (
-                        <span key={u._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center">
-                            {u.fullName}
+                        <span
+                            key={u._id}
+                            className={`bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center transition-all duration-150 ${hovered === u._id ? 'bg-blue-600 text-white font-bold scale-110 z-10' : ''}`}
+                            onMouseEnter={() => setHovered(u._id)}
+                            onMouseLeave={() => setHovered(null)}
+                        >
+                            {hovered === u._id ? u.fullName : (selectedUsers.length === 1 ? u.fullName : hovered ? '' : u.fullName)}
                             <button
                                 type="button"
                                 className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
@@ -527,92 +569,68 @@ function ScheduleAddPage() {
                     ))}
                 </div>
             );
-        }
-        // Edit mode: hover từng tên chỉ hiện đúng tên đó, vẫn cho xóa từng người
+        };
+
         return (
-            <div className="flex flex-wrap gap-1">
-                {selectedUsers.map(u => (
-                    <span
-                        key={u._id}
-                        className={`bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center transition-all duration-150 ${hovered === u._id ? 'bg-blue-600 text-white font-bold scale-110 z-10' : ''}`}
-                        onMouseEnter={() => setHovered(u._id)}
-                        onMouseLeave={() => setHovered(null)}
-                    >
-                        {hovered === u._id ? u.fullName : (selectedUsers.length === 1 ? u.fullName : hovered ? '' : u.fullName)}
-                        <button
-                            type="button"
-                            className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
-                            style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
-                            aria-label={`Xóa ${u.fullName}`}
-                            onClick={e => {
-                                e.stopPropagation();
-                                handleRemoveUser(u._id);
-                            }}
-                        >
-                            ×
-                        </button>
+            <div className="relative" tabIndex={0} onBlur={handleBlur}>
+                {/* Render selected names OUTSIDE the trigger button to avoid button nesting */}
+                {renderSelectedNames()}
+                <button
+                    type="button"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px]"
+                    onClick={handleToggle}
+                >
+                    {selected && selected.length > 0 && users.filter(u => selected.includes(u._id)).length > 0 ? (
+                        <span className="text-gray-900">{selected.length} đã chọn</span>
+                    ) : <span className="text-gray-400">{placeholder}</span>}
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6" /></svg>
                     </span>
-                ))}
+                </button>
+                {open && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
+                        {filteredUsers.length === 0 && (
+                            <div className="px-3 py-2 text-gray-400 text-sm">Không có nhân viên</div>
+                        )}
+                        {filteredUsers.map((user) => (
+                            <label key={user._id} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2 accent-blue-600"
+                                    checked={false}
+                                    disabled={false}
+                                    onChange={e => {
+                                        let newSelected = Array.isArray(selected) ? [...selected] : [];
+                                        if (e.target.checked) {
+                                            if (!newSelected.includes(user._id)) newSelected.push(user._id);
+                                        } else {
+                                            newSelected = newSelected.filter(id => id !== user._id);
+                                        }
+                                        onChange(newSelected);
+                                    }}
+                                />
+                                {user.fullName}
+                            </label>
+                        ))}
+                    </div>
+                )}
             </div>
         );
-    };
-
-    return (
-        <div className="relative" tabIndex={0} onBlur={handleBlur}>
-            <button
-                type="button"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px]"
-                onClick={handleToggle}
-            >
-                {selected && selected.length > 0 && users.filter(u => selected.includes(u._id)).length > 0 ? (
-                    renderSelectedNames()
-                ) : <span className="text-gray-400">{placeholder}</span>}
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
-                </span>
-            </button>
-            {open && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
-                    {filteredUsers.length === 0 && (
-                        <div className="px-3 py-2 text-gray-400 text-sm">Không có nhân viên</div>
-                    )}
-                    {filteredUsers.map((user) => (
-                        <label key={user._id} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
-                            <input
-                                type="checkbox"
-                                className="mr-2 accent-blue-600"
-                                checked={false}
-                                disabled={false}
-                                onChange={e => {
-                                    let newSelected = Array.isArray(selected) ? [...selected] : [];
-                                    if (e.target.checked) {
-                                        if (!newSelected.includes(user._id)) newSelected.push(user._id);
-                                    } else {
-                                        newSelected = newSelected.filter(id => id !== user._id);
-                                    }
-                                    onChange(newSelected);
-                                }}
-                            />
-                            {user.fullName}
-                        </label>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
+    }
 
 
 
-// Component hiển thị tên riêng biệt khi hover (không còn sử dụng, giữ lại để tránh lỗi import)
-function HoverSingleName() {
-    return null;
-}
+    // Component hiển thị tên riêng biệt khi hover (không còn sử dụng, giữ lại để tránh lỗi import)
+    // function HoverSingleName() {
+    //     return null;
+    // }
 
     return (
         <div className="flex min-h-screen">
             <Toaster />
+
             <main className="flex-1 p-8 flex flex-col gap-8 items-center bg-gradient-to-br from-blue-50 to-white min-h-screen">
+
                 <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-6">
                     <h1 className="text-4xl font-bold text-center text-blue-700 mb-6 tracking-tight drop-shadow-lg">Lịch trình làm việc</h1>
                     <div className="flex flex-col md:flex-row gap-6 w-full justify-center">
@@ -640,155 +658,155 @@ function HoverSingleName() {
                                 onChange={handleShiftChange}
                             >
                                 <option value="MORNING">Ca sáng (7h - 11h30)</option>
-                                <option value="AFTERNOON">Ca trưa (11h30 - 13h30)</option>
-                                <option value="EVENING">Ca chiều (13h30 - 17h)</option>
+                                <option value="NOON">Ca trưa (11h30 - 13h30)</option>
+                                <option value="AFTERNOON">Ca chiều (13h30 - 17h)</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <section className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm max-w-8xl w-full overflow-x-auto">
-    <table className="w-full border border-gray-300 rounded-lg table-fixed text-center">
-        <thead>
-            <tr className="bg-gray-100 border-b border-gray-300">
-                <th className="border-r border-gray-300 py-3 font-semibold text-sm bg-white max-w-[140px]">Phòng</th>
-                {days.slice(1).map((d) => (
-                    <th key={d.value} className="border-r border-gray-300 py-3 font-semibold text-sm">
-                        {d.label}<br /><span className="text-xs font-normal">{d.label.match(/\((.*?)\)/)?.[1]}</span>
-                    </th>
-                ))}
-            </tr>
-        </thead>
-        <tbody>
-            {rooms.map((room) => (
-                <tr key={room._id || room.roomNumber} className="border-t border-gray-300">
-                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
-                        {room.roomNumber}
-                    </td>
-                    {days.slice(1).map((d) => {
-                        // Tính ngày tương ứng với ô
-                        // Lấy đúng ngày ISO cho từng cột
-                        const cellDate = d.date;
-                        const normalizeDate = (iso) => new Date(iso).toISOString().slice(0, 10);
-                        const roomId = room._id || room.roomNumber;
-                        const schedules = [
-                            ...serverSchedules.filter(s =>
-                                (s.room?._id === roomId || s.room?.roomNumber === room.roomNumber || s.room === roomId)
-                                && normalizeDate(s.date) === cellDate
-                                && s.shift === formData.shift
-                            ).map(s => ({
-                                ...s,
-                                fullName: s.userId?.fullName || '',
-                                specialty: s.userId?.specialtyName || '',
-                            }))
-                        ];
-                        const isScheduled = schedules.length > 0;
+                    <table className="w-full border border-gray-300 rounded-lg table-fixed text-center">
+                        <thead>
+                            <tr className="bg-gray-100 border-b border-gray-300">
+                                <th className="border-r border-gray-300 py-3 font-semibold text-sm bg-white max-w-[140px]">Phòng</th>
+                                {days.slice(1).map((d) => (
+                                    <th key={d.value} className="border-r border-gray-300 py-3 font-semibold text-sm">
+                                        {d.label}<br /><span className="text-xs font-normal">{d.label.match(/\((.*?)\)/)?.[1]}</span>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rooms.map((room) => (
+                                <tr key={room._id || room.roomNumber} className="border-t border-gray-300">
+                                    <td className="border-r border-gray-300 py-5 font-medium text-gray-700 bg-gray-50 max-w-[140px]">
+                                        {room.roomNumber}
+                                    </td>
+                                    {days.slice(1).map((d) => {
+                                        // Tính ngày tương ứng với ô
+                                        // Lấy đúng ngày ISO cho từng cột
+                                        const cellDate = addOneDayToDateString(d.date);
+                                        const normalizeDate = (iso) => new Date(iso).toISOString().slice(0, 10);
+                                        const roomId = room._id || room.roomNumber;
+                                        const schedules = [
+                                            ...serverSchedules.filter(s =>
+                                                (s.room?._id === roomId || s.room?.roomNumber === room.roomNumber || s.room === roomId)
+                                                && normalizeDate(s.date) === cellDate
+                                                && s.shift === formData.shift
+                                            ).map(s => ({
+                                                ...s,
+                                                fullName: s.userId?.fullName || '',
+                                                specialty: s.userId?.specialtyName || '',
+                                            }))
+                                        ];
+                                        const isScheduled = schedules.length > 0;
 
-                        
-                        const handleCellBoxClick = () => {
-                            if (!isScheduled) {
-                                setIsEditMode(false); 
-                                return handleCellClick(room.roomNumber, d.date, null);
-                            }
-                            
-                            const allUserIds = schedules.map(s => s.userId?._id || s.userId).filter(Boolean);
-                            setModalForm({
-                                userId: allUserIds,
-                                room: roomId,
-                                shift: formData.shift,
-                                date: cellDate,
-                                _id: undefined 
-                            });
-                            setModalErrors({});
-                            setIsEditMode(true); 
-                            setModalOpen(true);
-                        };
 
-                        return (
-                            <td
-                                key={d.value}
-                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-pointer hover:bg-green-400' : 'cursor-pointer hover:bg-blue-50'}`}
-                                onClick={handleCellBoxClick}
-                            >
-                                {isScheduled ? (
-                                    <div className="text-xs text-white font-semibold text-center">
-                                        {schedules.map((s, idx) => {
-                                            const userNames = s.fullName ? s.fullName.split('_') : [];
-                                            return (
-                                                <div key={idx}>
-                                                    {userNames.length > 1 ? (
-                                                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2}}>
-                                                            {userNames.map((name, i) => {
-                                                                // Tìm đúng userId của nhân viên này trong schedules
-                                                                const userObj = Array.isArray(s.userId) ? s.userId[i] : s.userId;
-                                                                const userId = userObj?._id || userObj || (s.userId?._id || s.userId);
-                                                                return (
-                                                                    <div
-                                                                        key={i}
-                                                                        className={`hover:bg-white hover:text-black transition rounded cursor-pointer px-1`}
-                                                                        title={name.trim()}
-                                                                    onClick={e => {
-                                                                        e.stopPropagation();
-                                                                        setIsEditMode(true);
-                                                                        setModalForm({
-                                                                            userId: [userId],
-                                                                            room: s.room?._id || s.room,
-                                                                            shift: s.shift,
-                                                                            date: s.date,
-                                                                            _id: s._id
-                                                                        });
-                                                                        setModalErrors({});
-                                                                        setModalOpen(true);
-                                                                    }}
-                                                                    >
-                                                                        {name.trim()}
+                                        const handleCellBoxClick = () => {
+                                            if (!isScheduled) {
+                                                setIsEditMode(false);
+                                                return handleCellClick(room.roomNumber, addOneDayToDateString(d.date), null);
+                                            }
+
+                                            const allUserIds = schedules.map(s => s.userId?._id || s.userId).filter(Boolean);
+                                            setModalForm({
+                                                userId: allUserIds,
+                                                room: roomId,
+                                                shift: formData.shift,
+                                                date: cellDate,
+                                                _id: undefined
+                                            });
+                                            setModalErrors({});
+                                            setIsEditMode(true);
+                                            setModalOpen(true);
+                                        };
+
+                                        return (
+                                            <td
+                                                key={d.value}
+                                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-pointer hover:bg-green-400' : 'cursor-pointer hover:bg-blue-50'}`}
+                                                onClick={handleCellBoxClick}
+                                            >
+                                                {isScheduled ? (
+                                                    <div className="text-xs text-white font-semibold text-center">
+                                                        {schedules.map((s, idx) => {
+                                                            const userNames = s.fullName ? s.fullName.split('_') : [];
+                                                            return (
+                                                                <div key={idx}>
+                                                                    {userNames.length > 1 ? (
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                                                            {userNames.map((name, i) => {
+                                                                                // Tìm đúng userId của nhân viên này trong schedules
+                                                                                const userObj = Array.isArray(s.userId) ? s.userId[i] : s.userId;
+                                                                                const userId = userObj?._id || userObj || (s.userId?._id || s.userId);
+                                                                                return (
+                                                                                    <div
+                                                                                        key={i}
+                                                                                        className={`hover:bg-white hover:text-black transition rounded cursor-pointer px-1`}
+                                                                                        title={name.trim()}
+                                                                                        onClick={e => {
+                                                                                            e.stopPropagation();
+                                                                                            setIsEditMode(true);
+                                                                                            setModalForm({
+                                                                                                userId: [userId],
+                                                                                                room: s.room?._id || s.room,
+                                                                                                shift: s.shift,
+                                                                                                date: s.date,
+                                                                                                _id: s._id
+                                                                                            });
+                                                                                            setModalErrors({});
+                                                                                            setModalOpen(true);
+                                                                                        }}
+                                                                                    >
+                                                                                        {name.trim()}
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div
+                                                                            className="hover:bg-white hover:text-black transition rounded cursor-pointer"
+                                                                            title={s.fullName}
+                                                                            onClick={e => {
+                                                                                e.stopPropagation();
+                                                                                setIsEditMode(true);
+                                                                                const userId = s.userId?._id || s.userId;
+                                                                                setModalForm({
+                                                                                    userId: [userId],
+                                                                                    room: s.room?._id || s.room,
+                                                                                    shift: s.shift,
+                                                                                    date: s.date,
+                                                                                    _id: s._id
+                                                                                });
+                                                                                setModalErrors({});
+                                                                                setModalOpen(true);
+                                                                            }}
+                                                                        >
+                                                                            {s.fullName}
+                                                                        </div>
+                                                                    )}
+                                                                    {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
+                                                                    <div className="italic text-white text-xs">
+                                                                        {s.userId?.role === 'doctor' && 'Bác sĩ'}
+                                                                        {s.userId?.role === 'technician' && 'Kỹ thuật viên'}
+                                                                        {s.userId?.role === 'nursing' && 'Điều dưỡng'}
+                                                                        {(!s.userId?.role || (s.userId?.role !== 'doctor' && s.userId?.role !== 'technician' && s.userId?.role !== 'nursing')) && 'Nhân viên'}
                                                                     </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="hover:bg-white hover:text-black transition rounded cursor-pointer"
-                                                            title={s.fullName}
-                                                            onClick={e => {
-                                                                e.stopPropagation();
-                                                                setIsEditMode(true);
-                                                                const userId = s.userId?._id || s.userId;
-                                                                setModalForm({
-                                                                    userId: [userId],
-                                                                    room: s.room?._id || s.room,
-                                                                    shift: s.shift,
-                                                                    date: s.date,
-                                                                    _id: s._id
-                                                                });
-                                                                setModalErrors({});
-                                                                setModalOpen(true);
-                                                            }}
-                                                        >
-                                                            {s.fullName}
-                                                        </div>
-                                                    )}
-                                                    {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
-                                                    <div className="italic text-white text-xs">
-                                                        {s.userId?.role === 'doctor' && 'Bác sĩ'}
-                                                        {s.userId?.role === 'technician' && 'Kỹ thuật viên'}
-                                                        {s.userId?.role === 'nursing' && 'Điều dưỡng'}
-                                                        {(!s.userId?.role || (s.userId?.role !== 'doctor' && s.userId?.role !== 'technician' && s.userId?.role !== 'nursing')) && 'Nhân viên'}
+                                                                    {idx !== schedules.length - 1 && <hr className="my-1" />}
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    {idx !== schedules.length - 1 && <hr className="my-1" />}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : null}
-                            </td>
-                        );
-                    })}
-                </tr>
-            ))}
-        </tbody>
-    </table>
-</section>
+                                                ) : null}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
 
 
 
@@ -838,8 +856,8 @@ function HoverSingleName() {
                                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
                                             <option value="MORNING">Ca sáng (7h - 11h30)</option>
-                                            <option value="AFTERNOON">Ca trưa (11h30 - 13h30)</option>
-                                            <option value="EVENING">Ca chiều (13h30 - 17h)</option>
+                                            <option value="NOON">Ca trưa (11h30 - 13h30)</option>
+                                            <option value="AFTERNOON">Ca chiều (13h30 - 17h)</option>
                                         </select>
                                     </div>
                                 )}
@@ -956,7 +974,7 @@ function HoverSingleName() {
                                                 }
                                             }}
                                         >
-                                            Xóa 
+                                            Xóa
                                         </button>
                                     )}
                                     {modalForm._id && (

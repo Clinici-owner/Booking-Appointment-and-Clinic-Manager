@@ -60,11 +60,9 @@ const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProces
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
-const ScheduleListPage = React.lazy(() => import("../pages/ScheduleListPage"));
-const ScheduleDetailPage = React.lazy(() => import("../pages/ScheduleDetailPage"));
+
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
-const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
 const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
 const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
 
@@ -128,11 +126,8 @@ const AppRoute = [
   { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
   
   // Schedule Manager
-  { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
-  { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
   { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage},
 
   // Doctor
