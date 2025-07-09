@@ -462,19 +462,49 @@ function ScheduleAddPage() {
     function MultiSelectDropdown({ users, selected, onChange, placeholder = [], bookedUserIds = [], editMode = false }) {
     const [open, setOpen] = useState(false);
     const [hovered, setHovered] = useState(null);
+    const [localSelected, setLocalSelected] = useState(selected);
+
+    // Cập nhật localSelected khi prop selected thay đổi (đồng bộ hóa)
+    useEffect(() => {
+        setLocalSelected(selected);
+    }, [selected]);
+
     const handleToggle = () => setOpen(v => !v);
     const handleBlur = (e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
     };
-    // Ẩn khỏi dropdown những nhân viên đã được chọn lịch trình ở ca/phòng/ngày này (bookedUserIds)
-    // và cả những nhân viên đã được chọn trong form hiện tại (selected)
+
     const filteredUsers = users.filter(u =>
-        !(selected.includes(u._id) || bookedUserIds.includes(u._id))
+        !(localSelected.includes(u._id) || bookedUserIds.includes(u._id))
     );
+
+    // Hàm cập nhật database khi xóa/chọn nhân viên
+    const handleRemoveUser = async (userId) => {
+        const newSelected = localSelected.filter(id => id !== userId);
+        setLocalSelected(newSelected);
+        onChange(newSelected);
+        // Nếu đang ở edit mode (modalForm._id hoặc isEditMode), gọi API xóa schedule ngay
+        // (Chỉ xóa nếu đang chỉnh sửa, không xóa khi tạo mới)
+        if (editMode && typeof window !== 'undefined') {
+            try {
+                // Tìm scheduleId cần xóa (nếu có)
+                const scheduleId = window?.modalForm?._id;
+                if (scheduleId) {
+                    await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleId));
+                }
+            } catch (error) {
+                // Log lỗi ra console và hiển thị toast báo lỗi
+                console.error('Lỗi khi xóa lịch trình:', error);
+                if (typeof toast === 'function') {
+                    toast.error('Lỗi khi xóa lịch trình!');
+                }
+            }
+        }
+    };
 
     // Hiển thị tên đã chọn với dấu x để xóa từng nhân viên
     const renderSelectedNames = () => {
-        const selectedUsers = users.filter(u => selected.includes(u._id));
+        const selectedUsers = users.filter(u => localSelected.includes(u._id));
         if (!editMode) {
             return (
                 <div className="flex flex-wrap gap-1">
@@ -488,8 +518,7 @@ function ScheduleAddPage() {
                                 aria-label={`Xóa ${u.fullName}`}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    const newSelected = selected.filter(id => id !== u._id);
-                                    onChange(newSelected);
+                                    handleRemoveUser(u._id);
                                 }}
                             >
                                 ×
@@ -517,8 +546,7 @@ function ScheduleAddPage() {
                             aria-label={`Xóa ${u.fullName}`}
                             onClick={e => {
                                 e.stopPropagation();
-                                const newSelected = selected.filter(id => id !== u._id);
-                                onChange(newSelected);
+                                handleRemoveUser(u._id);
                             }}
                         >
                             ×
