@@ -229,7 +229,7 @@ class ScheduleController {
 
   async getTechnicianRoomServices(req, res) {
     try {
-      const { userId } = req.body;
+      const { userId } = req.params;
 
       if (!userId) {
         return res
@@ -269,6 +269,7 @@ class ScheduleController {
         room: room._id,
         status: "available",
       });
+      console.log(services);
 
       const serviceNames = services.map((service) => service.paraclinalName);
 
