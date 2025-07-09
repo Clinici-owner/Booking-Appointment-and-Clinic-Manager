@@ -62,11 +62,11 @@ function ScheduleAddPage() {
         // Nếu modal đang mở thì set giờ mặc định luôn
         if (modalOpen) {
             if (shift === 'MORNING') {
-                setModalForm((prev) => ({ ...prev, startTime: '07:00', endTime: '12:00' }));
+                setModalForm((prev) => ({ ...prev, startTime: '07:00', endTime: '11:30' }));
             } else if (shift === 'AFTERNOON') {
-                setModalForm((prev) => ({ ...prev, startTime: '13:00', endTime: '17:00' }));
+                setModalForm((prev) => ({ ...prev, startTime: '11:30', endTime: '13:30' }));
             } else if (shift === 'EVENING') {
-                setModalForm((prev) => ({ ...prev, startTime: '18:00', endTime: '21:00' }));
+                setModalForm((prev) => ({ ...prev, startTime: '13:30', endTime: '17:00' }));
             } else {
                 setModalForm((prev) => ({ ...prev, startTime: '', endTime: '' }));
             }
@@ -472,31 +472,57 @@ function ScheduleAddPage() {
         !(selected.includes(u._id) || bookedUserIds.includes(u._id))
     );
 
-    // Hiển thị tên đã chọn với hiệu ứng hover từng tên riêng biệt khi ở edit mode
+    // Hiển thị tên đã chọn với dấu x để xóa từng nhân viên
     const renderSelectedNames = () => {
         const selectedUsers = users.filter(u => selected.includes(u._id));
         if (!editMode) {
             return (
                 <div className="flex flex-wrap gap-1">
                     {selectedUsers.map(u => (
-                        <span key={u._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-block">
+                        <span key={u._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center">
                             {u.fullName}
+                            <button
+                                type="button"
+                                className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
+                                style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
+                                aria-label={`Xóa ${u.fullName}`}
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    const newSelected = selected.filter(id => id !== u._id);
+                                    onChange(newSelected);
+                                }}
+                            >
+                                ×
+                            </button>
                         </span>
                     ))}
                 </div>
             );
         }
-        // Edit mode: hover từng tên chỉ hiện đúng tên đó
+        // Edit mode: hover từng tên chỉ hiện đúng tên đó, vẫn cho xóa từng người
         return (
             <div className="flex flex-wrap gap-1">
                 {selectedUsers.map(u => (
                     <span
                         key={u._id}
-                        className={`bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-block transition-all duration-150 ${hovered === u._id ? 'bg-blue-600 text-white font-bold scale-110 z-10' : ''}`}
+                        className={`bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center transition-all duration-150 ${hovered === u._id ? 'bg-blue-600 text-white font-bold scale-110 z-10' : ''}`}
                         onMouseEnter={() => setHovered(u._id)}
                         onMouseLeave={() => setHovered(null)}
                     >
                         {hovered === u._id ? u.fullName : (selectedUsers.length === 1 ? u.fullName : hovered ? '' : u.fullName)}
+                        <button
+                            type="button"
+                            className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
+                            style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
+                            aria-label={`Xóa ${u.fullName}`}
+                            onClick={e => {
+                                e.stopPropagation();
+                                const newSelected = selected.filter(id => id !== u._id);
+                                onChange(newSelected);
+                            }}
+                        >
+                            ×
+                        </button>
                     </span>
                 ))}
             </div>
@@ -585,9 +611,9 @@ function HoverSingleName() {
                                 value={formData.shift}
                                 onChange={handleShiftChange}
                             >
-                                <option value="MORNING">Ca sáng (7h - 12h)</option>
-                                <option value="AFTERNOON">Ca trưa (13h - 17h)</option>
-                                <option value="EVENING">Ca chiều (18h - 21h)</option>
+                                <option value="MORNING">Ca sáng (7h - 11h30)</option>
+                                <option value="AFTERNOON">Ca trưa (11h30 - 13h30)</option>
+                                <option value="EVENING">Ca chiều (13h30 - 17h)</option>
                             </select>
                         </div>
                     </div>
@@ -783,9 +809,9 @@ function HoverSingleName() {
                                             onChange={handleModalFormChange}
                                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            <option value="MORNING">Ca sáng (7h - 12h)</option>
-                                            <option value="AFTERNOON">Ca trưa (13h - 17h)</option>
-                                            <option value="EVENING">Ca chiều (18h - 21h)</option>
+                                            <option value="MORNING">Ca sáng (7h - 11h30)</option>
+                                            <option value="AFTERNOON">Ca trưa (11h30 - 13h30)</option>
+                                            <option value="EVENING">Ca chiều (13h30 - 17h)</option>
                                         </select>
                                     </div>
                                 )}
