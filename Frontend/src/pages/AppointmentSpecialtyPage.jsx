@@ -9,6 +9,33 @@ import { getAllSchedules } from "../services/scheduleService";
 import BannerName from "../components/BannerName";
 
 import CheckIcon from "@mui/icons-material/Check";
+
+const generateTimeRanges = (start, end, stepMinutes) => {
+  const result = [];
+  let [hour, minute] = start.split(":").map(Number);
+  const [endHour, endMinute] = end.split(":").map(Number);
+
+  while (hour < endHour || (hour === endHour && minute < endMinute)) {
+    const startTime = `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
+
+    minute += stepMinutes;
+    if (minute >= 60) {
+      hour++;
+      minute %= 60;
+    }
+
+    const endTime = `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
+
+    result.push(`${startTime} - ${endTime}`);
+  }
+
+  return result;
+};
+
 function AppointmentSpecialtyPage() {
   const { id } = useParams();
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -17,19 +44,26 @@ function AppointmentSpecialtyPage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [scheduleByDoctor, setScheduleByDoctor] = useState([]);
+  const [expandedSchedules, setExpandedSchedules] = useState({});
 
   const selectDoctor = (doctorId) => {
-  setSelectedDoctorId(doctorId);
+    setSelectedDoctorId(doctorId);
 
-  const matched = schedules.filter(
-    (schedule) => schedule.userId._id === doctorId
-  );
+    const matched = schedules.filter(
+      (schedule) => schedule.userId._id === doctorId
+    );
 
-  console.log("Matched schedules:", matched);
-  
-  setScheduleByDoctor(matched); // luôn ghi đè mới
-};
+    console.log("Matched schedules:", matched);
 
+    setScheduleByDoctor(matched); // luôn ghi đè mới
+  };
+
+  const toggleSchedule = (id) => {
+    setExpandedSchedules((prev) => ({
+      ...prev,
+      [id]: !prev[id], // toggle true/false
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -244,32 +278,79 @@ function AppointmentSpecialtyPage() {
               </div>
               {/* Thời gian làm việc của bác sĩ */}
               <div className="mt-6">
-                <h3 className="text-xl font-semibold text-custom-blue mb-4">
+                <h3 className="text-2xl font-bold text-custom-blue mb-6">
                   Thời gian làm việc
                 </h3>
                 {scheduleByDoctor.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul className="space-y-6">
                     {scheduleByDoctor.map((schedule) => (
-                      <li key={schedule._id} className="border-b py-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-700">
-                            {new Date(schedule.date).toLocaleDateString()} -{" "}
-                            {schedule.shift === "MORNING"
-                              ? "Sáng "
-                              : schedule.shift === "AFTERNOON"
-                              ? "Chiều"
-                              : "Tối"}
+                      <li
+                        key={schedule._id}
+                        className="p-4 rounded-xl border border-custom-blue shadow-sm bg-white hover:shadow-md transition"
+                      >
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-gray-800 font-medium text-base">
+                              {new Date(schedule.date).toLocaleDateString()}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                                schedule.shift === "MORNING"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : schedule.shift === "AFTERNOON"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-purple-100 text-purple-800"
+                              }`}
+                            >
+                              {schedule.shift === "MORNING"
+                                ? "Buổi sáng"
+                                : schedule.shift === "AFTERNOON"
+                                ? "Buổi chiều"
+                                : "Buổi tối"}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500 mt-1 md:mt-0">
+                            Phòng: <strong>{schedule.room.roomNumber}</strong>
                           </span>
-                          <span className="text-gray-500">
-                            Phòng: {schedule.room.roomNumber}
-                          </span>
-                          <Link
-                            to={`/appointment/${schedule._id}`}
-                            className="text-custom-blue hover:underline"
-                          >
-                            Xem chi tiết
-                          </Link>
                         </div>
+
+                        {schedule.shift === "MORNING" ? (
+                          <>
+                            <button
+                              className="text-sm text-blue-600 hover:underline font-medium mt-2"
+                              onClick={() => toggleSchedule(schedule._id)}
+                            >
+                              {expandedSchedules[schedule._id]
+                                ? "Ẩn khung giờ"
+                                : "Xem khung giờ"}
+                            </button>
+
+                            {expandedSchedules[schedule._id] && (
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+                                {generateTimeRanges("07:00", "10:30", 30).map(
+                                  (range, index) => (
+                                    <button
+                                      key={index}
+                                      className="border border-blue-300 rounded-lg py-2 text-sm text-gray-700 hover:bg-blue-50 hover:border-blue-500 transition"
+                                      // onClick={() => handleSelectTime(schedule._id, range)}
+                                    >
+                                      {range}
+                                    </button>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="mt-2">
+                            <Link
+                              to={`/appointment/${schedule._id}`}
+                              className="text-blue-600 hover:underline text-sm font-medium"
+                            >
+                              Xem chi tiết
+                            </Link>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
