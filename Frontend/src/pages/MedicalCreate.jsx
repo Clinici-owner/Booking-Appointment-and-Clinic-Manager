@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "sonner";
-import { getAvailableRooms } from "../services/medicalService";  
+import { getAvailableRooms } from "../services/medicalService";
 import {
-  Container,
   TextField,
   Button,
   Typography,
   Alert,
-  Box,
   Paper,
   MenuItem,
 } from "@mui/material";
@@ -18,12 +16,23 @@ const MedicCreatePage = () => {
   const [form, setForm] = useState({
     name: "",
     price: "",
-    room: "",  // Không cần specialty nữa
+    room: "",
   });
   const [errorMsg, setErrorMsg] = useState("");
-  const [availableRooms, setAvailableRooms] = useState([]);  // Khởi tạo là mảng rỗng
+  const [availableRooms, setAvailableRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Lấy user từ sessionStorage
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  // Kiểm tra quyền truy cập
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      toast.error("Bạn không có quyền truy cập trang này.");
+      navigate("/"); // hoặc "/unauthorized"
+    }
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -40,11 +49,15 @@ const MedicCreatePage = () => {
         setAvailableRooms(rooms);
       } else {
         setAvailableRooms([]);
-        toast.error("Tất cả các phòng đã được sử dụng hết.");
+        toast.error("Tất cả các phòng đã được sử dụng hết.", {
+          id: "no-rooms"
+        });
       }
     } catch (error) {
       setAvailableRooms([]);
-      toast.error("Không thể tải danh sách phòng: " + error.message);
+      toast.error("Không thể tải danh sách phòng: " + error.message, {
+        id: "fetch-error"
+      });
     } finally {
       setLoading(false);
     }
@@ -52,7 +65,7 @@ const MedicCreatePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.room) {  // Không cần kiểm tra specialty
+    if (!form.name || !form.price || !form.room) {
       setErrorMsg("Vui lòng điền đầy đủ thông tin.");
       return;
     }
@@ -72,8 +85,10 @@ const MedicCreatePage = () => {
   };
 
   useEffect(() => {
-    fetchRooms();
-  }, []);
+    if (user?.role === "admin") {
+      fetchRooms();
+    }
+  }, [user]);
 
   return (
     <div className="w-full">

@@ -51,6 +51,7 @@ export const ROUTE_PATH = {
   UPDATE_SCHEDULE: '/admin/schedules/update',
   SCHEDULE_DETAIL: '/admin/schedules/detail',
   OWN_SCHEDULE: '/schedules/own',
+  ROOM_SCHEDULE: '/schedules/room',
   
 
   //Doctor
