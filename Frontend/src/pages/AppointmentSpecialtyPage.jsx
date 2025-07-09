@@ -4,19 +4,32 @@ import { Link, useParams } from "react-router-dom";
 
 import { getSpecialtyById } from "../services/specialtyService";
 import { DoctorService } from "../services/doctorService";
+import { getAllSchedules } from "../services/scheduleService";
 
 import BannerName from "../components/BannerName";
 
-import CheckIcon from '@mui/icons-material/Check';
+import CheckIcon from "@mui/icons-material/Check";
 function AppointmentSpecialtyPage() {
   const { id } = useParams();
   const user = JSON.parse(sessionStorage.getItem("user"));
   const [specialty, setSpecialty] = useState(null);
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
+  const [schedules, setSchedules] = useState([]);
+  const [scheduleByDoctor, setScheduleByDoctor] = useState([]);
+
   const selectDoctor = (doctorId) => {
-    setSelectedDoctorId(doctorId); // chọn mới -> ghi đè
-  };
+  setSelectedDoctorId(doctorId);
+
+  const matched = schedules.filter(
+    (schedule) => schedule.userId._id === doctorId
+  );
+
+  console.log("Matched schedules:", matched);
+  
+  setScheduleByDoctor(matched); // luôn ghi đè mới
+};
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,17 +43,24 @@ function AppointmentSpecialtyPage() {
     const fetchDoctors = async () => {
       try {
         const response = await DoctorService.getDoctorsBySpecialty(id);
-        console.log("Fetched doctors:", response);
-
         setDoctors(response);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách bác sĩ:", err);
+      }
+    };
+    const fetchSchedules = async () => {
+      try {
+        const response = await getAllSchedules();
+        setSchedules(response);
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách lịch:", err);
       }
     };
 
     if (id) {
       fetchData(); // chỉ gọi khi có id
       fetchDoctors();
+      fetchSchedules();
     }
   }, [id]);
 
@@ -220,6 +240,41 @@ function AppointmentSpecialtyPage() {
                         </Link>
                       </div>
                     )
+                )}
+              </div>
+              {/* Thời gian làm việc của bác sĩ */}
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold text-custom-blue mb-4">
+                  Thời gian làm việc
+                </h3>
+                {scheduleByDoctor.length > 0 ? (
+                  <ul className="space-y-2">
+                    {scheduleByDoctor.map((schedule) => (
+                      <li key={schedule._id} className="border-b py-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">
+                            {new Date(schedule.date).toLocaleDateString()} -{" "}
+                            {schedule.shift === "MORNING"
+                              ? "Sáng "
+                              : schedule.shift === "AFTERNOON"
+                              ? "Chiều"
+                              : "Tối"}
+                          </span>
+                          <span className="text-gray-500">
+                            Phòng: {schedule.room.roomNumber}
+                          </span>
+                          <Link
+                            to={`/appointment/${schedule._id}`}
+                            className="text-custom-blue hover:underline"
+                          >
+                            Xem chi tiết
+                          </Link>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">Không có lịch hẹn nào.</p>
                 )}
               </div>
             </div>
