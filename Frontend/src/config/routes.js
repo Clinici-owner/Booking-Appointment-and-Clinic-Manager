@@ -63,7 +63,7 @@ const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
-
+const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
 const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
@@ -128,6 +128,7 @@ const AppRoute = [
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage},
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },

@@ -48,6 +48,7 @@ export const ROUTE_PATH = {
   //Schedule manager
   ADD_SCHEDULE: '/admin/schedules/add',
   OWN_SCHEDULE: '/schedules/own',
+  ROOM_SCHEDULE: '/schedules/room',
   
 
   //Doctor

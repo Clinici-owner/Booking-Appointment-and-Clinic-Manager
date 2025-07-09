@@ -30,24 +30,6 @@ class medicalProcessController {
         }
     }
 
-    async updateProcessStep(req, res) {
-        const { stepId } = req.params;
-        const { isCompleted } = req.body;
-        try {
-            const processStep = await ProcessStep.findByIdAndUpdate(
-                stepId,
-                { isCompleted },
-                { new: true }
-            );
-            if (!processStep) {
-                return res.status(404).json({ message: "Process step not found" });
-            }
-            res.status(200).json(processStep);
-        } catch (error) {
-            console.error("Error updating process step:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    }
 
     async getAllMedicalProcesses(req, res) {
         try {
@@ -118,25 +100,6 @@ class medicalProcessController {
             res.status(200).json(medicalProcess);
         } catch (error) {
             console.error("Error updating medical process status:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    }
-
-    updateMedicalProcessCurrentStep = async (req, res) => {
-        const { processId } = req.params;
-        const { currentStep } = req.body;
-        try {
-            const medicalProcess = await MedicalProcess.findByIdAndUpdate(
-                processId,
-                { currentStep },
-                { new: true }
-            );
-            if (!medicalProcess) {
-                return res.status(404).json({ message: "Medical process not found" });
-            }
-            res.status(200).json(medicalProcess);
-        } catch (error) {
-            console.error("Error updating medical process current step:", error);
             res.status(500).json({ message: "Internal server error" });
         }
     }

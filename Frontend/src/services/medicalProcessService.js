@@ -47,17 +47,6 @@ export const MedicalProcessService = {
       );
     }
   },
-  updateMedicalStep: async (stepId, updateData) => {
-    try {
-      const response = await axios.post(`${API_URL}/step/update/${stepId}`, updateData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating medical step:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to update medical step"
-      );
-    }
-  },
   updateMedicalProcessStatus : async (processId, status) => {
     try {
       const response = await axios.post(`${API_URL}/updateStatus/${processId}`, { status });
@@ -69,15 +58,4 @@ export const MedicalProcessService = {
       );
     }
   },
-  updateMedicalProcessCurrentStep: async (processId, currentStep) => {
-    try {
-      const response = await axios.post(`${API_URL}/updateCurrentStep/${processId}`, { currentStep });
-      return response.data;
-    } catch (error) {
-      console.error("Error updating medical process current step:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to update medical process current step"
-      );
-    }
-  }
 };
