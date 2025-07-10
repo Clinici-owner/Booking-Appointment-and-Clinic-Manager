@@ -79,4 +79,9 @@ export const ROUTE_PATH = {
 
   //Technician
   TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
+
+  //Patient
+
+  PATIENT_MY_PROCESS: '/MyProcess',
+
 };
