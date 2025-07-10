@@ -1,26 +1,50 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:3000/api/schedule';
+const SCHEDULE_API_URL = "http://localhost:3000/api/schedules";
+const PROCESS_API_URL = "http://localhost:3000/api/medicalProcess";
 
 const stepProcessService = {
+
   async getTechnicianRoomServices() {
     try {
-      const user = JSON.parse(sessionStorage.getItem("user"));
+      const userStr = sessionStorage.getItem("user");
+      if (!userStr) throw new Error("Không tìm thấy thông tin người dùng.");
 
-      if (!user || !user._id) {
-        throw new Error("Không tìm thấy userId trong sessionStorage");
-      }
+      const user = JSON.parse(userStr);
+      if (!user._id) throw new Error("Không có userId hợp lệ.");
 
-      const response = await axios.post(`${API_URL}/room`, {
-        userId: user._id
-      });
-
+      const response = await axios.get(`${SCHEDULE_API_URL}/room/${user._id}`);
       return response.data;
     } catch (error) {
-      console.error('Lỗi khi gọi API stepProcess:', error.response?.data || error.message);
+      console.error(
+        "Lỗi khi gọi API stepProcess:",
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message
+      );
       throw error;
     }
-  }
+  },
+
+  /**
+   * @param {string} userId 
+   */
+  async completeCurrentStep(userId) {
+    try {
+      if (!userId) throw new Error("Thiếu userId khi gọi completeStep.");
+
+      const response = await axios.post(`${PROCESS_API_URL}/complete-step/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Lỗi khi gọi completeCurrentStep:",
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message
+      );
+      throw error;
+    }
+  },
 };
 
 export default stepProcessService;
