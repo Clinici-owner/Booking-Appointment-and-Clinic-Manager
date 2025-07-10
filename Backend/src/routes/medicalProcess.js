@@ -11,6 +11,6 @@ router.get('/:processId', medicalProcessController.getMedicalProcessById);
 router.post('/step/create', medicalProcessController.createProcessStep);
 
 router.post('/complete-step/:userId', medicalProcessController.completeCurrentStep);
-
+router.get("/my-process/:userId", medicalProcessController.getPatientMedicalProcess);
 module.exports = router;
 

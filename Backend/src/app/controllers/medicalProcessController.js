@@ -196,7 +196,62 @@ class medicalProcessController {
       console.error("Lỗi khi hoàn thành bước khám:", error);
       return res.status(500).json({ message: "Lỗi máy chủ." });
     }
+  };
+
+  async getPatientMedicalProcess(req, res) {
+  const { userId } = req.params; 
+
+  try {
+    const medicalProcess = await MedicalProcess.findOne({
+      patientId: userId,
+    })
+      .sort({ createdAt: -1 })
+      .populate("doctorId", "fullName email avatar") 
+      .populate({
+        path: "processSteps",
+        populate: {
+          path: "serviceId",
+          populate: { path: "room" },
+        },
+      });
+
+    if (!medicalProcess) {
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy tiến trình khám bệnh." });
+    }
+
+    const processInfo = {
+      processId: medicalProcess._id,
+      doctor: {
+        fullName: medicalProcess.doctorId.fullName,
+        email: medicalProcess.doctorId.email,
+        avatar: medicalProcess.doctorId.avatar,
+      },
+      status: medicalProcess.status,
+      currentStep: medicalProcess.currentStep,
+      totalSteps: medicalProcess.processSteps.length,
+      steps: medicalProcess.processSteps.map((step, index) => ({
+        stepNumber: index + 1,
+        isCompleted: step.isCompleted,
+        serviceName: step.serviceId?.paraclinalName || "Không xác định",
+        roomId: step.serviceId?.room?._id,
+        roomNumber: step.serviceId?.room?.roomNumber,
+        roomName: step.serviceId?.room?.roomName || "Chưa phân phòng",
+        notes: step.notes,
+        createdAt: step.createdAt,
+      })),
+      startedAt: medicalProcess.createdAt,
+      updatedAt: medicalProcess.updatedAt,
+    };
+
+    return res.status(200).json(processInfo);
+  } catch (error) {
+    console.error("Lỗi khi lấy tiến trình của bệnh nhân:", error);
+    return res.status(500).json({ message: "Lỗi máy chủ." });
   }
+};
+
 }
 
 module.exports = new medicalProcessController();
