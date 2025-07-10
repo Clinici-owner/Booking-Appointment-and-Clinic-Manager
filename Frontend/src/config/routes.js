@@ -59,6 +59,7 @@ const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessL
 const MedicalProcessDetailPage = React.lazy(() => import("../pages/MyProcessPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
+const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
@@ -157,7 +158,8 @@ const AppRoute = [
 
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
- 
+  // Create Medical History
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: DoctorLayout },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},

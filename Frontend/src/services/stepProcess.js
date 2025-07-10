@@ -45,6 +45,32 @@ const stepProcessService = {
       throw error;
     }
   },
-};
+
+  getTodayProcessStepsByRoom: async () => {
+    const roomData = await stepProcessService.getTechnicianRoomServices();
+    const roomId = roomData?.roomId || roomId;
+    try {
+      const response = await axios.get(`${PROCESS_API_URL}/process-steps/today/${roomId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching today's process steps by room:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch today's process steps by room"
+      );
+    }
+  },
+
+  updateProcessStepNotes: async (stepId, notes) => {
+    try {
+      const response = await axios.post(`${PROCESS_API_URL}/step/update-notes/${stepId}`, { notes });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating process step notes:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to update process step notes"
+      );
+    }
+  }
+}
 
 export default stepProcessService;

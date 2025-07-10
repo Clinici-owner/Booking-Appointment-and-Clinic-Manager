@@ -4,26 +4,86 @@ const Room = require("../models/Room");
 const ParaclinicalService = require("../models/ParaclinicalService");
 
 class medicalProcessController {
+  async getTodayProcessStepsByRoom(req, res) {
+    const { roomId } = req.params;
 
-    async createProcessStep(req, res) {
-        const { serviceId, notes, patientId, isFirstStep } = req.body;
-        try {
-            const processStep = new ProcessStep({
-                serviceId,
-                notes
-            });
-            await processStep.save();
+    try {
+      // Lấy ngày bắt đầu và kết thúc của hôm nay
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
 
-            // Chỉ thêm vào hàng đợi nếu là bước đầu tiên
-            if (isFirstStep) {
-                const service = await ParaclinicalService.findById(serviceId).populate('room');
-                if (service && service.room) {
-                    await Room.updateOne(
-                        { _id: service.room._id },
-                        { $push: { patientQueue: patientId } }
-                    );
-                }
-            }
+      // Tìm các ProcessStep có serviceId liên quan đến roomId
+      // Giả sử ProcessStep có trường serviceId tham chiếu ParaclinicalService, và ParaclinicalService có trường room
+      // Cần populate để lọc theo roomId
+      const steps = await ProcessStep.find({
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      }).populate({
+        path: "serviceId",
+        populate: { path: "room" },
+      });
+
+      // Lọc các step có serviceId.room._id === roomId
+      const filteredSteps = steps.filter(
+        (step) =>
+          step.serviceId &&
+          step.serviceId.room &&
+          String(step.serviceId.room._id) === String(roomId)
+      );
+
+      // Lấy danh sách bệnh nhân liên quan đến các bước quy trình này
+      // Giả sử mỗi step có trường patient hoặc serviceId có patient, nếu không thì cần truy vấn MedicalProcess
+      // Ở đây sẽ truy vấn MedicalProcess để lấy patient cho từng step
+      const stepIds = filteredSteps.map((step) => step._id);
+      const medicalProcesses = await MedicalProcess.find({
+        processSteps: { $in: stepIds },
+      }).populate("patientId");
+
+      // Map stepId -> patient
+      const stepIdToPatient = {};
+      medicalProcesses.forEach((mp) => {
+        mp.processSteps.forEach((psId) => {
+          if (stepIds.find((id) => String(id) === String(psId))) {
+            stepIdToPatient[String(psId)] = mp.patientId;
+          }
+        });
+      });
+
+      // Gắn patient vào từng step
+      const stepsWithPatient = filteredSteps.map((step) => ({
+        ...step.toObject(),
+        patient: stepIdToPatient[String(step._id)] || null,
+      }));
+
+      return res.status(200).json(stepsWithPatient);
+    } catch (error) {
+      console.error("Lỗi khi lấy các bước quy trình theo roomId:", error);
+      return res.status(500).json({ message: "Lỗi máy chủ." });
+    }
+  }
+
+  async createProcessStep(req, res) {
+    const { serviceId, notes, patientId, isFirstStep } = req.body;
+    try {
+      const processStep = new ProcessStep({
+        serviceId,
+        notes,
+      });
+      await processStep.save();
+
+      // Chỉ thêm vào hàng đợi nếu là bước đầu tiên
+      if (isFirstStep) {
+        const service = await ParaclinicalService.findById(serviceId).populate(
+          "room"
+        );
+        if (service && service.room) {
+          await Room.updateOne(
+            { _id: service.room._id },
+            { $push: { patientQueue: patientId } }
+          );
+        }
+      }
 
       res.status(201).json(processStep);
     } catch (error) {
@@ -182,7 +242,7 @@ class medicalProcessController {
         const nextRoom = nextStep.serviceId?.room;
         if (nextRoom) {
           await Room.findByIdAndUpdate(nextRoom._id, {
-            $addToSet: { patientQueue: userId }, 
+            $addToSet: { patientQueue: userId },
           });
         }
       }
@@ -252,6 +312,30 @@ class medicalProcessController {
   }
 };
 
+
+  async updateProcessStepNotes(req, res) {
+    const { stepId } = req.params;
+    const { notes } = req.body;
+
+    try {
+      const processStep = await ProcessStep.findById(stepId);
+      if (!processStep) {
+        return res
+          .status(404)
+          .json({ message: "Bước quy trình không tồn tại." });
+      }
+
+      processStep.notes = notes;
+      await processStep.save();
+
+      return res
+        .status(200)
+        .json({ message: "Cập nhật ghi chú bước quy trình thành công." });
+    } catch (error) {
+      console.error("Lỗi khi cập nhật ghi chú bước quy trình:", error);
+      return res.status(500).json({ message: "Lỗi máy chủ." });
+    }
+  }
 }
 
 module.exports = new medicalProcessController();
