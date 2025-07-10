@@ -13,6 +13,6 @@ router.post('/step/update-notes/:stepId', medicalProcessController.updateProcess
 router.post('/complete-step/:userId', medicalProcessController.completeCurrentStep);
 
 router.get('/process-steps/today/:roomId', medicalProcessController.getTodayProcessStepsByRoom);
-
+router.get("/my-process/:userId", medicalProcessController.getPatientMedicalProcess);
 module.exports = router;
 

@@ -82,4 +82,9 @@ export const ROUTE_PATH = {
 
   //Medical history
   LIST_MEDICAL_STEPS_TODAY_BY_ROOM: '/medical-process/steps/today',
+
+  //Patient
+
+  PATIENT_MY_PROCESS: '/MyProcess',
+
 };
