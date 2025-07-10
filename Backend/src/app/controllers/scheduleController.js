@@ -278,6 +278,7 @@ class ScheduleController {
       }).select("fullName email");
 
       return res.status(200).json({
+        roomId: room._id,
         roomNumber: room.roomNumber,
         roomName: room.roomName,
         services: serviceNames,
