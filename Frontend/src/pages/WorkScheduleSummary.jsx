@@ -127,7 +127,7 @@ const WorkScheduleSummary = () => {
           </>
         ) : (
           <Typography color="text.secondary">
-            Hôm nay là ngày nghĩ.
+            Hôm nay là ngày nghỉ.
           </Typography>
         )}
       </Paper>
