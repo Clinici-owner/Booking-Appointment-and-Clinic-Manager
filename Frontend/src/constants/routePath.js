@@ -74,8 +74,9 @@ export const ROUTE_PATH = {
   //Appointment for patient
   APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',
   HEALTH_PACKAGE_LIST: '/health-packages-list',
-
   APPOINTMENT_PAYMENT: '/appointment-payment',
+  APPOINTMENT_PATIENT: '/appointment-patient',
+  APPOINTMENT_DETAIL: '/appointment-patient/appointment-detail/:id',
   // 404
   NOT_FOUND: '*',
 

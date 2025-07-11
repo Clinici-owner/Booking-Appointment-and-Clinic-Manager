@@ -314,6 +314,11 @@ function AppointmentPayment() {
             Sau khi chuyển khoản, vui lòng chờ xác nhận thanh toán trong vòng 10
             giây.
           </p>
+          <p className="mt-2 pt-1 text-red-600 font-semibold">
+            Vui lòng tới sớm 15 phút trước giờ khám đã hẹn. Nếu có bất kỳ thay đổi nào về
+            lịch khám, chúng tôi sẽ thông báo qua số điện thoại hoặc email đã
+            cung cấp.
+          </p>
         </div>
       </div>
 

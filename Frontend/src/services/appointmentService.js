@@ -30,7 +30,7 @@ const appointmentService = {
 
   getAppointmentById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/appointments/${id}`);
+      const response = await axios.get(`${API_URL}/${id}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching appointment by ID:", error);
@@ -66,7 +66,18 @@ const appointmentService = {
       console.error("Error fetching appointments by specialty:", error);
       throw error;
     }
+  },
+
+  getAppointmentsByPatient: async (patientId) => {
+    try {
+      const response = await axios.get(`${API_URL}/patient/${patientId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching appointments by patient:", error);
+      throw error;
+    }
   }
+
 };
 
 export default appointmentService;

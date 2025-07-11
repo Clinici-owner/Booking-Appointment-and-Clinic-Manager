@@ -100,3 +100,13 @@ export const getSchedulesBySpecialtyAndDate = async (specialtyId, date) => {
         throw error;
     }
 };
+
+export const getScheduleByDoctorAndShiftAndDate = async (doctorId, shift, date) => {
+    try {
+        const res = await axios.get(`${API_URL}/schedule-by-doctor/${doctorId}/${shift}/${date}`);
+        return res.data; 
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch trình theo bác sĩ, ca và ngày:', error);
+        throw error;
+    }
+};

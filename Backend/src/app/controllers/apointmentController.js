@@ -28,10 +28,10 @@ class AppointmentController {
   async getAppointments(req, res) {
     try {
       const appointments = await Appointment.find()
-        .populate('patientId', 'name email')
-        .populate('doctorId', 'name email')
-        .populate('specialties', 'name')
-        .populate('healthPackage', 'packageName packagePrice');
+        .populate('patientId')
+        .populate('doctorId')
+        .populate('specialties')
+        .populate('healthPackage');
 
       res.status(200).json(appointments);
     } catch (error) {
@@ -44,10 +44,10 @@ class AppointmentController {
     try {
       const { id } = req.params;
       const appointment = await Appointment.findById(id)
-        .populate('patientId', 'name email')
-        .populate('doctorId', 'name email')
-        .populate('specialties', 'name')
-        .populate('healthPackage', 'packageName packagePrice');
+        .populate('patientId')
+        .populate('doctorId')
+        .populate('specialties')
+        .populate('healthPackage');
 
       if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
 
@@ -100,6 +100,21 @@ class AppointmentController {
       res.status(200).json(appointments);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo chuyên khoa', error });
+    }
+  }
+
+  //lấy lịch hẹn theo bệnh nhân
+  async getAppointmentsByPatient(req, res) {
+    try {
+      const { patientId } = req.params;
+      const appointments = await Appointment.find({ patientId })
+        .populate('doctorId')
+        .populate('specialties')
+        .populate('healthPackage');
+
+      res.status(200).json(appointments);
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo bệnh nhân', error });
     }
   }
 }
