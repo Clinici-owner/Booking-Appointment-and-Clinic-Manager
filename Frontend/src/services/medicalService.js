@@ -30,9 +30,14 @@ export const listService = async () => {
 
 export const editMedicalService = async (id, data) => {
   try {
-    const res = await axios.put(`${API_URL}/${id}`, data, {
+    const res = await axios.put(`${API_URL}/${id}`, {
+      name: data.name,          
+      price: data.price,       
+      room: data.room,          
+      status: data.status       
+    }, {
       headers: {
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json',
       },
     });
     return res.data;
