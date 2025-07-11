@@ -74,9 +74,19 @@ export const ROUTE_PATH = {
   //Appointment for patient
   APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',
   HEALTH_PACKAGE_LIST: '/health-packages-list',
+
+  APPOINTMENT_PAYMENT: '/appointment-payment',
   // 404
   NOT_FOUND: '*',
 
   //Technician
   TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
+
+  //Medical history
+  LIST_MEDICAL_STEPS_TODAY_BY_ROOM: '/medical-process/steps/today',
+
+  //Patient
+
+  PATIENT_MY_PROCESS: '/MyProcess',
+
 };
