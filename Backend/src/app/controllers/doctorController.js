@@ -6,7 +6,7 @@ class doctorController {
     const { id } = req.params;
     try {
       const doctorProfile = await DoctorProfile.findOne({ doctorId: id })
-        .populate("certificateId");
+        .populate("certificateId specialties doctorId");
       if (!doctorProfile) {
         return res.status(404).json({ message: "Doctor profile not found" });
       }

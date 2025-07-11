@@ -88,3 +88,15 @@ export const getSchedulesForRoomAndDay = async (roomId, day) => {
         throw error;
     }
 };
+
+export const getSchedulesBySpecialtyAndDate = async (specialtyId, date) => {
+    try {
+        const res = await axios.get(`${API_URL}/schedule-by-specialty/${specialtyId}`, {
+            params: { date }
+        });
+        return res.data; 
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch trình theo chuyên khoa và ngày:', error);
+        throw error;
+    }
+};
