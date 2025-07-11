@@ -474,10 +474,11 @@ function ScheduleAddPage() {
     // MultiSelectDropdown component for user selection by role
     function MultiSelectDropdown({ users, selected, onChange, placeholder = [], bookedUserIds = [], editMode = false }) {
         const [open, setOpen] = useState(false);
-        const [hovered, setHovered] = useState(null);
         const [localSelected, setLocalSelected] = useState(selected);
 
-        // Cập nhật localSelected khi prop selected thay đổi (đồng bộ hóa)
+        // Nhận thêm prop roleLock (vai trò được phép chỉnh sửa), truyền từ ngoài vào
+        const roleLock = arguments.length > 1 && arguments[1] && arguments[1].roleLock;
+
         useEffect(() => {
             setLocalSelected(selected);
         }, [selected]);
@@ -493,20 +494,18 @@ function ScheduleAddPage() {
 
         // Hàm cập nhật database khi xóa/chọn nhân viên
         const handleRemoveUser = async (userId) => {
+            const user = users.find(u => u._id === userId);
+            if (editMode && roleLock && user && user.role !== roleLock) return;
             const newSelected = localSelected.filter(id => id !== userId);
             setLocalSelected(newSelected);
             onChange(newSelected);
-            // Nếu đang ở edit mode (modalForm._id hoặc isEditMode), gọi API xóa schedule ngay
-            // (Chỉ xóa nếu đang chỉnh sửa, không xóa khi tạo mới)
             if (editMode && typeof window !== 'undefined') {
                 try {
-                    // Tìm scheduleId cần xóa (nếu có)
                     const scheduleId = window?.modalForm?._id;
                     if (scheduleId) {
                         await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleId));
                     }
                 } catch (error) {
-                    // Log lỗi ra console và hiển thị toast báo lỗi
                     console.error('Lỗi khi xóa lịch trình:', error);
                     if (typeof toast === 'function') {
                         toast.error('Lỗi khi xóa lịch trình!');
@@ -519,40 +518,16 @@ function ScheduleAddPage() {
         const renderSelectedNames = () => {
             const selectedUsers = users.filter(u => localSelected.includes(u._id));
             if (selectedUsers.length === 0) return null;
-            if (!editMode) {
-                return (
-                    <div className="flex flex-wrap gap-1 mb-1">
-                        {selectedUsers.map(u => (
-                            <span key={u._id} className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center">
-                                {u.fullName}
-                                <button
-                                    type="button"
-                                    className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
-                                    style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
-                                    aria-label={`Xóa ${u.fullName}`}
-                                    onClick={e => {
-                                        e.stopPropagation();
-                                        handleRemoveUser(u._id);
-                                    }}
-                                >
-                                    ×
-                                </button>
-                            </span>
-                        ))}
-                    </div>
-                );
-            }
-            // Edit mode: hover từng tên chỉ hiện đúng tên đó, vẫn cho xóa từng người
             return (
                 <div className="flex flex-wrap gap-1 mb-1">
                     {selectedUsers.map(u => (
                         <span
                             key={u._id}
-                            className={`bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center transition-all duration-150 ${hovered === u._id ? 'bg-blue-600 text-white font-bold scale-110 z-10' : ''}`}
-                            onMouseEnter={() => setHovered(u._id)}
-                            onMouseLeave={() => setHovered(null)}
+                            className={
+                                `bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white hover:scale-105 hover:z-10`
+                            }
                         >
-                            {hovered === u._id ? u.fullName : (selectedUsers.length === 1 ? u.fullName : hovered ? '' : u.fullName)}
+                            {u.fullName}
                             <button
                                 type="button"
                                 className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
@@ -562,6 +537,7 @@ function ScheduleAddPage() {
                                     e.stopPropagation();
                                     handleRemoveUser(u._id);
                                 }}
+                                disabled={editMode && roleLock && u.role !== roleLock}
                             >
                                 ×
                             </button>
@@ -577,17 +553,25 @@ function ScheduleAddPage() {
                 {renderSelectedNames()}
                 <button
                     type="button"
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px]"
-                    onClick={handleToggle}
+                    className={`w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px] relative ${editMode && roleLock ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    onClick={editMode && roleLock ? undefined : handleToggle}
+                    disabled={editMode && roleLock}
                 >
                     {selected && selected.length > 0 && users.filter(u => selected.includes(u._id)).length > 0 ? (
-                        <span className="text-gray-900">{selected.length} đã chọn</span>
+                        (() => {
+                            const selectedUsers = users.filter(u => selected.includes(u._id));
+                            if (selectedUsers.length === 1) {
+                                return <span className="text-gray-900">{selectedUsers[0].fullName}</span>;
+                            } else {
+                                return <span className="text-gray-900">{selectedUsers.map(u => u.fullName).join(', ')}</span>;
+                            }
+                        })()
                     ) : <span className="text-gray-400">{placeholder}</span>}
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <span className="pointer-events-none flex items-center absolute right-3 top-1/2 transform -translate-y-1/2">
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6" /></svg>
                     </span>
                 </button>
-                {open && (
+                {open && (!editMode || !roleLock) && (
                     <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
                         {filteredUsers.length === 0 && (
                             <div className="px-3 py-2 text-gray-400 text-sm">Không có nhân viên</div>
@@ -598,7 +582,7 @@ function ScheduleAddPage() {
                                     type="checkbox"
                                     className="mr-2 accent-blue-600"
                                     checked={false}
-                                    disabled={false}
+                                    disabled={editMode && roleLock && user.role !== roleLock}
                                     onChange={e => {
                                         let newSelected = Array.isArray(selected) ? [...selected] : [];
                                         if (e.target.checked) {
@@ -725,73 +709,42 @@ function ScheduleAddPage() {
                                         return (
                                             <td
                                                 key={d.value}
-                                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-pointer hover:bg-green-400' : 'cursor-pointer hover:bg-blue-50'}`}
+                                                className={`border-r border-gray-300 py-5 schedule-cell ${isScheduled ? 'bg-green-500 cursor-pointer hover:bg-green-500' : 'cursor-pointer hover:bg-blue-50'}`}
                                                 onClick={handleCellBoxClick}
                                             >
                                                 {isScheduled ? (
                                                     <div className="text-xs text-white font-semibold text-center">
                                                         {schedules.map((s, idx) => {
-                                                            const userNames = s.fullName ? s.fullName.split('_') : [];
+                                                            // const userNames = s.fullName ? s.fullName.split('_') : [];
+                                                            // Hiển thị mỗi user là 1 block, hover vào block sẽ highlight toàn bộ vùng (không bị cắt nửa)
+                                                            const displayName = s.fullName || '';
+                                                            const displayRole = s.userId?.role === 'doctor' ? 'Bác sĩ' : (s.userId?.role === 'technician' ? 'Kỹ thuật viên' : (s.userId?.role === 'nursing' ? 'Điều dưỡng' : 'Nhân viên'));
                                                             return (
-                                                                <div key={idx}>
-                                                                    {userNames.length > 1 ? (
-                                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                                                                            {userNames.map((name, i) => {
-                                                                                // Tìm đúng userId của nhân viên này trong schedules
-                                                                                const userObj = Array.isArray(s.userId) ? s.userId[i] : s.userId;
-                                                                                const userId = userObj?._id || userObj || (s.userId?._id || s.userId);
-                                                                                return (
-                                                                                    <div
-                                                                                        key={i}
-                                                                                        className={`hover:bg-white hover:text-black transition rounded cursor-pointer px-1`}
-                                                                                        title={name.trim()}
-                                                                                        onClick={e => {
-                                                                                            e.stopPropagation();
-                                                                                            setIsEditMode(true);
-                                                                                            setModalForm({
-                                                                                                userId: [userId],
-                                                                                                room: s.room?._id || s.room,
-                                                                                                shift: s.shift,
-                                                                                                date: s.date,
-                                                                                                _id: s._id
-                                                                                            });
-                                                                                            setModalErrors({});
-                                                                                            setModalOpen(true);
-                                                                                        }}
-                                                                                    >
-                                                                                        {name.trim()}
-                                                                                    </div>
-                                                                                );
-                                                                            })}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div
-                                                                            className="hover:bg-white hover:text-black transition rounded cursor-pointer"
-                                                                            title={s.fullName}
-                                                                            onClick={e => {
-                                                                                e.stopPropagation();
-                                                                                setIsEditMode(true);
-                                                                                const userId = s.userId?._id || s.userId;
-                                                                                setModalForm({
-                                                                                    userId: [userId],
-                                                                                    room: s.room?._id || s.room,
-                                                                                    shift: s.shift,
-                                                                                    date: s.date,
-                                                                                    _id: s._id
-                                                                                });
-                                                                                setModalErrors({});
-                                                                                setModalOpen(true);
-                                                                            }}
-                                                                        >
-                                                                            {s.fullName}
-                                                                        </div>
-                                                                    )}
-                                                                    {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
-                                                                    <div className="italic text-white text-xs">
-                                                                        {s.userId?.role === 'doctor' && 'Bác sĩ'}
-                                                                        {s.userId?.role === 'technician' && 'Kỹ thuật viên'}
-                                                                        {s.userId?.role === 'nursing' && 'Điều dưỡng'}
-                                                                        {(!s.userId?.role || (s.userId?.role !== 'doctor' && s.userId?.role !== 'technician' && s.userId?.role !== 'nursing')) && 'Nhân viên'}
+                                                                <div
+                                                                    key={idx}
+                                                                    className="group relative"
+                                                                >
+                                                                    <div
+                                                                        className="px-2 py-1 rounded bg-green-500 text-white font-semibold text-xs text-center transition-colors duration-150 group-hover:bg-white group-hover:text-black cursor-pointer border-b border-white last:border-b-0"
+                                                                        title={displayName}
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setIsEditMode(true);
+                                                                            const userId = s.userId?._id || s.userId;
+                                                                            setModalForm({
+                                                                                userId: [userId],
+                                                                                room: s.room?._id || s.room,
+                                                                                shift: s.shift,
+                                                                                date: s.date,
+                                                                                _id: s._id
+                                                                            });
+                                                                            setModalErrors({});
+                                                                            setModalOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        {displayName}<br />
+                                                                        <span className="italic">{displayRole}</span>
+                                                                        {s.specialty && <div className="italic text-sm">{s.specialty}</div>}
                                                                     </div>
                                                                     {idx !== schedules.length - 1 && <hr className="my-1" />}
                                                                 </div>
@@ -829,7 +782,12 @@ function ScheduleAddPage() {
                                     <input
                                         type="text"
                                         name="room"
-                                        value={modalForm.room}
+                                        value={(() => {
+                                            // Hiển thị số phòng thay vì id phòng
+                                            if (!modalForm.room) return '';
+                                            const found = rooms?.find(r => r._id === modalForm.room || r.roomNumber === modalForm.room);
+                                            return found ? found.roomNumber : modalForm.room;
+                                        })()}
                                         readOnly
                                         className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
                                     />
@@ -839,7 +797,22 @@ function ScheduleAddPage() {
                                     <input
                                         type="text"
                                         name="date"
-                                        value={Array.isArray(modalForm.date) ? modalForm.date.join(", ") : modalForm.date}
+                                        value={(() => {
+                                            // Hiển thị ngày dạng dd/MM/yyyy, đồng bộ cả ô và từng nhân viên
+                                            if (Array.isArray(modalForm.date)) {
+                                                return modalForm.date.map(d => {
+                                                    if (!d) return '';
+                                                    const dateObj = new Date(d);
+                                                    if (isNaN(dateObj)) return d;
+                                                    return dateObj.toLocaleDateString('vi-VN');
+                                                }).join(', ');
+                                            } else if (modalForm.date) {
+                                                const dateObj = new Date(modalForm.date);
+                                                if (isNaN(dateObj)) return modalForm.date;
+                                                return dateObj.toLocaleDateString('vi-VN');
+                                            }
+                                            return '';
+                                        })()}
                                         readOnly={!(!modalForm._id)}
                                         onChange={modalForm._id ? handleModalFormChange : undefined}
                                         className={`w-full rounded-md border border-gray-300 ${modalForm._id ? 'bg-white' : 'bg-gray-100'} px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${modalForm._id ? '' : 'cursor-not-allowed'}`}
@@ -893,7 +866,11 @@ function ScheduleAddPage() {
                                     <MultiSelectDropdown
                                         users={doctors.filter(u => u.role === 'technician')}
                                         selected={modalForm.userId}
-                                        onChange={newSelected => setModalForm(prev => ({ ...prev, userId: newSelected }))}
+                                        onChange={newSelected =>
+                                            modalForm._id
+                                                ? setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))
+                                                : setModalForm(prev => ({ ...prev, userId: newSelected }))
+                                        }
                                         placeholder="Chọn kỹ thuật viên"
                                         bookedUserIds={(() => {
                                             const currentRoom = modalForm.room;
@@ -916,7 +893,11 @@ function ScheduleAddPage() {
                                     <MultiSelectDropdown
                                         users={doctors.filter(u => u.role === 'nursing')}
                                         selected={modalForm.userId}
-                                        onChange={newSelected => setModalForm(prev => ({ ...prev, userId: newSelected }))}
+                                        onChange={newSelected =>
+                                            modalForm._id
+                                                ? setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))
+                                                : setModalForm(prev => ({ ...prev, userId: newSelected }))
+                                        }
                                         placeholder="Chọn điều dưỡng"
                                         bookedUserIds={(() => {
                                             const currentRoom = modalForm.room;
