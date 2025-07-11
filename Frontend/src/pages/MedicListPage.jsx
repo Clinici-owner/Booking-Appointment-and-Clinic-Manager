@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { listService } from "../services/medicalService";
+import { listService, editMedicalService } from "../services/medicalService";
 import { Toaster, toast } from "sonner";
 import {
   Typography,
@@ -17,8 +17,10 @@ const MedicListPage = () => {
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState([]);
-  const navigate = useNavigate();
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", price: "" });
 
+  const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
@@ -39,10 +41,10 @@ const MedicListPage = () => {
   };
 
   const handleSearch = (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    setSearchTerm(searchTerm);
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
     const filtered = services.filter((service) =>
-      service.paraclinalName.toLowerCase().includes(searchTerm)
+      service.paraclinalName.toLowerCase().includes(term)
     );
     setFilteredServices(filtered);
   };
@@ -52,6 +54,45 @@ const MedicListPage = () => {
       fetchServices();
     }
   }, [user]);
+
+  const handleEditClick = (service) => {
+    setEditingId(service._id);
+    setEditForm({
+      name: service.paraclinalName,
+      price: service.paraPrice,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ name: "", price: "" });
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({
+      ...editForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSaveEdit = async (id) => {
+    if (!editForm.name || !editForm.price) {
+      toast.error("Tên và giá không được bỏ trống.");
+      return;
+    }
+
+    try {
+      await editMedicalService(id, {
+        paraclinalName: editForm.name,
+        paraPrice: parseInt(editForm.price),
+      });
+      toast.success("Cập nhật dịch vụ thành công!");
+      setEditingId(null);
+      fetchServices();
+    } catch (error) {
+      toast.error("Lỗi khi cập nhật dịch vụ: " + error.message);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -88,29 +129,76 @@ const MedicListPage = () => {
             {filteredServices.map((s, index) => (
               <React.Fragment key={s._id}>
                 <ListItem
-                  sx={{ alignItems: "flex-start", px: 0, flexDirection: "column" }}
+                  sx={{
+                    alignItems: "flex-start",
+                    px: 0,
+                    flexDirection: "column",
+                  }}
                 >
-                  <ListItemText
-                    primary={
-                      <Typography variant="body1" fontWeight="bold">
-                        {s.paraclinalName}
-                      </Typography>
-                    }
-                    secondary={
-                      <>
-                        <Typography variant="body2" color="text.secondary">
-                          Giá: {s.paraPrice} VNĐ | Phòng: {s.room?.roomNumber || "Không rõ"}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color={s.status === "available" ? "green" : "red"}
-                        >
-                          Trạng thái:{" "}
-                          {s.status === "available" ? "Đang hoạt động" : "Tạm dừng"}
-                        </Typography>
-                      </>
-                    }
-                  />
+                  {editingId === s._id ? (
+                    <>
+                      <TextField
+                        fullWidth
+                        label="Tên dịch vụ"
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleEditChange}
+                        sx={{ mb: 1 }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Giá (VNĐ)"
+                        name="price"
+                        type="number"
+                        value={editForm.price}
+                        onChange={handleEditChange}
+                        sx={{ mb: 1 }}
+                      />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleSaveEdit(s._id)}
+                        sx={{ mr: 1 }}
+                      >
+                        Lưu
+                      </Button>
+                      <Button variant="text" size="small" onClick={handleCancelEdit}>
+                        Hủy
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body1" fontWeight="bold">
+                            {s.paraclinalName}
+                          </Typography>
+                        }
+                        secondary={
+                          <>
+                            <Typography variant="body2" color="text.secondary">
+                              Giá: {s.paraPrice} VNĐ | Phòng: {s.room?.roomNumber || "Không rõ"}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color={s.status === "available" ? "green" : "red"}
+                            >
+                              Trạng thái:{" "}
+                              {s.status === "available" ? "Đang hoạt động" : "Tạm dừng"}
+                            </Typography>
+                          </>
+                        }
+                      />
+                      <Button
+                        variant="text"
+                        size="small"
+                        sx={{ mt: 1 }}
+                        onClick={() => handleEditClick(s)}
+                      >
+                        Cập nhật
+                      </Button>
+                    </>
+                  )}
                 </ListItem>
                 {index < filteredServices.length - 1 && <Divider sx={{ my: 1 }} />}
               </React.Fragment>

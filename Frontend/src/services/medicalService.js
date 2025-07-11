@@ -66,6 +66,8 @@ export const getAvailableRooms = async () => {
   }
 };
 
+
+
 export const getSpecialties = async () => {
   try {
     const res = await axios.get(SPECIALY_API_URL);
@@ -76,3 +78,13 @@ export const getSpecialties = async () => {
   }
 };
 
+
+export const getRoomsBySpecialty = async (specialtyId) => {
+  try {
+    const res = await axios.get(`${SPECIALY_API_URL}/rooms/${specialtyId}`);
+    return res.data.rooms;
+  } catch (error) {
+    console.error('Lỗi khi lấy phòng theo chuyên khoa:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};

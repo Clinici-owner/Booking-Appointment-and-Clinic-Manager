@@ -1,36 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "sonner";
-import { getAvailableRooms } from "../services/medicalService";
+import {
+  getSpecialties,
+  createMedicalService,
+  getRoomsBySpecialty
+} from "../services/medicalService";
 import {
   TextField,
   Button,
   Typography,
   Alert,
   Paper,
-  MenuItem,
+  MenuItem
 } from "@mui/material";
-import { createMedicalService } from "../services/medicalService";
 
 const MedicCreatePage = () => {
   const [form, setForm] = useState({
     name: "",
     price: "",
     room: "",
+    specialty: ""
   });
   const [errorMsg, setErrorMsg] = useState("");
   const [availableRooms, setAvailableRooms] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Lấy user từ sessionStorage
   const user = JSON.parse(sessionStorage.getItem("user"));
 
-  // Kiểm tra quyền truy cập
   useEffect(() => {
     if (!user || user.role !== "admin") {
       toast.error("Bạn không có quyền truy cập trang này.");
-      navigate("/"); // hoặc "/unauthorized"
+      navigate("/");
     }
   }, []);
 
@@ -41,31 +44,47 @@ const MedicCreatePage = () => {
     });
   };
 
-  const fetchRooms = async () => {
-    setLoading(true);
+  const fetchSpecialties = async () => {
     try {
-      const rooms = await getAvailableRooms();
-      if (Array.isArray(rooms) && rooms.length > 0) {
-        setAvailableRooms(rooms);
-      } else {
-        setAvailableRooms([]);
-        toast.error("Tất cả các phòng đã được sử dụng hết.", {
-          id: "no-rooms"
-        });
-      }
+      const data = await getSpecialties();
+      setSpecialties(data);
     } catch (error) {
-      setAvailableRooms([]);
-      toast.error("Không thể tải danh sách phòng: " + error.message, {
-        id: "fetch-error"
+      toast.error("Không thể tải danh sách chuyên khoa: " + error.message, {
+        id: "fetch-specialty-error"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const fetchRoomsBySpecialty = async () => {
+      if (!form.specialty) {
+        setAvailableRooms([]);
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await getRoomsBySpecialty(form.specialty);
+        setAvailableRooms(Array.isArray(res) ? res : []);
+      } catch (error) {
+        setAvailableRooms([]);
+        toast.error("Không thể tải phòng theo chuyên khoa: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoomsBySpecialty();
+  }, [form.specialty]);
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetchSpecialties();
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.room) {
+    if (!form.name || !form.price || !form.room || !form.specialty) {
       setErrorMsg("Vui lòng điền đầy đủ thông tin.");
       return;
     }
@@ -77,18 +96,15 @@ const MedicCreatePage = () => {
         name: "",
         price: "",
         room: "",
+        specialty: ""
       });
       navigate("/medical-services/list");
     } catch (err) {
-      toast.error("Lỗi tạo dịch vụ: " + (err?.response?.data?.message || err.message));
+      toast.error(
+        "Lỗi tạo dịch vụ: " + (err?.response?.data?.message || err.message)
+      );
     }
   };
-
-  useEffect(() => {
-    if (user?.role === "admin") {
-      fetchRooms();
-    }
-  }, [user]);
 
   return (
     <div className="w-full">
@@ -116,6 +132,27 @@ const MedicCreatePage = () => {
               value={form.price}
               onChange={handleChange}
             />
+
+            <TextField
+              select
+              fullWidth
+              name="specialty"
+              label="Chuyên khoa"
+              margin="normal"
+              value={form.specialty}
+              onChange={handleChange}
+            >
+              {specialties.length > 0 ? (
+                specialties.map((sp) => (
+                  <MenuItem key={sp._id} value={sp._id}>
+                    {sp.specialtyName}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>Không có chuyên khoa</MenuItem>
+              )}
+            </TextField>
+
             <TextField
               select
               fullWidth
@@ -124,7 +161,7 @@ const MedicCreatePage = () => {
               margin="normal"
               value={form.room}
               onChange={handleChange}
-              disabled={availableRooms.length === 0 || loading}
+              disabled={loading || !form.specialty}
             >
               {loading ? (
                 <MenuItem disabled>Đang tải phòng...</MenuItem>
@@ -135,7 +172,7 @@ const MedicCreatePage = () => {
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem disabled>Không có phòng khả dụng</MenuItem>
+                <MenuItem disabled>Không có phòng cho chuyên khoa này</MenuItem>
               )}
             </TextField>
 
@@ -144,11 +181,12 @@ const MedicCreatePage = () => {
               variant="contained"
               fullWidth
               sx={{ mt: 2 }}
-              disabled={availableRooms.length === 0 || loading}
+              disabled={loading}
             >
               TẠO DỊCH VỤ
             </Button>
           </form>
+
           <Button
             variant="outlined"
             fullWidth
@@ -157,6 +195,7 @@ const MedicCreatePage = () => {
           >
             Xem Danh Sách Dịch Vụ
           </Button>
+
           {errorMsg && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {errorMsg}

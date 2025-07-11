@@ -9,4 +9,5 @@ router.put('/lock/:id', specialtyController.lockSpecialty);
 router.put('/update/:id', specialtyController.updateSpecialty);
 router.post('/create', specialtyController.createSpecialty);
 
+router.get('/rooms/:id', specialtyController.getRoomsBySpecialty);
 module.exports = router;
