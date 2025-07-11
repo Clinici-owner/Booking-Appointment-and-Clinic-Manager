@@ -64,7 +64,9 @@ const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
+
 const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
+const AppointmentPaymentPage = React.lazy(() => import("../pages/AppointmentPayment"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -145,6 +147,7 @@ const AppRoute = [
 
   //Appointment for patient
   { path: ROUTE_PATH.APPOINTMENT_SPECIALTY, page: AppointmentSpecialtyPage, layout: MainLayout },
+  { path: ROUTE_PATH.APPOINTMENT_PAYMENT, page: AppointmentPaymentPage, layout: MainLayout },
 
 
   //Booking from package

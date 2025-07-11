@@ -11,8 +11,9 @@ const medicalProcessRouter = require('./medicalProcess')
 const healthPackageRouter = require('./healthPackage')
 const newsRouter = require('./news');
 const scheduleRouter = require('./schedule')
-const bookingRouter = require('./booking');
+const appointmentRouter = require('./appointment');
 const roomRouter = require('./room');
+const payosRouter = require('./payos');
 // const stepProcessRouter = require('./stepProcess');
 
 function route(app) {
@@ -29,8 +30,9 @@ function route(app) {
     app.use('/api/healthPackage', healthPackageRouter);
     app.use('/api/news', newsRouter);
     app.use('/api/schedules', scheduleRouter);
-    app.use('/api/booking', bookingRouter);
+    app.use('/api/appointments', appointmentRouter);
     app.use('/api/room', roomRouter);
+    app.use('/api/payos', payosRouter);
     // app.use('/api/stepProcess', stepProcessRouter);
 }
 

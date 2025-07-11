@@ -1,19 +1,13 @@
 const Appointment = require('../models/Appointment');
 const HealthPackage = require('../models/HealthPackage');
 
-class BookingController {
+class AppointmentController {
   // Tạo lịch hẹn
   async createAppointment(req, res) {
     try {
-      const {
-        patientId,
-        doctorId,
-        time,
-        specialties,
-        healthPackage,
-        symptoms
-      } = req.body;
-
+      const { appointmentData } = req.body;
+      const { patientId, doctorId, time, specialties, healthPackage, symptoms } = appointmentData;
+      
       const newAppointment = new Appointment({
         patientId,
         doctorId,
@@ -26,7 +20,7 @@ class BookingController {
       const savedAppointment = await newAppointment.save();
       res.status(201).json(savedAppointment);
     } catch (error) {
-      res.status(500).json({ message: 'Lỗi khi tạo lịch hẹn', error });
+      res.status(500).json({ message: 'Lỗi khi tạo lịch hẹn', error: error.message });
     }
   }
 
@@ -93,6 +87,21 @@ class BookingController {
       res.status(500).json({ success: false, message: 'Lỗi khi lấy gói khám', error });
     }
   }
+
+  // Lấy đặt lịch theo chuyên khoa
+  async getAppointmentsBySpecialty(req, res) {
+    try {
+      const { specialtyId } = req.params;
+      const appointments = await Appointment.find({ specialties: specialtyId })
+        .populate('doctorId')
+        .populate('specialties')
+        .populate('healthPackage');
+
+      res.status(200).json(appointments);
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo chuyên khoa', error });
+    }
+  }
 }
 
-module.exports = new BookingController();
+module.exports = new AppointmentController();
