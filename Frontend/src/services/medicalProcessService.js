@@ -58,4 +58,26 @@ export const MedicalProcessService = {
       );
     }
   },
+
+  getMyProcessByUserId: async () => {
+    try {
+      const userStr = sessionStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?._id;
+
+      if (!userId) {
+        throw new Error("Người dùng chưa đăng nhập hoặc không hợp lệ.");
+      }
+
+      const response = await axios.get(`${API_URL}/my-process/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching patient's medical process:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Failed to fetch patient's process"
+      );
+    }
+  },
+
 };

@@ -81,4 +81,12 @@ export const ROUTE_PATH = {
 
   //Technician
   TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
+
+  //Medical history
+  LIST_MEDICAL_STEPS_TODAY_BY_ROOM: '/medical-process/steps/today',
+
+  //Patient
+
+  PATIENT_MY_PROCESS: '/MyProcess',
+
 };

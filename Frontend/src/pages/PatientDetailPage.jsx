@@ -182,16 +182,6 @@ const PatientDetail = () => {
                 )}
 
                 <p className="text-sm text-gray-500 mt-2">Bác sĩ: Bs. {record.doctorId?.fullName || 'N/A'}</p>
-                <p className="text-sm text-gray-500">Trạng thái:
-                  <span className={`ml-1 ${record.status === 'complete' ? 'text-green-500' :
-                      record.status === 'pending' ? 'text-yellow-500' :
-                        'text-gray-500'
-                    }`}>
-                    {record.status === 'complete' ? 'Hoàn thành' :
-                      record.status === 'pending' ? 'Đang chờ' :
-                        record.status || 'N/A'}
-                  </span>
-                </p>
               </div>
             ))}
           </div>

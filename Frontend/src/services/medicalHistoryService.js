@@ -14,4 +14,15 @@ export const MedicalHistoryService = {
         );
     }
 },
+  createMedicalHistory: async (data) => {
+    try {
+      const response = await axios.post(`${API_URL}/create`, data);
+      return response.data;
+    } catch (error) {
+        console.error("Error creating medical history:", error);
+        throw new Error(
+            error.response?.data?.message || "Failed to create medical history"
+        );
+    }
+  },
 };
