@@ -33,7 +33,7 @@ function SpecialtyDetailPage() {
               <img
                 src={doc.file_path}
                 alt={specialty.specialtyName}
-                className="w-full object-cover"
+                className="w-full object-cover h-140 rounded-lg shadow-md mb-2"
               />
             </div>
           ))}

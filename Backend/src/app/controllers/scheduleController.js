@@ -301,7 +301,7 @@ class ScheduleController {
 
       //lấy tất cả các lịch
       const schedules = await Schedule.find({
-        date: { $gte: startOfDay},
+        date: { $gte: startOfDay },
       })
         .populate("userId")
         .populate("room");
@@ -321,7 +321,7 @@ class ScheduleController {
       });
 
       console.log("filteredSchedules:", filteredSchedules.length);
-      
+
       // lấy lịch theo role là bác sĩ
       const schedulesByDoctor = filteredSchedules.filter((schedule) => {
         return schedule.userId.role === "doctor";
@@ -329,13 +329,54 @@ class ScheduleController {
 
       // Sắp xếp lịch trình theo ngày
       schedulesByDoctor.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
+
       res.status(200).json(schedulesByDoctor);
     } catch (error) {
       console.error("Lỗi khi lấy lịch trình:", error);
       res.status(500).json({ message: "Lỗi máy chủ" });
     }
   }
+
+  //lấy chính xác lịch trình theo id, shift, date của bác sĩ
+  async getScheduleByIdAndShiftAndDate(req, res) {
+  try {
+    const { doctorId, shift, date } = req.params;
+
+    if (!doctorId || !shift || !date) {
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc." });
+    }
+
+    // Chuyển chuỗi date thành kiểu Date và chuẩn hóa về đầu ngày
+    const start = new Date(date);
+    const end = new Date(date);
+
+    if (isNaN(start.getTime())) {
+      return res.status(400).json({ message: "Ngày không hợp lệ." });
+    }
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    // Tìm lịch theo userId, shift và date nằm trong khoảng ngày
+    const schedule = await Schedule.findOne({
+      userId: doctorId,
+      shift: shift,
+      date: { $gte: start, $lte: end },
+    })
+      .populate("userId", "fullName role")
+      .populate("room", "roomName roomNumber");
+
+    if (!schedule) {
+      return res.status(404).json({ message: "Không tìm thấy lịch trình." });
+    }
+
+    res.status(200).json(schedule);
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch trình:", error);
+    res.status(500).json({ message: "Lỗi máy chủ" });
+  }
+}
+
 }
 
 module.exports = new ScheduleController();
