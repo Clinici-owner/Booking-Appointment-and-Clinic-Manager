@@ -154,6 +154,29 @@ class SpecialtyController {
       res.status(500).json({ error: "Lỗi khi lấy chuyên khoa đang mở." });
     }
   }
+
+
+
+  async getRoomsBySpecialty(req, res) {
+  try {
+    const { id } = req.params;
+
+    const specialty = await Specialty.findById(id).populate("room");
+    if (!specialty) {
+      return res.status(404).json({ error: "Chuyên khoa không tồn tại." });
+    }
+
+    res.status(200).json({
+      message: `Danh sách phòng thuộc chuyên khoa ${specialty.specialtyName}`,
+      rooms: specialty.room,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách phòng của chuyên khoa:", error);
+    res.status(500).json({
+      error: "Lỗi khi lấy danh sách phòng của chuyên khoa.",
+    });
+  }
+}
 }
 
 module.exports = new SpecialtyController();
