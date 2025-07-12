@@ -5,6 +5,7 @@ const HealthPackage = new Schema({
     packageName: { type: String, required: true },
     packagePrice: { type: Number, required: true },
     service: [{type: Schema.Types.ObjectId, ref: 'ParaclinicalService', required: true}],
+    specialties: [{ type: Schema.Types.ObjectId, ref: 'Specialty' }],
     packageImage: { type: String, default: 'imageExample.jpg' },
     status: { type: String, enum: ['active', 'nonactive'], default: 'active' },
     description: { type: String, default: '' },

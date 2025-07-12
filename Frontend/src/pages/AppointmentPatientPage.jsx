@@ -50,7 +50,7 @@ function AppointmentPatientPage() {
         </h3>
         {item.healthPackage ? (
           <p className="text-sm text-gray-600">
-            Gói khám: {item.healthPackage.name || "Không rõ"}
+            Gói khám: {item.healthPackage.packageName || "Không rõ"}
           </p>
         ) : (
           <p className="text-sm text-gray-600">

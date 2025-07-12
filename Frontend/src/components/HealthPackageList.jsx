@@ -1,4 +1,5 @@
-"use client"
+import React from "react"
+import { Link } from "react-router-dom"
 
 function HealthPackageList({
   healthPackages,
@@ -47,8 +48,8 @@ function HealthPackageList({
 
           <div className="p-6">
             <div className="mb-3">
-              <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{pkg.packageName}</h3>
-              <p className="text-gray-600 text-sm line-clamp-3">{pkg.description || "Chưa có mô tả"}</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">{pkg.packageName}</h3>
+              <p className="text-gray-600 text-sm line-clamp-3" dangerouslySetInnerHTML={{ __html: pkg.description }}></p>
             </div>
 
             {/* Price Section - Simplified */}
@@ -60,18 +61,6 @@ function HealthPackageList({
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-blue-200">
                 <span className="text-sm text-gray-600">Số dịch vụ:</span>
                 <span className="text-sm font-semibold text-gray-700">{pkg.service?.length || 0} dịch vụ</span>
-              </div>
-            </div>
-
-            {/* Creator Info */}
-            <div className="mb-4 text-xs text-gray-500 space-y-1">
-              <div className="flex items-center">
-                <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-                <span>Tạo bởi: {pkg.userId?.fullName || "Không rõ"}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                <span>Ngày tạo: {new Date(pkg.createdAt).toLocaleDateString("vi-VN")}</span>
               </div>
             </div>
 
@@ -110,11 +99,12 @@ function HealthPackageList({
 
               {/* Nếu không có button nào hiển thị, có thể thêm một button khác cho user */}
               {!showDetailButton && !showToggleButton && !showDeleteButton && (
-                <button
-                  className="flex-1 bg-gray-100 text-gray-600 py-2 px-4 rounded-lg cursor-not-allowed text-sm font-medium"
-                  disabled
+                <Link
+                  to={`/health-packages/detail/${pkg._id}`}
+                  className="w-full text-center text-white bg-custom-blue py-2 px-4 rounded-lg text-sm font-medium hover:bg-custom-bluehover2 transition-colors duration-300"
                 >
-                </button>
+                  Chi tiết gói khám
+                </Link>
               )}
             </div>
           </div>
