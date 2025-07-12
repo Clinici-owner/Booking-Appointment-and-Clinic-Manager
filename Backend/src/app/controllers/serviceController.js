@@ -10,7 +10,7 @@ class serviceController {
         return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
       }
 
-      const existingRoom = await Room.findById(room); 
+      const existingRoom = await Room.findById(room);
       if (!existingRoom) {
         return res.status(400).json({ message: "Phòng không tồn tại" });
       }
@@ -28,31 +28,28 @@ class serviceController {
         paraclinalName: name,
         paraPrice: price,
         room: room,
-        specialty: specialty || null,  
+        specialty: specialty || null,
       });
 
-      await service.save(); 
+      await service.save();
 
-      existingRoom.status = 'used';  
-      await existingRoom.save();  
+      existingRoom.status = "used";
+      await existingRoom.save();
 
       return res.status(201).json({
         message: "Tạo dịch vụ thành công và phòng đã được đánh dấu là 'used'",
         service,
       });
     } catch (error) {
-      console.error("Lỗi trong tạo dịch vụ:", error);  
-      next(error);  
+      console.error("Lỗi trong tạo dịch vụ:", error);
+      next(error);
     }
   }
-
 
   // Hoang Anh dang dung
   async listService(req, res) {
     try {
-      const servicelist = await Service.find()
-        .populate("room")
-
+      const servicelist = await Service.find().populate("room");
 
       return res.status(200).json({
         message: "Lấy danh sách dịch vụ thành công",
@@ -73,7 +70,7 @@ class serviceController {
         return res.status(400).json({ error: "Chưa có serviceId" });
       }
 
-      const service = await Service.findById(serviceId).populate('room');
+      const service = await Service.findById(serviceId).populate("room");
 
       if (!service) {
         return res.status(404).json({ error: "Không tìm thấy dịch vụ" });
@@ -92,49 +89,57 @@ class serviceController {
       const { name, price, room, status } = req.body;
       const { serviceId } = req.params;
 
-      if (!serviceId || !name || !price || !room || !status) {
-        return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+      if (!serviceId) {
+        return res.status(400).json({ message: "Thiếu serviceId" });
       }
 
-      if (!["available", "disable"].includes(status)) {
-        return res.status(400).json({ message: "Trạng thái không hợp lệ" });
-      }
-
-      const existingRoom = await Room.findById(room); // Kiểm tra phòng tồn tại
-      if (!existingRoom) {
-        return res.status(400).json({ message: "Phòng không tồn tại" });
-      }
-
-      const duplicateRoom = await Service.findOne({
-        room: room,
-        _id: { $ne: serviceId },
-      });
-      if (duplicateRoom) {
-        return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
-      }
-
-      if (price <= 0) {
-        return res.status(400).json({ message: "Giá phải lớn hơn 0!" });
-      }
-
-      const updatedService = await Service.findByIdAndUpdate(
-        serviceId,
-        {
-          paraclinalName: name,
-          paraPrice: price,
-          room: room,
-          status,
-        },
-        { new: true }
-      );
-
-      if (!updatedService) {
+      const service = await Service.findById(serviceId);
+      if (!service) {
         return res.status(404).json({ message: "Không tìm thấy dịch vụ" });
       }
 
+      // Nếu có room mới thì kiểm tra tồn tại
+      if (room) {
+        const existingRoom = await Room.findById(room);
+        if (!existingRoom) {
+          return res.status(400).json({ message: "Phòng không tồn tại" });
+        }
+
+        const duplicateRoom = await Service.findOne({
+          room: room,
+          _id: { $ne: serviceId },
+        });
+        if (duplicateRoom) {
+          return res
+            .status(400)
+            .json({
+              message: "Phòng này đã được sử dụng cho một dịch vụ khác",
+            });
+        }
+
+        service.room = room;
+      }
+
+      if (name) service.paraclinalName = name;
+      if (price !== undefined) {
+        if (price <= 0) {
+          return res.status(400).json({ message: "Giá phải lớn hơn 0!" });
+        }
+        service.paraPrice = price;
+      }
+
+      if (status) {
+        if (!["available", "disable"].includes(status)) {
+          return res.status(400).json({ message: "Trạng thái không hợp lệ" });
+        }
+        service.status = status;
+      }
+
+      await service.save();
+
       return res.status(200).json({
         message: "Cập nhật dịch vụ thành công",
-        service: updatedService,
+        service,
       });
     } catch (error) {
       next(error);
@@ -166,7 +171,9 @@ class serviceController {
         service: updatedService,
       });
     } catch (err) {
-      return res.status(500).json({ message: "Lỗi hệ thống.", error: err.message });
+      return res
+        .status(500)
+        .json({ message: "Lỗi hệ thống.", error: err.message });
     }
   }
 
@@ -179,7 +186,7 @@ class serviceController {
         ? { paraclinalName: { $regex: name, $options: "i" } }
         : {};
 
-      const services = await Service.find(query).populate('room'); // Lấy thông tin phòng
+      const services = await Service.find(query).populate("room"); // Lấy thông tin phòng
 
       return res.status(200).json({
         message: "Tìm kiếm thành công",
@@ -191,6 +198,5 @@ class serviceController {
     }
   }
 }
-
 
 module.exports = new serviceController();

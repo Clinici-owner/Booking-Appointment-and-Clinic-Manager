@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { listService, editMedicalService } from "../services/medicalService";
+import {
+  listService,
+  editMedicalService
+} from "../services/medicalService";
 import { Toaster, toast } from "sonner";
 import {
   Typography,
@@ -10,6 +13,7 @@ import {
   Divider,
   Button,
   TextField,
+  MenuItem
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +22,7 @@ const MedicListPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", price: "" });
+  const [editForm, setEditForm] = useState({ name: "", price: "", status: "available" });
 
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -60,12 +64,13 @@ const MedicListPage = () => {
     setEditForm({
       name: service.paraclinalName,
       price: service.paraPrice,
+      status: service.status || "available",
     });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setEditForm({ name: "", price: "" });
+    setEditForm({ name: "", price: "", status: "available" });
   };
 
   const handleEditChange = (e) => {
@@ -83,8 +88,9 @@ const MedicListPage = () => {
 
     try {
       await editMedicalService(id, {
-        paraclinalName: editForm.name,
-        paraPrice: parseInt(editForm.price),
+        name: editForm.name,
+        price: parseInt(editForm.price),
+        status: editForm.status,
       });
       toast.success("Cập nhật dịch vụ thành công!");
       setEditingId(null);
@@ -154,6 +160,19 @@ const MedicListPage = () => {
                         onChange={handleEditChange}
                         sx={{ mb: 1 }}
                       />
+                      <TextField
+                        select
+                        fullWidth
+                        label="Trạng thái hoạt động"
+                        name="status"
+                        value={editForm.status}
+                        onChange={handleEditChange}
+                        sx={{ mb: 1 }}
+                      >
+                        <MenuItem value="available">Đang hoạt động</MenuItem>
+                        <MenuItem value="disable">Tạm dừng</MenuItem>
+                      </TextField>
+
                       <Button
                         variant="contained"
                         size="small"
