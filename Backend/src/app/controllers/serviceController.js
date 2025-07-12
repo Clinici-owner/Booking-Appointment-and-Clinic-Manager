@@ -15,12 +15,10 @@ class serviceController {
         return res.status(400).json({ message: "Phòng không tồn tại" });
       }
 
-      const existingService = await Service.findOne({ room: room });
-      if (existingService) {
-        return res
-          .status(400)
-          .json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
-      }
+      // const existingService = await Service.findOne({ room: room });
+      // if (existingService) {
+      //   return res.status(400).json({ message: "Phòng này đã được sử dụng cho một dịch vụ khác" });
+      // }
 
       if (price <= 0) {
         return res.status(400).json({ message: "Giá phải lớn hơn 0!" });

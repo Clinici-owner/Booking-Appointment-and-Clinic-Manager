@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 
 import { getSpecialtyById } from "../services/specialtyService";
 
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import BannerName from "../components/BannerName";
 
 function SpecialtyDetailPage() {
   const { id } = useParams();
   const [specialty, setSpecialty] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSpecialty = async () => {
@@ -19,6 +21,15 @@ function SpecialtyDetailPage() {
 
   if (!specialty) {
     return <div>Loading...</div>;
+  }
+
+  const handleBookAppointment = () => {
+    // Logic to handle booking appointment
+    navigate(`/appointment-specialty/${id}`, {
+      state: {
+        typeAppointment: "specialty",
+      },
+    });
   }
 
   return (
@@ -62,12 +73,12 @@ function SpecialtyDetailPage() {
             </p>
           </div>
           <div className="flex justify-center pt-4 items-center">
-            <Link
-              to={`/appointment-specialty/${id}`}
+            <button
+              onClick={handleBookAppointment}
               className="bg-custom-blue text-white px-10 py-4 rounded-xl shadow-2xl hover:shadow-blue-300 hover:scale-105 transition-transform duration-300"
             >
               Đặt lịch khám ngay
-            </Link>
+            </button>
           </div>
         </div>
       </div>

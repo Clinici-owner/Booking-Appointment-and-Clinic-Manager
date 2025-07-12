@@ -76,7 +76,8 @@ async getAllHealthPackages (req, res) {
       const { id } = req.params
 
       const healthPackage = await HealthPackage.findById(id)
-        .populate("service", "serviceName servicePrice description")
+        .populate("service")
+        .populate("specialties")
         .populate("userId", "fullName email phone role")
 
       if (!healthPackage) {
@@ -102,7 +103,7 @@ async getAllHealthPackages (req, res) {
   // POST /api/admin/health-packages - Tạo gói khám mới
   async createHealthPackage (req, res) {
     try {
-      const { packageName, packagePrice, service, packageImage, description, userId } = req.body
+      const { packageName, packagePrice, service, specialties, packageImage, description, userId } = req.body
 
       // Validation
       if (!packageName || !packagePrice || !service || !userId) {
@@ -134,6 +135,7 @@ async getAllHealthPackages (req, res) {
         packageName,
         packagePrice,
         service,
+        specialties,
         packageImage: packageImage || "imageExample.jpg",
         description: description || "",
         userId,
@@ -145,6 +147,7 @@ async getAllHealthPackages (req, res) {
       const populatedPackage = await HealthPackage.findById(savedPackage._id)
         .populate("service", "serviceName servicePrice")
         .populate("userId", "fullName email phone role")
+        .populate("specialties")
 
       res.status(201).json({
         success: true,

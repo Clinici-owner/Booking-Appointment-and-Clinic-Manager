@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { DoctorService } from "../services/doctorService";
 import { getSpecialtyById } from "../services/specialtyService";
 import { getScheduleById } from "../services/scheduleService";
+import { healthPackageService } from "../services/healthPackageService";
 import appointmentService from "../services/appointmentService";
 
 import napas247 from "../assets/images/napas247.png";
@@ -18,9 +19,17 @@ import { Toaster, toast } from "sonner";
 
 function AppointmentPayment() {
   const location = useLocation();
-  const { doctorId, scheduleId, timeRange, symptoms, specialtyId } =
-    location.state || {};
+  const {
+    doctorId,
+    scheduleId,
+    timeRange,
+    symptoms,
+    specialtyId,
+    typeAppointment,
+    packageId,
+  } = location.state || {};
 
+  const [healthPackage, setHealthPackage] = useState({});
   const [doctor, setDoctor] = useState({});
   const [specialty, setSpecialty] = useState({});
   const [schedule, setSchedule] = useState({});
@@ -31,7 +40,7 @@ function AppointmentPayment() {
     doctorId: doctorId || "",
     time: "",
     specialties: specialtyId ? [specialtyId] : [],
-    healthPackage: null,
+    healthPackage: packageId || null,
     symptoms: symptoms || "",
   });
 
@@ -54,6 +63,24 @@ function AppointmentPayment() {
       date.getMonth() + 1
     } năm ${date.getFullYear()}`;
   };
+
+  //lấy gói khám nếu có
+  useEffect(() => {
+    const fetchHealthPackage = async () => {
+      if (packageId) {
+        try {
+          const response = await healthPackageService.getHealthPackageById(
+            packageId
+          );
+          setHealthPackage(response.data);
+        } catch (error) {
+          console.error("Error fetching health package:", error);
+        }
+      }
+    };
+    fetchHealthPackage();
+  }, [packageId]);
+
   // Lần 1: fetch dữ liệu bác sĩ, chuyên khoa, lịch hẹn
   useEffect(() => {
     const fetchAll = async () => {
@@ -126,7 +153,7 @@ function AppointmentPayment() {
         if (response.status === "PAID") {
           try {
             console.log(appointmentData);
-            
+
             await appointmentService.createAppointment(appointmentData);
 
             clearInterval(pollingRef.current);
@@ -247,9 +274,26 @@ function AppointmentPayment() {
             {formatVietnameseDate(schedule?.date)}
           </p>
           <p>
-            <strong>Triệu chứng:</strong> {symptoms}
+            <strong>Triệu chứng:</strong> {symptoms ? symptoms : "Chưa cung cấp"}
           </p>
+          {typeAppointment == "healthPackage" ? (
+            <p>
+              <strong>Hình thức khám: Gói sức khỏe</strong>
+            </p>
+          ) : (
+            <p>
+              <strong>Hình thức khám: Chuyên khoa</strong>
+            </p>
+          )}
         </div>
+        <div className="grid grid-cols-1 gap-4 text-sm leading-relaxed mt-4">
+          {healthPackage && (
+            <p>
+              <strong className="whitespace-nowrap">Tên gói khám:</strong>{" "}
+              {healthPackage.packageName || "Không có gói khám nào"}
+            </p>
+          )}
+          </div>
       </div>
 
       {/* Thanh toán */}
@@ -315,9 +359,9 @@ function AppointmentPayment() {
             giây.
           </p>
           <p className="mt-2 pt-1 text-red-600 font-semibold">
-            Vui lòng tới sớm 15 phút trước giờ khám đã hẹn. Nếu có bất kỳ thay đổi nào về
-            lịch khám, chúng tôi sẽ thông báo qua số điện thoại hoặc email đã
-            cung cấp.
+            Vui lòng tới sớm 15 phút trước giờ khám đã hẹn. Nếu có bất kỳ thay
+            đổi nào về lịch khám, chúng tôi sẽ thông báo qua số điện thoại hoặc
+            email đã cung cấp.
           </p>
         </div>
       </div>
