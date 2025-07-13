@@ -23,23 +23,12 @@ function ScheduleAddPage() {
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
     const navigate = useNavigate();
-    // Hiển thị tuần động theo ngày hiện tại của máy tính
+    // Hiển thị tuần động, luôn bắt đầu từ 07/07/2025
     const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    // Lấy ngày đầu tuần (thứ 2) dựa trên ngày hiện tại
-    function getMonday(d) {
-        const date = new Date(d);
-        const day = date.getDay();
-        // Nếu là Chủ nhật (0), thì lùi về thứ 2 tuần hiện tại (không lùi sang tuần trước)
-        // Đảm bảo luôn lấy thứ 2 của tuần hiện tại, kể cả khi là Chủ nhật
-        // Nếu là Chủ nhật, cần lùi về thứ 2 trước đó 6 ngày
-        const diff = day === 0 ? -6 : 1 - day;
-        date.setDate(date.getDate() + diff);
-        date.setHours(0, 0, 0, 0);
-        return date;
-    }
-    const today = new Date();
-    // Luôn lấy thứ 2 của tuần hiện tại, kể cả khi là Chủ nhật
-    const monday = getMonday(today);
+    const initialMonday = new Date('2025-07-07T00:00:00');
+    const [weekOffset, setWeekOffset] = useState(0); // 0 là tuần đầu tiên
+    const monday = new Date(initialMonday);
+    monday.setDate(initialMonday.getDate() + weekOffset * 7);
     const days = [
         { value: '', label: 'Chọn ngày' },
         ...Array.from({ length: 7 }).map((_, i) => {
@@ -54,6 +43,10 @@ function ScheduleAddPage() {
             };
         })
     ];
+
+    // Hàm chuyển tuần
+    const handleNextWeek = () => setWeekOffset(offset => offset + 1);
+    const handlePreviousWeek = () => setWeekOffset(offset => offset - 1);
 
 
     const addOneDayToDateString = (dateString) => {
@@ -185,13 +178,7 @@ function ScheduleAddPage() {
         const { name, value } = e.target;
         if (name === "date") {
             // Lấy dải ngày tuần hiện tại giống như days ở ngoài giao diện
-            const today = new Date();
-            const monday = getMonday(today);
-            const allowedDates = Array.from({ length: 7 }).map((_, i) => {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
-                return d.toISOString().slice(0, 10);
-            });
+            const allowedDates = days.slice(1).map(d => d.date);
             const newDates = value
                 ? value.split(",").map(d => d.trim()).filter(d => allowedDates.includes(d))
                 : [];
@@ -617,7 +604,7 @@ function ScheduleAddPage() {
 
                 <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-6">
                     <h1 className="text-4xl font-bold text-center text-blue-700 mb-6 tracking-tight drop-shadow-lg">Lịch trình làm việc</h1>
-                    <div className="flex flex-col md:flex-row gap-6 w-full justify-center">
+                    <div className="flex flex-row gap-6 w-full justify-center items-center">
                         <div className="w-full md:w-1/2">
                             <label htmlFor="department" className="block mb-1 font-semibold text-gray-700">Chọn chuyên khoa</label>
                             <select
@@ -646,8 +633,38 @@ function ScheduleAddPage() {
                                 <option value="AFTERNOON">Ca chiều (13h30 - 17h)</option>
                             </select>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handlePreviousWeek}
+                                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-200 transition"
+                                aria-label="Tuần trước"
+                            >
+                                <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                            <span className="text-lg font-bold text-blue-700 tracking-wide px-4 py-2 rounded bg-white shadow border border-blue-200 whitespace-nowrap">
+                                {days[1] && days[1].date ? (() => {
+                                    const monday = new Date(days[2].date);
+                                    return monday.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                })() : ''}
+                                {' - '}
+                                {days[1] && days[1].date ? (() => {
+                                    const sunday = new Date(days[1].date);
+                                    sunday.setDate(sunday.getDate() + 7);
+                                    return sunday.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                })() : ''}
+                            </span>
+                            <button
+                                onClick={handleNextWeek}
+                                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-200 transition"
+                                aria-label="Tuần sau"
+                            >
+                                <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                        </div>
                     </div>
+                    
                 </div>
+                
 
                 <section className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm max-w-8xl w-full overflow-x-auto">
                     <table className="w-full border border-gray-300 rounded-lg table-fixed text-center">

@@ -19,6 +19,7 @@ const drawerWidth = 240;
 const navItems = [
   { label: "Tạo hồ sơ kĩ thuật viên", icon: <AssignmentIcon />, path: "/doctor/createDoctorProfile" },
   { label: "Danh sách quy trình khám bệnh", icon: <MedicalServicesIcon />, path: "/doctor/medicalProcess" },
+  { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
 ];
 
 export default function DoctorNavSidebar({ children }) {
