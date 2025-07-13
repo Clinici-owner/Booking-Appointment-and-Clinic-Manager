@@ -46,7 +46,7 @@ export const UserService = {
               res.data.user._id
             );
             window.location.href = technicianProfile
-              ? "/"
+              ? "/schedules/room"
               : "/technician/createTechnicianProfile";
           } catch (error) {
             console.error("Lỗi khi kiểm tra hồ sơ kỹ thuật viên:", error);

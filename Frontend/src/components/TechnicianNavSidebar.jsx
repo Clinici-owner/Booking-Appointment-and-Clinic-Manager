@@ -19,6 +19,7 @@ const drawerWidth = 240;
 const navItems = [
   { label: "Danh sách hàng chờ bệnh nhân", icon: <AssignmentIcon />, path: "/schedules/room" },
   { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
+  { label: "Tải kết quả khám bệnh nhân", icon: <MedicalServicesIcon />, path: "/medical-process/steps/today" },
 ];
 
 export default function TechnicianNavSidebar({ children }) {

@@ -19,6 +19,8 @@ import {
     Avatar,
     Chip
 } from "@mui/material";
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -40,6 +42,7 @@ const ListMedicalStepsTodayByRoomPage = () => {
     const [selectedDoctor, setSelectedDoctor] = useState("");
     const [resultFiles, setResultFiles] = useState([]);
     const [diagnosis, setDiagnosis] = useState("");
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         const fetchTodaySteps = async () => {
@@ -66,6 +69,7 @@ const ListMedicalStepsTodayByRoomPage = () => {
         const doctorsData = await UserService.getAllDoctors();
         if (doctorsData && Array.isArray(doctorsData)) {
             setDoctors(doctorsData);
+            console.log("Doctors fetched successfully:", doctorsData);
       }
     };
 
@@ -117,11 +121,11 @@ const ListMedicalStepsTodayByRoomPage = () => {
         try {
             await stepProcessService.updateProcessStepNotes(selectedService._id, diagnosis);
             await MedicalHistoryService.createMedicalHistory(payload);
-            alert("Tải lên kết quả thành công!");
+            setSnackbar({ open: true, message: 'Tải lên kết quả thành công!', severity: 'success' });
             handleDialogClose();
         } catch (error) {
             console.error("Error uploading result:", error);
-            alert("Tải lên kết quả thất bại. Vui lòng thử lại sau.");
+            setSnackbar({ open: true, message: 'Tải lên kết quả thất bại. Vui lòng thử lại sau.', severity: 'error' });
         }
     };
 
@@ -187,22 +191,24 @@ const ListMedicalStepsTodayByRoomPage = () => {
                                 <TableCell>
                                     {formatDate(service.createdAt)}
                                 </TableCell>
-                                <TableCell>
-                                    <button
-                                        style={{
-                                            background: '#1976d2',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: 4,
-                                            padding: '6px 12px',
-                                            cursor: 'pointer',
-                                            fontWeight: 500
-                                        }}
-                                        onClick={() => handleUploadResult(service)}
-                                    >
-                                        Tải lên kết quả
-                                    </button>
-                                </TableCell>
+                        <TableCell>
+                            {service.isCompleted && (
+                                <button
+                                    style={{
+                                        background: '#1976d2',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 4,
+                                        padding: '6px 12px',
+                                        cursor: 'pointer',
+                                        fontWeight: 500
+                                    }}
+                                    onClick={() => handleUploadResult(service)}
+                                >
+                                    Tải lên kết quả
+                                </button>
+                            )}
+                        </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -278,6 +284,16 @@ const ListMedicalStepsTodayByRoomPage = () => {
                     </DialogActions>
                 </form>
             </Dialog>
+        <Snackbar
+            open={snackbar.open}
+            autoHideDuration={4000}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+            <MuiAlert elevation={6} variant="filled" severity={snackbar.severity} sx={{ width: '100%' }}>
+                {snackbar.message}
+            </MuiAlert>
+        </Snackbar>
         </Box>
     );
 };
