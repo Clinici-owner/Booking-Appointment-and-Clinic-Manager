@@ -57,7 +57,7 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
-const MedicalProcessDetailPage = React.lazy(() => import("../pages/MyProcessPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -148,7 +148,7 @@ const AppRoute = [
 
 
   //Patient
-  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MedicalProcessDetailPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
 
   // Technician
   { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
