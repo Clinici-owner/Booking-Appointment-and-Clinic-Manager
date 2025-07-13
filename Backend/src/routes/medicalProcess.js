@@ -7,10 +7,12 @@ router.post('/create', medicalProcessController.createMedicalProcess);
 router.post('/update/:processId', medicalProcessController.updateMedicalProcess);
 router.post('/updateStatus/:processId', medicalProcessController.updateMedicalProcessStatus);
 router.get('/:processId', medicalProcessController.getMedicalProcessById);
-router.post('/updateCurrentStep/:processId', medicalProcessController.updateMedicalProcessCurrentStep);
 
 router.post('/step/create', medicalProcessController.createProcessStep);
-router.post('/step/update/:stepId', medicalProcessController.updateProcessStep);
+router.post('/step/update-notes/:stepId', medicalProcessController.updateProcessStepNotes);
+router.post('/complete-step/:userId', medicalProcessController.completeCurrentStep);
 
+router.get('/process-steps/today/:roomId', medicalProcessController.getTodayProcessStepsByRoom);
+router.get("/my-process/:userId", medicalProcessController.getPatientMedicalProcess);
 module.exports = router;
 

@@ -34,8 +34,8 @@ export const ROUTE_PATH = {
   UPDATE_PASSWORD: '/user-profile/update-password',
 
   //Service manager
-  SERVICES_LIST: '/createMedical',  
-
+  SERVICES_CREATE: '/createMedical',  
+  SERVICES_LIST: '/medical-services/list',
   //Specialty manager
   SPECIALTIES_LIST: '/admin/specialties',
   ADD_SPECIALTY: '/admin/specialties/add',
@@ -46,11 +46,9 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL_PATIENT: '/specialties/:id',
 
   //Schedule manager
-  SCHEDULE_LIST: '/admin/schedules',
   ADD_SCHEDULE: '/admin/schedules/add',
-  UPDATE_SCHEDULE: '/admin/schedules/update',
-  SCHEDULE_DETAIL: '/admin/schedules/detail',
   OWN_SCHEDULE: '/schedules/own',
+  ROOM_SCHEDULE: '/schedules/room',
   
 
   //Doctor
@@ -71,10 +69,26 @@ export const ROUTE_PATH = {
 
   // Health package for user
   HEALTH_PACKAGE_USER: '/health-packages',
+  HEALTH_PACKAGE_DETAIL_USER: '/health-packages/detail/:id',
+  PACKAGE_LIST: '/health-package/list',
+
+  //Appointment for patient
+  APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',
   HEALTH_PACKAGE_LIST: '/health-packages-list',
+  APPOINTMENT_PAYMENT: '/appointment-payment',
+  APPOINTMENT_PATIENT: '/appointment-patient',
+  APPOINTMENT_DETAIL: '/appointment-patient/appointment-detail/:id',
   // 404
   NOT_FOUND: '*',
 
   //Technician
   TECHNICIAN_PROFILE_CREATE: '/technician/createTechnicianProfile',
+
+  //Medical history
+  LIST_MEDICAL_STEPS_TODAY_BY_ROOM: '/medical-process/steps/today',
+
+  //Patient
+
+  PATIENT_MY_PROCESS: '/MyProcess',
+
 };

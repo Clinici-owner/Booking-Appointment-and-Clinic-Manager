@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import { 
   Add as AddIcon, 
   Delete as DeleteIcon, 
@@ -30,7 +31,7 @@ import { listService } from '../services/medicalService';
 import { MedicalProcessService } from '../services/medicalProcessService';
 
 const CreateMedicalProcessPage = () => {
-  // State management
+  // State management with safe initial values
   const [doctor, setDoctor] = useState(null);
   const [patients, setPatients] = useState([]);
   const [services, setServices] = useState([]);
@@ -43,28 +44,36 @@ const CreateMedicalProcessPage = () => {
     message: '',
     severity: 'success'
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch data on mount
+  // Fetch data on mount with error handling
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        
         const [patientsRes, servicesRes] = await Promise.all([
-          PatientService.getAllPatients(),
-          listService()
+          PatientService.getAllPatients().catch(() => []), // Return empty array on error
+          listService().catch(() => ({ services: [] })) // Return empty object with services array on error
         ]);
         
-        setPatients(patientsRes || []);
-        setServices(servicesRes.services || []);
+        // Safe data setting with null checks
+        setPatients(Array.isArray(patientsRes) ? patientsRes : []);
+        setServices(Array.isArray(servicesRes?.services) ? servicesRes.services : []);
 
-        const doctorData = JSON.parse(sessionStorage.getItem('user'));
+        // Doctor validation
+        const doctorData = JSON.parse(sessionStorage.getItem('user') || 'null');
         if (!doctorData || doctorData.role !== 'doctor') {
           window.location.href = '/login';
-        } else {
-          setDoctor(doctorData);
+          return;
         }
+        setDoctor(doctorData);
+        
       } catch (error) {
         console.error('Error fetching data:', error);
         showSnackbar('Lỗi khi tải dữ liệu', 'error');
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -80,10 +89,10 @@ const CreateMedicalProcessPage = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  // Process steps management
+  // Process steps management with null checks
   const addProcessStep = () => {
     const newId = processStepsForm.length > 0 
-      ? Math.max(...processStepsForm.map(step => step.id)) + 1 
+      ? Math.max(...processStepsForm.map(step => step.id || 0)) + 1 
       : 1;
     setProcessStepsForm([...processStepsForm, { id: newId, serviceId: '', notes: '' }]);
   };
@@ -100,48 +109,55 @@ const CreateMedicalProcessPage = () => {
     ));
   };
 
-  // Form submission
+  // Form submission with enhanced validation
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!selectedPatient || !selectedPatient._id) {
+      showSnackbar('Vui lòng chọn bệnh nhân hợp lệ', 'error');
+      return;
+    }
+
+    if (processStepsForm.some(step => !step.serviceId)) {
+      showSnackbar('Vui lòng chọn dịch vụ cho tất cả các bước', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Validate form
-      if (!selectedPatient) {
-        showSnackbar('Vui lòng chọn bệnh nhân', 'error');
-        return;
-      }
-
-      if (processStepsForm.some(step => !step.serviceId)) {
-        showSnackbar('Vui lòng chọn dịch vụ cho tất cả các bước', 'error');
-        return;
-      }
-
-      // Create process steps and collect their IDs
-      const processStepPromises = processStepsForm.map(step => 
+      // Create process steps with error handling
+      const processStepPromises = processStepsForm.map((step, idx) => 
         MedicalProcessService.createProcessStep({
           serviceId: step.serviceId,
-          notes: step.notes,
-          patientId: selectedPatient._id
+          notes: step.notes || '', // Ensure notes is at least empty string
+          patientId: selectedPatient._id,
+          isFirstStep: idx === 0 // chỉ bước đầu tiên là true
+        }).catch(error => {
+          console.error('Error creating process step:', error);
+          throw new Error('Failed to create one or more process steps');
         })
       );
 
       const createdSteps = await Promise.all(processStepPromises);
-      const processStepIds = createdSteps.map(step => step._id);
+      const processStepIds = createdSteps.map(step => step?._id).filter(Boolean);
+
+      if (processStepIds.length !== processStepsForm.length) {
+        throw new Error('Some process steps failed to create');
+      }
 
       // Create the main medical process
       await MedicalProcessService.createMedicalProcess({
         patientId: selectedPatient._id,
-        doctorId: doctor._id,
+        doctorId: doctor?._id || '',
         processSteps: processStepIds
       });
 
-      // Success handling
       showSnackbar('Tạo tiến trình khám thành công!');
       resetForm();
     } catch (error) {
       console.error('Error creating medical process:', error);
-      showSnackbar('Có lỗi xảy ra khi tạo tiến trình khám', 'error');
+      showSnackbar(error.message || 'Có lỗi xảy ra khi tạo tiến trình khám', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -152,6 +168,15 @@ const CreateMedicalProcessPage = () => {
     setSelectedPatient(null);
     setPatientInputValue('');
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box className="min-h-screen flex items-center justify-center">
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <Box className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -171,21 +196,21 @@ const CreateMedicalProcessPage = () => {
           <Card className="shadow-lg rounded-xl overflow-hidden">
             <CardContent className="p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Patient Selection */}
+                {/* Patient Selection with null checks */}
                 <Box>
                   <Typography variant="subtitle1" className="font-medium text-gray-700 mb-2">
                     Bệnh nhân <span className="text-red-500">*</span>
                   </Typography>
                   <Autocomplete
-                    options={patients}
-                    getOptionLabel={(option) => option.fullName}
+                    options={Array.isArray(patients) ? patients : []}
+                    getOptionLabel={(option) => option?.fullName || 'Không xác định'}
                     inputValue={patientInputValue}
                     value={selectedPatient}
                     onInputChange={(event, newInputValue) => {
-                      setPatientInputValue(newInputValue);
+                      setPatientInputValue(newInputValue || '');
                     }}
                     onChange={(event, newValue) => {
-                      setSelectedPatient(newValue);
+                      setSelectedPatient(newValue || null);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -207,9 +232,9 @@ const CreateMedicalProcessPage = () => {
                     renderOption={(props, option) => (
                       <Box component="li" {...props} className="hover:bg-blue-50">
                         <Box className="flex justify-between w-full">
-                          <Typography>{option.fullName}</Typography>
+                          <Typography>{option?.fullName || 'Không xác định'}</Typography>
                           <Typography variant="body2" className="text-gray-500">
-                            {option.phone}
+                            {option?.phone || 'Không có số điện thoại'}
                           </Typography>
                         </Box>
                       </Box>
@@ -224,7 +249,7 @@ const CreateMedicalProcessPage = () => {
                   />
                 </Box>
                 
-                {/* Process Steps */}
+                {/* Process Steps with null checks */}
                 <Box>
                   <Box className="flex justify-between items-center mb-4">
                     <Typography variant="subtitle1" className="font-medium text-gray-700">
@@ -245,7 +270,7 @@ const CreateMedicalProcessPage = () => {
                   
                   <Box className="space-y-4">
                     {processStepsForm.map((step, index) => (
-                      <Grow in={true} key={step.id}>
+                      <Grow in={true} key={step.id || index}>
                         <Card 
                           variant="outlined" 
                           className="rounded-lg hover:shadow-md transition-all duration-300"
@@ -273,7 +298,7 @@ const CreateMedicalProcessPage = () => {
                                   Dịch vụ <span className="text-red-500">*</span>
                                 </Typography>
                                 <Select
-                                  value={step.serviceId}
+                                  value={step.serviceId || ''}
                                   onChange={(e) => handleStepChange(step.id, 'serviceId', e.target.value)}
                                   variant="outlined"
                                   fullWidth
@@ -285,9 +310,10 @@ const CreateMedicalProcessPage = () => {
                                   <MenuItem value="" disabled>
                                     <em>Chọn dịch vụ...</em>
                                   </MenuItem>
-                                  {services.map(service => (
-                                    <MenuItem key={service._id} value={service._id}>
-                                      {service.paraclinalName} (Phòng: {service.room.roomNumber})
+                                  {Array.isArray(services) && services.map(service => (
+                                    <MenuItem key={service?._id || index} value={service?._id || ''}>
+                                      {service?.paraclinalName || 'Dịch vụ không xác định'} 
+                                      {service?.room?.roomNumber ? ` (Phòng: ${service.room.roomNumber})` : ''}
                                     </MenuItem>
                                   ))}
                                 </Select>
@@ -298,7 +324,7 @@ const CreateMedicalProcessPage = () => {
                                   Ghi chú (tùy chọn)
                                 </Typography>
                                 <TextField
-                                  value={step.notes}
+                                  value={step.notes || ''}
                                   onChange={(e) => handleStepChange(step.id, 'notes', e.target.value)}
                                   variant="outlined"
                                   fullWidth
@@ -324,7 +350,7 @@ const CreateMedicalProcessPage = () => {
                     fullWidth
                     size="large"
                     className="py-3 shadow-md hover:shadow-lg transition-all duration-300"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !doctor}
                   >
                     {isSubmitting ? (
                       <CircularProgress size={24} color="inherit" />

@@ -47,17 +47,6 @@ export const MedicalProcessService = {
       );
     }
   },
-  updateMedicalStep: async (stepId, updateData) => {
-    try {
-      const response = await axios.post(`${API_URL}/step/update/${stepId}`, updateData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating medical step:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to update medical step"
-      );
-    }
-  },
   updateMedicalProcessStatus : async (processId, status) => {
     try {
       const response = await axios.post(`${API_URL}/updateStatus/${processId}`, { status });
@@ -69,15 +58,26 @@ export const MedicalProcessService = {
       );
     }
   },
-  updateMedicalProcessCurrentStep: async (processId, currentStep) => {
+
+  getMyProcessByUserId: async () => {
     try {
-      const response = await axios.post(`${API_URL}/updateCurrentStep/${processId}`, { currentStep });
+      const userStr = sessionStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const userId = user?._id;
+
+      if (!userId) {
+        throw new Error("Người dùng chưa đăng nhập hoặc không hợp lệ.");
+      }
+
+      const response = await axios.get(`${API_URL}/my-process/${userId}`);
       return response.data;
     } catch (error) {
-      console.error("Error updating medical process current step:", error);
+      console.error("Error fetching patient's medical process:", error);
       throw new Error(
-        error.response?.data?.message || "Failed to update medical process current step"
+        error.response?.data?.message ||
+          "Failed to fetch patient's process"
       );
     }
-  }
+  },
+
 };

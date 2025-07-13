@@ -35,6 +35,7 @@ const UserProfilePage = React.lazy(() => import("../pages/UserProfilePage"));
 const UserProfileUpdatePage = React.lazy(() => import("../pages/UserProfileUpdatePage"));
 
 const CreateMedical = React.lazy(() => import("../pages/MedicalCreate"))
+const listMedical = React.lazy(() => import("../pages/MedicListPage"))
 
 const SpecialtiesListPage = React.lazy(() => import("../pages/SpecialtyListPage"));
 const SpecialtyDetailPage = React.lazy(() => import("../pages/SpecialtyDetailPage"));
@@ -45,6 +46,7 @@ const SpecialtyDetailPatientPage = React.lazy(() => import("../pages/SpecialtyDe
 
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
+const HealthPackageDetailPatientPage = React.lazy(() => import("../pages/HealthPackageDetailPatientPage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
 const CreateHealthPackagePage = React.lazy(() => import("../pages/CreateHealthPackagePage"));
 const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/HealthPackageDetailPage"));
@@ -55,16 +57,22 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
-const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MyProcessPage"));
+
+const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
+const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
 
-const ScheduleListPage = React.lazy(() => import("../pages/ScheduleListPage"));
-const ScheduleDetailPage = React.lazy(() => import("../pages/ScheduleDetailPage"));
+
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
-const ScheduleUpdatePage = React.lazy(() => import("../pages/ScheduleUpdatePage"));
+const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
 
+const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
+const AppointmentPaymentPage = React.lazy(() => import("../pages/AppointmentPayment"));
+const AppointmentPatientPage = React.lazy(() => import("../pages/AppointmentPatientPage"));
+const AppointmentDetailPatientPage = React.lazy(() => import("../pages/AppointmentDetailPatientPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -112,8 +120,11 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
   {path: ROUTE_PATH.HEALTH_PACKAGE_USER, page: HealthPackagePage, layout: MainLayout},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL_USER, page: HealthPackageDetailPatientPage, layout: MainLayout},
+
   //Service Manager
-  {path: ROUTE_PATH.SERVICES_LIST, page: CreateMedical, layout: AdminLayout},
+  {path: ROUTE_PATH.SERVICES_CREATE, page: CreateMedical, layout: AdminLayout},
+  {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout},
 
   // Specialty Manager
   { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
@@ -125,11 +136,9 @@ const AppRoute = [
   { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
   
   // Schedule Manager
-  { path: ROUTE_PATH.SCHEDULE_LIST, page: ScheduleListPage, layout: AdminLayout },
-  { path: ROUTE_PATH.SCHEDULE_DETAIL, page: ScheduleDetailPage, layout: AdminLayout },
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.UPDATE_SCHEDULE, page: ScheduleUpdatePage, layout: AdminLayout },
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage},
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
@@ -137,20 +146,30 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
 
+
+  //Patient
+  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MedicalProcessDetailPage, layout: MainLayout },
+
   // Technician
   { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
 
   //Booking from package
 
+  { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
- 
+  //Appointment for patient
+  { path: ROUTE_PATH.APPOINTMENT_SPECIALTY, page: AppointmentSpecialtyPage, layout: MainLayout },
+  { path: ROUTE_PATH.APPOINTMENT_PAYMENT, page: AppointmentPaymentPage, layout: MainLayout },
+  { path: ROUTE_PATH.APPOINTMENT_PATIENT, page: AppointmentPatientPage, layout: MainLayout },
+  { path: ROUTE_PATH.APPOINTMENT_DETAIL, page: AppointmentDetailPatientPage, layout: MainLayout },
 
 
   //Booking from package
 
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
- 
+  // Create Medical History
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: DoctorLayout },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},

@@ -71,7 +71,7 @@ function Header() {
                   : "text-black hover:bg-custom-bluehover"
               }`}
             >
-              Chuyên khoa
+              Khám chuyên khoa
             </Link>
           </li>
           <li>
@@ -83,10 +83,10 @@ function Header() {
                   : "text-black hover:bg-custom-bluehover"
               }`}
             >
-              Dịch vụ
+              Khám dịch vụ
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/news"
               className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
@@ -97,7 +97,7 @@ function Header() {
             >
               Tin tức
             </Link>
-          </li>
+          </li> */}
           <li>
             {userData ? (
               <Menu as="div" className="relative inline-block text-left">
@@ -135,7 +135,7 @@ function Header() {
                   <div className="py-1">
                     <MenuItem>
                       <a
-                        href="user-profile"
+                        href="/user-profile"
                         className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                       >
                         <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
@@ -148,7 +148,7 @@ function Header() {
                   <div className="py-1">
                     <MenuItem>
                       <a
-                        href="#"
+                        href="/appointment-patient"
                         className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                       >
                         <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">

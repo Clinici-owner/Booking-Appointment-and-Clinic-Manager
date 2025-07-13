@@ -28,7 +28,6 @@ export const DoctorService = {
   },
    getDoctorsBySpecialty: async (specialtyId) => {
     try {
-      console.log('DoctorService.getDoctorsBySpecialty specialtyId:', specialtyId);
       
       if (!specialtyId || typeof specialtyId !== 'string' || specialtyId.trim() === '') {
         throw new Error('Invalid specialtyId');
@@ -36,7 +35,6 @@ export const DoctorService = {
 
       const encodedId = specialtyId.trim();
       const url = `${API_URL}/specialties/${encodedId}`;
-      console.log('DoctorService.getDoctorsBySpecialty url:', url);
 
       const response = await axios.get(url);
       // Kiểm tra dữ liệu trả về
