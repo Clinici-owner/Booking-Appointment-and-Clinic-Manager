@@ -42,7 +42,6 @@ const ListMedicalStepsTodayByRoomPage = () => {
     const [diagnosis, setDiagnosis] = useState("");
 
     useEffect(() => {
-        // Giả lập gọi API để lấy danh sách dịch vụ y tế hôm nay
         const fetchTodaySteps = async () => {
             const steps = await stepProcessService.getTodayProcessStepsByRoom();
             setTodaySteps(steps);
