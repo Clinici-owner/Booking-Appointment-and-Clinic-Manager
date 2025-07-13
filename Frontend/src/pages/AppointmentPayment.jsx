@@ -303,9 +303,13 @@ function AppointmentPayment() {
         </h2>
         <div className="space-y-1 text-sm leading-relaxed">
           <p>
-            <strong>Tổng chi phí:</strong>{" "}
+            <strong>Chi phí khám:</strong>{" "}
             <span className="text-red-600 font-bold">
               {specialty?.medicalFee?.toLocaleString("vi-VN")} VNĐ
+            </span>
+          
+            <span className="text-gray-500">
+              {" "}Chưa bao gồm chi phí xét nghiệm, cận lâm sàng nếu có
             </span>
           </p>
           <p>

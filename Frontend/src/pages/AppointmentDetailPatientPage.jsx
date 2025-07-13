@@ -190,10 +190,14 @@ function AppointmentDetailPatientPage() {
         </h2>
         <div className="space-y-1 text-sm leading-relaxed">
           <p>
-            <strong>Tổng chi phí:</strong>{" "}
+            <strong>Chi phí khám:</strong>{" "}
             <span className="text-red-600 font-bold">
               {appointment.specialties[0]?.medicalFee?.toLocaleString("vi-VN")}{" "}
               VNĐ
+            </span>
+            {/* note */}
+            <span className="text-gray-500">
+              {" "}Chưa bao gồm chi phí xét nghiệm, cận lâm sàng nếu có
             </span>
           </p>
           <p>
