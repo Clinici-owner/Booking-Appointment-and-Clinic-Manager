@@ -46,6 +46,7 @@ const SpecialtyDetailPatientPage = React.lazy(() => import("../pages/SpecialtyDe
 
 const NotFoundPage = React.lazy(() => import("../pages/NotFoundPage"));
 const HealthPackagePage = React.lazy(() => import("../pages/HealthPackagePage"));
+const HealthPackageDetailPatientPage = React.lazy(() => import("../pages/HealthPackageDetailPatientPage"));
 const AdminHealthPackagePage = React.lazy(() => import("../pages/AdminHealthPackagePage"));
 const CreateHealthPackagePage = React.lazy(() => import("../pages/CreateHealthPackagePage"));
 const AdminHealthPackageDetailPage = React.lazy(() => import("../pages/HealthPackageDetailPage"));
@@ -119,6 +120,8 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
   {path: ROUTE_PATH.HEALTH_PACKAGE_USER, page: HealthPackagePage, layout: MainLayout},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL_USER, page: HealthPackageDetailPatientPage, layout: MainLayout},
+
   //Service Manager
   {path: ROUTE_PATH.SERVICES_CREATE, page: CreateMedical, layout: AdminLayout},
   {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout},

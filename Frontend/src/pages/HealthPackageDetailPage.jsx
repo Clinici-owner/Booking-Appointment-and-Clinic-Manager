@@ -287,7 +287,7 @@ function AdminHealthPackageDetailPage({ packageId }) {
               {/* Description */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Mô tả</h3>
-                <p className="text-gray-700">{healthPackage.description || "Chưa có mô tả cho gói khám này."}</p>
+                <p className="text-gray-700" dangerouslySetInnerHTML={{ __html: healthPackage.description }}></p>
               </div>
 
               {/* Price Info */}

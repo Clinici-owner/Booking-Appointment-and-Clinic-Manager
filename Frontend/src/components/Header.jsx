@@ -71,7 +71,7 @@ function Header() {
                   : "text-black hover:bg-custom-bluehover"
               }`}
             >
-              Đặt khám 
+              Khám chuyên khoa
             </Link>
           </li>
           <li>
@@ -83,10 +83,10 @@ function Header() {
                   : "text-black hover:bg-custom-bluehover"
               }`}
             >
-              Dịch vụ
+              Khám dịch vụ
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/news"
               className={`px-3 py-2 rounded-full font-semibold cursor-pointer transition duration-300 hover:shadow-md ${
@@ -97,7 +97,7 @@ function Header() {
             >
               Tin tức
             </Link>
-          </li>
+          </li> */}
           <li>
             {userData ? (
               <Menu as="div" className="relative inline-block text-left">

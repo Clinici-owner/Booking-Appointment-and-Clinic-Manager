@@ -12,7 +12,7 @@ import BannerName from "../components/BannerName";
 
 import CheckIcon from "@mui/icons-material/Check";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function AppointmentSpecialtyPage() {
   const { id } = useParams();
@@ -28,6 +28,11 @@ function AppointmentSpecialtyPage() {
   const [scheduleByDoctor, setScheduleByDoctor] = useState([]);
   const [expandedSchedules, setExpandedSchedules] = useState({});
   const [symptoms, setSymptoms] = useState("");
+
+  const location = useLocation();
+  
+  const typeAppointment = location.state?.typeAppointment || "specialty";
+  const packageId = location.state?.healthPackageId || null;
 
   const [listTimeAppointment, setListTimeAppointment] = useState([
     {
@@ -123,6 +128,8 @@ function AppointmentSpecialtyPage() {
           timeRange: selectedTime.timeRange,
           symptoms: symptoms,
           specialtyId: id,
+          typeAppointment: typeAppointment,
+          packageId: packageId,
         },
       });
     }

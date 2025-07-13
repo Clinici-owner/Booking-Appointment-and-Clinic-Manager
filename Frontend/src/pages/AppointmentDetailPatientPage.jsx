@@ -11,7 +11,6 @@ function AppointmentDetailPatientPage() {
   const [schedule, setSchedule] = useState(null);
   const [doctorProfile, setDoctorProfile] = useState(null);
   const { id } = useParams();
-  //   const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -52,7 +51,7 @@ function AppointmentDetailPatientPage() {
       "Thứ 6",
       "Thứ 7",
     ];
-    return `${weekdays[date.getUTCDay()]}, ngày ${date.getDate()} tháng ${
+    return `${weekdays[date.getUTCDay()]} ngày ${date.getDate()} tháng ${
       date.getMonth() + 1
     } năm ${date.getFullYear()}`;
   };
@@ -157,13 +156,30 @@ function AppointmentDetailPatientPage() {
           </p>
           <p className="whitespace-nowrap">
             <strong>Giờ khám:</strong>{" "}
-            {appointment.time.toString().substring(11, 16)}h,{" "}
+            {appointment.time.toString().substring(11, 16)}h{" "}
             {formatVietnameseDate(appointment.time)}
           </p>
           <p>
             <strong>Triệu chứng:</strong>{" "}
             {appointment.symptoms || "Chưa cung cấp"}
           </p>
+          {appointment.healthPackage != null ? (
+            <p>
+              <strong>Hình thức khám: Gói sức khỏe</strong>{" "}
+            </p>
+          ) : (
+            <p>
+              <strong>Hình thức khám: Chuyên khoa</strong>
+            </p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-sm leading-relaxed mt-4">
+          {appointment.healthPackage && (
+            <p>
+              <strong className="whitespace-nowrap">Tên gói khám:</strong>{" "}
+              {appointment.healthPackage.packageName || "Không có gói khám nào"}
+            </p>
+          )}
         </div>
       </div>
 
