@@ -17,12 +17,11 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 const drawerWidth = 240;
 
 const navItems = [
-  { label: "Tạo hồ sơ kĩ thuật viên", icon: <AssignmentIcon />, path: "/doctor/createDoctorProfile" },
-  { label: "Danh sách quy trình khám bệnh", icon: <MedicalServicesIcon />, path: "/doctor/medicalProcess" },
+  { label: "Danh sách hàng chờ bệnh nhân", icon: <AssignmentIcon />, path: "/schedules/room" },
   { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
 ];
 
-export default function DoctorNavSidebar({ children }) {
+export default function TechnicianNavSidebar({ children }) {
   return (
     <Box sx={{ display: "flex"}}>
       <CssBaseline />
