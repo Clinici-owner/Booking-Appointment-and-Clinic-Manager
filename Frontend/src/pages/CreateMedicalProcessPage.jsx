@@ -29,11 +29,12 @@ import {
 import { PatientService } from '../services/patientService';
 import { listService } from '../services/medicalService';
 import { MedicalProcessService } from '../services/medicalProcessService';
+import  appointmentService  from '../services/appointmentService';
 
 const CreateMedicalProcessPage = () => {
   // State management with safe initial values
   const [doctor, setDoctor] = useState(null);
-  const [patients, setPatients] = useState([]);
+  const [appointmentsToday, setAppointmentsToday] = useState([]);
   const [services, setServices] = useState([]);
   const [patientInputValue, setPatientInputValue] = useState('');
   const [processStepsForm, setProcessStepsForm] = useState([{ id: 1, serviceId: '', notes: '' }]);
@@ -52,13 +53,13 @@ const CreateMedicalProcessPage = () => {
       try {
         setIsLoading(true);
         
-        const [patientsRes, servicesRes] = await Promise.all([
-          PatientService.getAllPatients().catch(() => []), // Return empty array on error
+        const [appointmentsTodayRes, servicesRes] = await Promise.all([
+          appointmentService.getAppointmentsToday().catch(() => []), // Return empty array on error
           listService().catch(() => ({ services: [] })) // Return empty object with services array on error
         ]);
         
         // Safe data setting with null checks
-        setPatients(Array.isArray(patientsRes) ? patientsRes : []);
+        setAppointmentsToday(Array.isArray(appointmentsTodayRes) ? appointmentsTodayRes : []);
         setServices(Array.isArray(servicesRes?.services) ? servicesRes.services : []);
 
         // Doctor validation
@@ -113,7 +114,7 @@ const CreateMedicalProcessPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!selectedPatient || !selectedPatient._id) {
+    if (!selectedPatient || !selectedPatient.patientId || !selectedPatient.patientId._id) {
       showSnackbar('Vui lòng chọn bệnh nhân hợp lệ', 'error');
       return;
     }
@@ -131,7 +132,7 @@ const CreateMedicalProcessPage = () => {
         MedicalProcessService.createProcessStep({
           serviceId: step.serviceId,
           notes: step.notes || '', // Ensure notes is at least empty string
-          patientId: selectedPatient._id,
+          patientId: selectedPatient.patientId._id,
           isFirstStep: idx === 0 // chỉ bước đầu tiên là true
         }).catch(error => {
           console.error('Error creating process step:', error);
@@ -148,7 +149,7 @@ const CreateMedicalProcessPage = () => {
 
       // Create the main medical process
       await MedicalProcessService.createMedicalProcess({
-        patientId: selectedPatient._id,
+        patientId: selectedPatient.patientId._id,
         doctorId: doctor?._id || '',
         processSteps: processStepIds
       });
@@ -202,8 +203,8 @@ const CreateMedicalProcessPage = () => {
                     Bệnh nhân <span className="text-red-500">*</span>
                   </Typography>
                   <Autocomplete
-                    options={Array.isArray(patients) ? patients : []}
-                    getOptionLabel={(option) => option?.fullName || 'Không xác định'}
+                    options={Array.isArray(appointmentsToday) ? appointmentsToday : []}
+                    getOptionLabel={(option) => option?.patientId.fullName || 'Không xác định'}
                     inputValue={patientInputValue}
                     value={selectedPatient}
                     onInputChange={(event, newInputValue) => {
@@ -232,9 +233,9 @@ const CreateMedicalProcessPage = () => {
                     renderOption={(props, option) => (
                       <Box component="li" {...props} className="hover:bg-blue-50">
                         <Box className="flex justify-between w-full">
-                          <Typography>{option?.fullName || 'Không xác định'}</Typography>
+                          <Typography>{option?.patientId.fullName || 'Không xác định'}</Typography>
                           <Typography variant="body2" className="text-gray-500">
-                            {option?.phone || 'Không có số điện thoại'}
+                            {option?.patientId.phone || 'Không có số điện thoại'}
                           </Typography>
                         </Box>
                       </Box>
