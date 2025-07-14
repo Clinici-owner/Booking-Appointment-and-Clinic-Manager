@@ -57,7 +57,7 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
-const MedicalProcessDetailPage = React.lazy(() => import("../pages/MyProcessPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -144,7 +144,7 @@ const AppRoute = [
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage},
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout},
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
@@ -154,7 +154,7 @@ const AppRoute = [
 
 
   //Patient
-  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MedicalProcessDetailPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
 
   // Technician
   { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
@@ -175,7 +175,7 @@ const AppRoute = [
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
   // Create Medical History
-  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
