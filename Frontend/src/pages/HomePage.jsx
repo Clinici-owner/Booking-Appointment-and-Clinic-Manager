@@ -332,7 +332,7 @@ function HomePage() {
 
             <div class="text-center mt-10">
               <a
-                href="#"
+                href="/doctors"
                 class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium inline-block transition"
               >
                 Xem tất cả bác sĩ

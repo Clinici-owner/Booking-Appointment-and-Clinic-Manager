@@ -76,6 +76,9 @@ const AppointmentDetailPatientPage = React.lazy(() => import("../pages/Appointme
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
+const DoctorListPage = React.lazy(() => import("../pages/DoctorListPage"));
+const DoctorDetailPage = React.lazy(() => import("../pages/DoctorDetailPage"));
+
 // Cấu hình route
 const AppRoute = [
   // Public
@@ -105,6 +108,9 @@ const AppRoute = [
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
+  //Doctor List For User
+  {path: ROUTE_PATH.DOCTOR_LIST, page: DoctorListPage, layout: MainLayout},
+  {path: ROUTE_PATH.DOCTOR_DETAIL, page: DoctorDetailPage, layout: MainLayout},
 
   // User Profile
   { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },

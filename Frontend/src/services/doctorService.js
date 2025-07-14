@@ -53,4 +53,31 @@ export const DoctorService = {
       }
     }
   },
-};
+ getAllDoctors: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/doctors`);
+      
+      // Kiểm tra cấu trúc response
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || 'Invalid response structure');
+      }
+      
+      return {
+        success: true,
+        doctors: response.data.data
+      };
+    } catch (error) {
+      console.error('Error fetching doctors:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Failed to fetch doctors');
+    }
+  },
+ getDoctorById: async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/doctors/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching doctor:', error);
+      throw error;
+    }
+  },
+}

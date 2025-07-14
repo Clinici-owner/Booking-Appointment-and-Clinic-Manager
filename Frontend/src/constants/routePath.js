@@ -72,6 +72,10 @@ export const ROUTE_PATH = {
   HEALTH_PACKAGE_DETAIL_USER: '/health-packages/detail/:id',
   PACKAGE_LIST: '/health-package/list',
 
+  //Doctor List for User
+  DOCTOR_LIST: '/doctors',
+  DOCTOR_DETAIL: '/doctors/:id', 
+
   //Appointment for patient
   APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',
   HEALTH_PACKAGE_LIST: '/health-packages-list',
