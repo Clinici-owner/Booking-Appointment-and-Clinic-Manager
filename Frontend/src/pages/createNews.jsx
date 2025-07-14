@@ -1,16 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createNews, uploadToCloudinary } from "../services/newsService";
-import { Button, TextField, TextareaAutosize, Box, Typography, IconButton } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
-import UploadIcon from '@mui/icons-material/CloudUpload';
+import { Toaster, toast } from "sonner";
+import {
+  Button,
+  TextField,
+  TextareaAutosize,
+  Box,
+  Typography,
+  IconButton
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import UploadIcon from "@mui/icons-material/CloudUpload";
 
 const NewsCreatePage = () => {
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState([]);
-  const [tags, setTags] = useState(""); 
+  const [tags, setTags] = useState("");
   const [category, setCategory] = useState("");
-  const navigate = useNavigate();
+  const [uploading, setUploading] = useState(false);
+
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") {
+      toast.error("Bạn không có quyền truy cập trang này.");
+      navigate("/");
+    }
+  }, []);
 
   const handleAddText = () => {
     setBlocks([...blocks, { type: "text", content: "", order: blocks.length }]);
@@ -19,9 +38,18 @@ const NewsCreatePage = () => {
   const handleAddImage = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      setUploading(true);
       const url = await uploadToCloudinary(file);
+      setUploading(false);
       if (url) {
-        setBlocks([...blocks, { type: "image", content: { url }, order: blocks.length }]);
+        setBlocks([
+          ...blocks,
+          {
+            type: "image",
+            content: url, 
+            order: blocks.length
+          }
+        ]);
       }
     }
   };
@@ -33,28 +61,29 @@ const NewsCreatePage = () => {
   };
 
   const handleSubmit = async () => {
-  if (blocks.length === 0) {
-    alert("Vui lòng thêm ít nhất một đoạn văn hoặc hình ảnh.");
-    return;
-  }
+    if (!title.trim() || blocks.length === 0) {
+      toast.error("Vui lòng nhập tiêu đề và nội dung bài viết.");
+      return;
+    }
 
-  try {
-    await createNews({
-      title,
-      blocks,
-      tags: tags.split(","),
-      category: category || "Thông báo",
-    });
-    alert("Tạo bài viết thành công!");
-    navigate("/news");
-  } catch (err) {
-    console.error(err);
-    alert("Lỗi khi tạo bài viết");
-  }
-};
+    try {
+      await createNews({
+        title,
+        blocks,
+        tags: tags.split(",").map(tag => tag.trim()).filter(Boolean),
+        category: category || "Thông báo",
+      });
+      toast.success("Tạo bài viết thành công!");
+      navigate("/news");
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi khi tạo bài viết: " + (err?.response?.data?.message || err.message));
+    }
+  };
 
   return (
     <Box sx={{ padding: 3 }}>
+      <Toaster position="top-right" richColors />
       <Typography variant="h4" gutterBottom>
         Tạo bài viết
       </Typography>
@@ -96,7 +125,7 @@ const NewsCreatePage = () => {
             />
           ) : block.type === "image" ? (
             <img
-              src={block.content.url}
+              src={block.content}
               alt=""
               style={{ maxWidth: "100%", borderRadius: 8 }}
             />
@@ -112,28 +141,29 @@ const NewsCreatePage = () => {
         >
           Thêm đoạn văn
         </Button>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleAddImage}
-          style={{ marginLeft: 16 }}
-        />
-        <IconButton color="primary" component="span" sx={{ marginLeft: 1 }}>
-          <UploadIcon />
-        </IconButton>
+
+        <label htmlFor="image-upload">
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleAddImage}
+            style={{ display: "none" }}
+          />
+          <IconButton color="primary" component="span" sx={{ ml: 2 }}>
+            <UploadIcon />
+          </IconButton>
+        </label>
       </Box>
 
       <Button
         variant="contained"
         color="primary"
         onClick={handleSubmit}
-        sx={{
-          marginTop: 3,
-          padding: "10px 20px",
-          borderRadius: 2,
-        }}
+        sx={{ marginTop: 3 }}
+        disabled={uploading}
       >
-        Lưu bài viết
+        {uploading ? "Đang tải ảnh..." : "Lưu bài viết"}
       </Button>
     </Box>
   );
