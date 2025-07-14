@@ -15,7 +15,7 @@ import { Toaster, toast } from "sonner";
 const WorkScheduleSummary = () => {
   const [roomData, setRoomData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [processingId, setProcessingId] = useState(null); // để disable nút trong khi xử lý
+  const [processingId, setProcessingId] = useState(null);
 
   const fetchRoomInfo = async () => {
     try {
@@ -24,7 +24,7 @@ const WorkScheduleSummary = () => {
       setRoomData(data);
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
+        error?.response?.data?.message ||
           "Không thể lấy thông tin phòng làm việc."
       );
     } finally {
@@ -44,8 +44,8 @@ const WorkScheduleSummary = () => {
       await fetchRoomInfo();
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
-          error.response?.data?.error ||
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
           "Lỗi khi hoàn tất bước xử lý."
       );
     } finally {
@@ -66,16 +66,14 @@ const WorkScheduleSummary = () => {
         ) : roomData ? (
           <>
             <Typography variant="body1" sx={{ mb: 1 }}>
-              📅 <strong>Ngày:</strong>{" "}
-              {new Date().toLocaleDateString("vi-VN")}
+              <strong>Ngày:</strong> {new Date().toLocaleDateString("vi-VN")}
             </Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>
-              🏥 <strong>Phòng:</strong> {roomData.roomNumber} -{" "}
-              {roomData.roomName}
+              <strong>Phòng:</strong> {roomData.roomNumber} - {roomData.roomName}
             </Typography>
 
             <Typography variant="body1" sx={{ mt: 2 }}>
-              🛠 <strong>Cận lâm sàn:</strong>{" "}
+              <strong>Dịch vụ cận lâm sàng:</strong>{" "}
               {Array.isArray(roomData.services) && roomData.services.length > 0
                 ? roomData.services
                     .map((s) => (typeof s === "string" ? s : s.name))
@@ -86,7 +84,7 @@ const WorkScheduleSummary = () => {
             <Divider sx={{ my: 2 }} />
 
             <Typography variant="h6" sx={{ mb: 1 }}>
-              👨‍⚕️ Danh sách bệnh nhân trong phòng:
+              Danh sách bệnh nhân trong phòng
             </Typography>
 
             {!Array.isArray(roomData.patientQueue) ||
@@ -118,7 +116,9 @@ const WorkScheduleSummary = () => {
                       onClick={() => handleCompleteStep(patient._id)}
                       disabled={processingId === patient._id}
                     >
-                      {processingId === patient._id ? "Đang xử lý..." : "Hoàn tất"}
+                      {processingId === patient._id
+                        ? "Đang xử lý..."
+                        : "Hoàn tất"}
                     </Button>
                   </ListItem>
                 ))}
@@ -126,9 +126,7 @@ const WorkScheduleSummary = () => {
             )}
           </>
         ) : (
-          <Typography color="text.secondary">
-            Hôm nay là ngày nghỉ.
-          </Typography>
+          <Typography color="text.secondary">Hôm nay là ngày nghỉ.</Typography>
         )}
       </Paper>
     </div>
