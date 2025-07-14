@@ -10,6 +10,7 @@ const News = new Schema({
         required: true,
         enum: ["text", "image", "quote", "video"]
       },
+      mediaRef: { type: Schema.Types.ObjectId, ref: 'DocumentUpload' },
       content: { type: Schema.Types.Mixed, required: true }, 
       order: { type: Number, default: 0 }
     }
