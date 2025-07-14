@@ -63,6 +63,8 @@ const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
+const Newspaperpage = React.lazy(() => import("../pages/NewPaper"));
+const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 
 
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
@@ -179,7 +181,9 @@ const AppRoute = [
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
-
+  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
+  {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout},
+  
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
 

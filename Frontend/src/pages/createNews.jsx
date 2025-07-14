@@ -46,7 +46,7 @@ const NewsCreatePage = () => {
           ...blocks,
           {
             type: "image",
-            content: url, 
+            content: url,
             order: blocks.length
           }
         ]);
@@ -156,15 +156,24 @@ const NewsCreatePage = () => {
         </label>
       </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ marginTop: 3 }}
-        disabled={uploading}
-      >
-        {uploading ? "Đang tải ảnh..." : "Lưu bài viết"}
-      </Button>
+      <Box sx={{ display: "flex", gap: 2, marginTop: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={uploading}
+        >
+          {uploading ? "Đang tải ảnh..." : "Lưu bài viết"}
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => navigate("/news")}
+        >
+          Xem danh sách bài viết
+        </Button>
+      </Box>
     </Box>
   );
 };
