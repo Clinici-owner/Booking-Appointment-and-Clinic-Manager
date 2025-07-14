@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { listNews } from "../services/newsService";
-import { Link } from "react-router-dom";
+import NewsCard from "../components/NewsCard";
 
 function NewsPage() {
   const [newsList, setNewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -37,22 +39,7 @@ function NewsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {newsList.map((news) => (
-            <Link
-              key={news._id}
-              to={`/news/${news._id}`}
-              className="border rounded-lg p-4 hover:shadow transition"
-            >
-              <h2 className="text-xl font-semibold mb-2">{news.title}</h2>
-              <p className="text-sm text-gray-600">
-                {news.category || "Chưa phân loại"} -{" "}
-                {new Date(news.createdAt).toLocaleDateString("vi-VN")}
-              </p>
-              <p className="mt-2 text-gray-800 line-clamp-2">
-                {
-                  news.blocks?.find((b) => b.type === "text")?.content?.slice(0, 100) || "..."
-                }
-              </p>
-            </Link>
+            <NewsCard key={news._id} news={news} isAdmin={user?.role === "admin"} />
           ))}
         </div>
       )}
