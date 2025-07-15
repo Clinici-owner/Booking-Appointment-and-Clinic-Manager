@@ -6,6 +6,7 @@ const DoctorProfile = require("../models/DoctorProfile");
 const ParaclinicalService = require("../models/ParaclinicalService");
 
 class ScheduleController {
+  
   async getAllSchedules(req, res) {
     try {
       const schedules = await Schedule.find()
@@ -17,47 +18,56 @@ class ScheduleController {
     }
   }
 
-  // Tạo lịch trình cho nhân viên: chỉ cần userId, room, shift, date (theo model Schedule)
+ 
   async createSchedule(req, res) {
     try {
-      let { userId, room, shift, date } = req.body;
-      if (!userId || !room || !shift || !date) {
-        return res.status(400).json({ error: "Thiếu thông tin bắt buộc." });
+      let { userIds, room, shift, dates } = req.body;
+  
+      if (!userIds || !Array.isArray(userIds) || userIds.length === 0 || !room || !shift || !dates || !Array.isArray(dates) || dates.length === 0) {
+        return res.status(400).json({ error: "Thiếu thông tin bắt buộc hoặc dữ liệu không hợp lệ." });
       }
-      // Nếu date là string, chuyển thành mảng
-      if (typeof date === "string") {
-        date = [date];
-      }
-      if (!Array.isArray(date)) {
-        return res.status(400).json({ error: "Ngày không hợp lệ." });
-      }
-      // Kiểm tra phòng
+  
+      
       const roomObj = await Room.findById(room);
       if (!roomObj)
         return res.status(404).json({ error: "Không tìm thấy phòng." });
-      // Tạo nhiều lịch trình nếu date là mảng
-      const createdSchedules = [];
-      for (const d of date) {
-        // Kiểm tra trùng lịch (bác sĩ, ca, ngày)
-        const exist = await Schedule.findOne({ userId, shift, date: d });
-        if (exist) continue; // Bỏ qua nếu đã có lịch
-        const schedule = await Schedule.create({
-          userId,
-          room,
-          shift,
-          date: d,
-        });
-        createdSchedules.push(schedule);
+  
+      const schedulesToCreate = [];
+      const conflicts = [];
+  
+      for (const userId of userIds) {
+        for (const date of dates) {
+          
+          const existingSchedule = await Schedule.findOne({ userId, shift, date });
+          if (existingSchedule) {
+            const conflictedUser = await User.findById(userId).select('fullName');
+            conflicts.push(`Nhân viên ${conflictedUser ? conflictedUser.fullName : userId} đã có lịch vào ngày ${new Date(date).toLocaleDateString('vi-VN')} ca ${shift}.`);
+          } else {
+            schedulesToCreate.push({
+              userId,
+              room,
+              shift,
+              date,
+            });
+          }
+        }
       }
-      if (createdSchedules.length === 0) {
+      
+      if (schedulesToCreate.length === 0) {
         return res.status(400).json({
-          error: "Tất cả các lịch trình đã tồn tại hoặc không hợp lệ.",
+          error: "Tất cả các lịch trình yêu cầu đã tồn tại hoặc không hợp lệ.",
+          conflicts: conflicts.length > 0 ? conflicts : undefined,
         });
       }
+  
+      const createdSchedules = await Schedule.insertMany(schedulesToCreate);
+      
       res.status(201).json({
-        message: `Tạo ${createdSchedules.length} lịch trình thành công.`,
+        message: `Tạo thành công ${createdSchedules.length} lịch trình.`,
         schedules: createdSchedules,
+        conflicts: conflicts.length > 0 ? conflicts : undefined,
       });
+  
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

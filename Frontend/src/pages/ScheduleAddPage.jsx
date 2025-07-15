@@ -23,18 +23,34 @@ function ScheduleAddPage() {
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [fetchError, setFetchError] = useState(null);
     const navigate = useNavigate();
-    // Hiển thị tuần động, luôn bắt đầu từ 07/07/2025
-    const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const initialMonday = new Date('2025-07-07T00:00:00');
-    const [weekOffset, setWeekOffset] = useState(0); // 0 là tuần đầu tiên
-    const monday = new Date(initialMonday);
-    monday.setDate(initialMonday.getDate() + weekOffset * 7);
+    // Hiển thị tuần động, luôn bắt đầu từ thứ Hai của tuần hiện tại (theo ngày hệ thống)
+    const weekdays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+    // Lấy ngày hiện tại (theo hệ thống)
+    const today = new Date();
+    // Tìm ngày thứ Hai đầu tuần hiện tại
+    const getMonday = (date) => {
+        const d = new Date(date);
+        const day = d.getDay();
+        // getDay: 0=Chủ nhật, 1=Thứ 2, ...
+        const diff = d.getDate() - ((day === 0 ? 7 : day) - 1);
+        d.setDate(diff);
+        d.setHours(0,0,0,0);
+        return d;
+    };
+    // weekOffset: 0 là tuần hiện tại, +1 tuần sau, -1 tuần trước
+    const [weekOffset, setWeekOffset] = useState(0);
+    const monday = (() => {
+        const baseMonday = getMonday(today);
+        const result = new Date(baseMonday);
+        result.setDate(baseMonday.getDate() + weekOffset * 7);
+        return result;
+    })();
     const days = [
         { value: '', label: 'Chọn ngày' },
         ...Array.from({ length: 7 }).map((_, i) => {
             const d = new Date(monday);
             d.setDate(monday.getDate() + i);
-            const weekday = weekdays[d.getDay()];
+            const weekday = weekdays[i];
             const dayStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
             return {
                 value: d.toISOString().slice(0, 10),
@@ -257,17 +273,16 @@ function ScheduleAddPage() {
             return;
         }
 
+        // 1. Edit mode: update 1 lịch trình (1 bác sĩ, 1 ngày)
         if (modalForm._id) {
-            // Edit mode: update schedule (chỉ cho phép sửa 1 lịch trình 1 bác sĩ)
             try {
                 const updateData = {
                     userId: Array.isArray(modalForm.userId) ? modalForm.userId[0] : modalForm.userId,
                     room: modalForm.room,
                     shift: modalForm.shift,
-                    date: modalForm.date
+                    date: Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date
                 };
                 await import('../services/scheduleService').then(m => m.updateSchedule(modalForm._id, updateData));
-                // Refresh server schedules
                 const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
                 setServerSchedules(updated);
                 toast.success('Cập nhật lịch trình thành công!', {
@@ -282,43 +297,51 @@ function ScheduleAddPage() {
             return;
         }
 
-        // Chỉnh sửa nhiều bác sĩ (click cả ô, không có _id, userId là mảng)
+        // 2. Chỉnh sửa nhiều bác sĩ/ngày (click cả ô, không có _id, userId là mảng, date có thể là mảng)
         if (!modalForm._id && Array.isArray(modalForm.userId) && modalForm.userId.length > 0) {
             try {
-                // Lấy ObjectId của phòng
                 const currentRoom = (() => {
                     const found = rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room);
                     return found ? found._id : modalForm.room;
                 })();
-                const currentDate = Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date;
+                const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
+                const userIds = modalForm.userId.map(id => id.toString());
                 const currentShift = modalForm.shift || formData.shift;
-                // Lấy danh sách lịch trình đã có ở phòng/ngày/ca này
+
+                // Lấy tất cả lịch trình đã có ở phòng/ngày/ca này
                 const existedSchedules = serverSchedules.filter(s =>
                     (s.room?._id === currentRoom || s.room === currentRoom || s.room?.roomNumber === currentRoom)
-                    && new Date(s.date).toISOString().slice(0, 10) === new Date(currentDate).toISOString().slice(0, 10)
+                    && selectedDates.includes(new Date(s.date).toISOString().slice(0, 10))
                     && s.shift === currentShift
                 );
-                const existedUserIds = existedSchedules.map(s => s.userId?._id?.toString() || s.userId?.toString());
-                const newUserIds = modalForm.userId.map(id => id.toString()).filter(id => !existedUserIds.includes(id));
-                const removedUserIds = existedUserIds.filter(id => !modalForm.userId.map(x => x.toString()).includes(id));
+                // Tìm userId-date đã có
+                const existedUserDatePairs = existedSchedules.map(s => ({
+                    userId: s.userId?._id?.toString() || s.userId?.toString(),
+                    date: new Date(s.date).toISOString().slice(0, 10)
+                }));
 
-                // Tạo lịch cho bác sĩ mới
-                for (const uid of newUserIds) {
-                    await createSchedule({
-                        userId: uid,
-                        room: currentRoom,
-                        shift: currentShift,
-                        date: currentDate,
-                    });
-                }
-                // Xóa lịch cho bác sĩ bị bỏ chọn
-                for (const uid of removedUserIds) {
-                    const scheduleToDelete = existedSchedules.find(s => (s.userId?._id?.toString() || s.userId?.toString()) === uid);
-                    if (scheduleToDelete) {
-                        await import('../services/scheduleService').then(m => m.deleteSchedule(scheduleToDelete._id));
+                // Tạo lịch cho userId-date chưa có
+                for (const uid of userIds) {
+                    for (const date of selectedDates) {
+                        const exists = existedUserDatePairs.some(pair => pair.userId === uid && pair.date === date);
+                        if (!exists) {
+                            await createSchedule({
+                                userId: uid,
+                                room: currentRoom,
+                                shift: currentShift,
+                                date
+                            });
+                        }
                     }
                 }
-                // Refresh server schedules
+                // Xóa lịch cho userId-date bị bỏ chọn
+                for (const s of existedSchedules) {
+                    const uid = s.userId?._id?.toString() || s.userId?.toString();
+                    const date = new Date(s.date).toISOString().slice(0, 10);
+                    if (!userIds.includes(uid) || !selectedDates.includes(date)) {
+                        await import('../services/scheduleService').then(m => m.deleteSchedule(s._id));
+                    }
+                }
                 const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
                 setServerSchedules(updated);
                 toast.success('Cập nhật lịch trình thành công!', {
@@ -333,25 +356,24 @@ function ScheduleAddPage() {
             return;
         }
 
-        // Tạo mới hoàn toàn (chưa có lịch nào ở phòng/ngày/ca này)
+        // 3. Tạo mới hoàn toàn (chưa có lịch nào ở phòng/ngày/ca này)
         try {
-            // Lấy ObjectId của phòng
             const currentRoom = (() => {
                 const found = rooms.find(r => r.roomNumber === modalForm.room || r._id === modalForm.room);
                 return found ? found._id : modalForm.room;
             })();
             const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
             const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
-            const createPromises = userIds.map(uid =>
-                createSchedule({
-                    userId: uid,
-                    room: currentRoom,
-                    shift: formData.shift,
-                    date: selectedDates,
-                })
-            );
-            await Promise.all(createPromises);
-            // Refresh server schedules
+            for (const uid of userIds) {
+                for (const date of selectedDates) {
+                    await createSchedule({
+                        userId: uid,
+                        room: currentRoom,
+                        shift: formData.shift,
+                        date
+                    });
+                }
+            }
             const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
             setServerSchedules(updated);
             toast.success('Tạo lịch trình thành công!', {
@@ -364,6 +386,86 @@ function ScheduleAddPage() {
             });
         }
     };
+
+    function MultiSelectDateDropdown({ days, selected, onChange }) {
+        const [open, setOpen] = useState(false);
+        // Đảm bảo localSelected luôn là mảng
+        const localSelected = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+
+        const handleToggle = () => setOpen(v => !v);
+        const handleBlur = (e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+        };
+
+        const handleRemoveDate = (date) => {
+            const newSelected = localSelected.filter(d => d !== date);
+            onChange(newSelected);
+        };
+
+        return (
+            <div className="relative" tabIndex={0} onBlur={handleBlur}>
+                {/* Render selected dates OUTSIDE the trigger button */}
+                <div className="flex flex-wrap gap-1 mb-1">
+                    {localSelected.map(date => (
+                        <span
+                            key={date}
+                            className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white hover:scale-105 hover:z-10"
+                        >
+                            {new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                            <button
+                                type="button"
+                                className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
+                                style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
+                                aria-label={`Xóa ngày ${date}`}
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    handleRemoveDate(date);
+                                }}
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
+                </div>
+                <button
+                    type="button"
+                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px] relative"
+                    onClick={handleToggle}
+                >
+                    {localSelected.length > 0
+                        ? localSelected.map(date => new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })).join(', ')
+                        : <span className="text-gray-400">Chọn ngày</span>}
+                    <span className="pointer-events-none flex items-center absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6" /></svg>
+                    </span>
+                </button>
+                {open && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
+                        {days.map(d => (
+                            <label key={d.date} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2 accent-blue-600"
+                                    checked={localSelected.includes(addOneDayToDateString(d.date))}
+                                    onChange={e => {
+                                        let newSelected = [...localSelected];
+                                        if (e.target.checked) {
+                                            if (!newSelected.includes(addOneDayToDateString(d.date))) newSelected.push(addOneDayToDateString(d.date));
+                                        } else {
+                                            newSelected = newSelected.filter(date => date !== addOneDayToDateString(d.date));
+                                        }
+                                        onChange(newSelected);
+                                    }}
+                                />
+                                {/* Hiển thị ngày đã cộng thêm 1 ngày */}
+                                {new Date(addOneDayToDateString(d.date)).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
 
 
 
@@ -811,29 +913,31 @@ function ScheduleAddPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Ngày</label>
-                                    <input
-                                        type="text"
-                                        name="date"
-                                        value={(() => {
-                                            // Hiển thị ngày dạng dd/MM/yyyy, đồng bộ cả ô và từng nhân viên
-                                            if (Array.isArray(modalForm.date)) {
-                                                return modalForm.date.map(d => {
-                                                    if (!d) return '';
-                                                    const dateObj = new Date(d);
-                                                    if (isNaN(dateObj)) return d;
-                                                    return dateObj.toLocaleDateString('vi-VN');
-                                                }).join(', ');
-                                            } else if (modalForm.date) {
-                                                const dateObj = new Date(modalForm.date);
-                                                if (isNaN(dateObj)) return modalForm.date;
-                                                return dateObj.toLocaleDateString('vi-VN');
-                                            }
-                                            return '';
-                                        })()}
-                                        readOnly={!(!modalForm._id)}
-                                        onChange={modalForm._id ? handleModalFormChange : undefined}
-                                        className={`w-full rounded-md border border-gray-300 ${modalForm._id ? 'bg-white' : 'bg-gray-100'} px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${modalForm._id ? '' : 'cursor-not-allowed'}`}
-                                    />
+                                    {isEditMode ? (
+                                        // Chế độ chỉnh sửa: chỉ hiển thị ngày, không cho chọn/chỉnh sửa
+                                        <input
+                                            type="text"
+                                            value={(() => {
+                                                if (Array.isArray(modalForm.date)) {
+                                                    return modalForm.date.map(date => new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })).join(', ');
+                                                } else if (modalForm.date) {
+                                                    return new Date(modalForm.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                                }
+                                                return '';
+                                            })()}
+                                            readOnly
+                                            className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-700 text-sm cursor-not-allowed"
+                                        />
+                                    ) : (
+                                        <>
+                                            <MultiSelectDateDropdown
+                                                days={days.slice(1)}
+                                                selected={modalForm.date}
+                                                onChange={newSelected => setModalForm(prev => ({ ...prev, date: newSelected }))}
+                                            />
+                                            <div className="text-xs text-gray-500 mt-1">Có thể chọn/xóa nhiều ngày linh hoạt</div>
+                                        </>
+                                    )}
                                     {modalErrors.date && <p className="text-xs text-red-600 mt-1">{modalErrors.date}</p>}
                                 </div>
                                 {(modalForm._id || (isEditMode && !modalForm._id)) && (

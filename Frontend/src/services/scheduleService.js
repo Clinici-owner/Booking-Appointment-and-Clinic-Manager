@@ -110,3 +110,18 @@ export const getScheduleByDoctorAndShiftAndDate = async (doctorId, shift, date) 
         throw error;
     }
 };
+
+export const importSchedulesFromExcel = async (file) => {
+    const API_URL = 'http://localhost:3000/api/schedules/import-excel';
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const res = await axios.post(API_URL, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return res.data;
+    } catch (error) {
+        console.error('Lỗi khi import lịch trình từ Excel:', error);
+        throw error;
+    }
+};
