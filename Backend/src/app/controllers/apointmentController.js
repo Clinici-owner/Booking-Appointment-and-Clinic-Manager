@@ -117,6 +117,24 @@ class AppointmentController {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo bệnh nhân', error });
     }
   }
+
+  async getAppointmentsToday(req, res) {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+      const appointments = await Appointment.find({
+        time: { $gte: startOfDay, $lt: endOfDay },
+        status: 'confirmed'
+      })
+        .populate('patientId');
+      res.status(200).json(appointments);
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn hôm nay', error });
+    }
+  }
 }
 
 module.exports = new AppointmentController();

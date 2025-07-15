@@ -3,24 +3,24 @@ const News = require('../models/News');
 class NewsController {
   async createNews(req, res) {
     try {
-      const { title, blocks, tags, category } = req.body;
+      const { title, blocks, tags = [], category } = req.body;
 
-      if (!title || !Array.isArray(blocks)) {
-        return res.status(400).json({ message: "Thiếu tiêu đề hoặc blocks" });
+      if (!title || !Array.isArray(blocks) || blocks.length === 0) {
+        return res.status(400).json({ message: "Thiếu tiêu đề hoặc nội dung bài viết" });
       }
 
-      const news = await News.create({
-      title,
-      blocks,
-      tags,
-      category,
-      createdBy: req.user._id, 
-    });
+      
 
-      await news.save();
-      return res.status(201).json({ message: "Tạo bài viết thành công", news });
+      const news = await News.create({
+        title,
+        blocks,
+        tags,
+        category,
+        });
+
+      return res.status(201).json({ message: "Tạo bài viết thành công", data: news });
     } catch (error) {
-      console.error("Error creating news:", error);
+      console.error("Error in createNews:", error);
       return res.status(500).json({ message: "Lỗi server" });
     }
   }
@@ -28,15 +28,17 @@ class NewsController {
   async getAllNews(req, res) {
     try {
       const { tag, category } = req.query;
-
       const filter = {};
+
       if (tag) filter.tags = tag;
       if (category) filter.category = category;
 
       const newsList = await News.find(filter).sort({ createdAt: -1 });
-      return res.status(200).json({ news: newsList });
+
+      return res.status(200).json({ message: "Lấy danh sách thành công", data: newsList });
     } catch (error) {
-      return res.status(500).json({ message: "Server error" });
+      console.error("Error in getAllNews:", error);
+      return res.status(500).json({ message: "Lỗi server" });
     }
   }
 
@@ -46,12 +48,13 @@ class NewsController {
       const news = await News.findById(id).populate("createdBy", "name");
 
       if (!news) {
-        return res.status(404).json({ message: "News not found" });
+        return res.status(404).json({ message: "Không tìm thấy bài viết" });
       }
 
-      return res.status(200).json({ news });
+      return res.status(200).json({ message: "Lấy bài viết thành công", data: news });
     } catch (error) {
-      return res.status(500).json({ message: "Server error" });
+      console.error("Error in getNewsById:", error);
+      return res.status(500).json({ message: "Lỗi server" });
     }
   }
 
@@ -60,34 +63,43 @@ class NewsController {
       const { id } = req.params;
       const { title, blocks, tags, category } = req.body;
 
-      const updated = await News.findByIdAndUpdate(
-        id,
-        { title, blocks, tags, category },
-        { new: true }
-      );
-
-      if (!updated) {
-        return res.status(404).json({ message: "News not found" });
+      const news = await News.findById(id);
+      if (!news) {
+        return res.status(404).json({ message: "Không tìm thấy bài viết" });
       }
 
-      return res.status(200).json({ message: "Updated successfully", news: updated });
+     
+
+      news.title = title || news.title;
+      news.blocks = blocks || news.blocks;
+      news.tags = tags || news.tags;
+      news.category = category || news.category;
+
+      const updated = await news.save();
+
+      return res.status(200).json({ message: "Cập nhật thành công", data: updated });
     } catch (error) {
-      return res.status(500).json({ message: "Server error" });
+      console.error("Error in updateNews:", error);
+      return res.status(500).json({ message: "Lỗi server" });
     }
   }
 
   async deleteNews(req, res) {
     try {
       const { id } = req.params;
-      const deleted = await News.findByIdAndDelete(id);
+      const news = await News.findById(id);
 
-      if (!deleted) {
-        return res.status(404).json({ message: "News not found" });
+      if (!news) {
+        return res.status(404).json({ message: "Không tìm thấy bài viết" });
       }
 
-      return res.status(200).json({ message: "News deleted" });
+      
+
+      await News.findByIdAndDelete(id);
+      return res.status(200).json({ message: "Xoá bài viết thành công" });
     } catch (error) {
-      return res.status(500).json({ message: "Server error" });
+      console.error("Error in deleteNews:", error);
+      return res.status(500).json({ message: "Lỗi server" });
     }
   }
 }

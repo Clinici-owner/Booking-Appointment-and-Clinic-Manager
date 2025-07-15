@@ -76,7 +76,17 @@ const appointmentService = {
       console.error("Error fetching appointments by patient:", error);
       throw error;
     }
-  }
+  },
+
+  getAppointmentsToday: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/today`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching today's appointments:", error);
+      throw error;
+    }
+  },
 
 };
 

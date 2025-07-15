@@ -57,12 +57,14 @@ const UpdatepasswordPage = React.lazy(() => import("../pages/UpdatePasswordPage"
 const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorProfilePage"));
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
-const MedicalProcessDetailPage = React.lazy(() => import("../pages/MyProcessPage"));
+const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
 const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
+const Newspaperpage = React.lazy(() => import("../pages/NewPaper"));
+const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 
 
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
@@ -75,6 +77,9 @@ const AppointmentPatientPage = React.lazy(() => import("../pages/AppointmentPati
 const AppointmentDetailPatientPage = React.lazy(() => import("../pages/AppointmentDetailPatientPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
+
+const DoctorListPage = React.lazy(() => import("../pages/DoctorListPage"));
+const DoctorDetailPage = React.lazy(() => import("../pages/DoctorDetailPage"));
 
 // Cấu hình route
 const AppRoute = [
@@ -105,6 +110,9 @@ const AppRoute = [
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
+  //Doctor List For User
+  {path: ROUTE_PATH.DOCTOR_LIST, page: DoctorListPage, layout: MainLayout},
+  {path: ROUTE_PATH.DOCTOR_DETAIL, page: DoctorDetailPage, layout: MainLayout},
 
   // User Profile
   { path: ROUTE_PATH.USER_PROFILE, page: UserProfilePage, layout: MainLayout },
@@ -138,7 +146,7 @@ const AppRoute = [
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage},
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout},
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
@@ -148,7 +156,7 @@ const AppRoute = [
 
 
   //Patient
-  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MedicalProcessDetailPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
 
   // Technician
   { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
@@ -169,11 +177,13 @@ const AppRoute = [
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
   // Create Medical History
-  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
-
+  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
+  {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout},
+  
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
 

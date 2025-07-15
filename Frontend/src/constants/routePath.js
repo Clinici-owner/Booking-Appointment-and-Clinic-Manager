@@ -59,6 +59,9 @@ export const ROUTE_PATH = {
 
   //News manager
   CREATE_NEWS: '/admin/news',
+  NEWS_PAPER:'/paper',
+  NEWS_EDIT: '/admin/news/edit',
+
 
   //Health package manager
   HEALTH_PACKAGE_MANAGER: '/admin/health-packages',
@@ -71,6 +74,10 @@ export const ROUTE_PATH = {
   HEALTH_PACKAGE_USER: '/health-packages',
   HEALTH_PACKAGE_DETAIL_USER: '/health-packages/detail/:id',
   PACKAGE_LIST: '/health-package/list',
+
+  //Doctor List for User
+  DOCTOR_LIST: '/doctors',
+  DOCTOR_DETAIL: '/doctors/:id', 
 
   //Appointment for patient
   APPOINTMENT_SPECIALTY: '/appointment-specialty/:id',

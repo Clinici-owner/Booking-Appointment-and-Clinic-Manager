@@ -12,7 +12,7 @@ import {
   Alert,
   Container,
 } from "@mui/material";
-import { MedicalProcessService } from "../services/MedicalProcessService";
+import { MedicalProcessService } from "../services/medicalProcessService";
 
 const MyProcessPage = () => {
   const [process, setProcess] = useState(null);
