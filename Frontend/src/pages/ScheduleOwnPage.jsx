@@ -195,16 +195,32 @@ const [userInfo, setUserInfo] = useState(() => {
             {sidebarPortal}
             <div className="flex-1 flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8">
                 <div className="w-full max-w-screen-xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                        <h2 className="text-[#212B36] font-bold text-4xl leading-tight">
+                    <div className="flex flex-col items-center w-full mb-6">
+                        <h2 className="text-blue-700 font-bold text-4xl leading-tight mb-4 text-center drop-shadow-sm">
                             Lịch Trình Cá Nhân
                         </h2>
-                        <div className="flex items-center gap-4">
-                            <button onClick={handlePreviousWeek} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold">Tuần Trước</button>
-                            <span className="text-lg font-semibold text-gray-700">
+                        <div className="flex items-center justify-center gap-4 w-full">
+                            <button
+                                onClick={handlePreviousWeek}
+                                className="w-10 h-10 flex items-center justify-center hover:bg-blue-50 text-blue-600 cursor-pointer"
+                                aria-label="Tuần trước"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                </svg>
+                            </button>
+                            <span className="px-6 py-2 border border-blue-200 rounded-md bg-white text-blue-700 font-semibold text-lg shadow-sm">
                                 {formatDisplayDate(new Date(days[0].date))} - {formatDisplayDate(new Date(days[6].date))}
                             </span>
-                            <button onClick={handleNextWeek} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md font-semibold">Tuần Sau</button>
+                            <button
+                                onClick={handleNextWeek}
+                                className="w-10 h-10 flex items-center justify-center hover:bg-blue-50 text-blue-600 cursor-pointer"
+                                aria-label="Tuần sau"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 

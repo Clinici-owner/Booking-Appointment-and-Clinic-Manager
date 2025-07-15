@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const scheduleController = require('../app/controllers/scheduleController');
+const multer = require('multer');
+const upload = multer();
 
 router.get('/all', scheduleController.getAllSchedules);
 router.post('/', scheduleController.createSchedule);
