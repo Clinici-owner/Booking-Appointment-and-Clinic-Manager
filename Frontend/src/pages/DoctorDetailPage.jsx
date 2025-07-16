@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DoctorService } from '../services/doctorService';
 
@@ -25,12 +25,7 @@ const DoctorDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '60vh'
-      }}>
+      <div className="flex justify-center items-center h-[60vh]">
         <div>Loading...</div>
       </div>
     );
@@ -38,13 +33,7 @@ const DoctorDetailPage = () => {
 
   if (error) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '60vh',
-        color: 'red'
-      }}>
+      <div className="flex justify-center items-center h-[60vh] text-red-500">
         <div>{error}</div>
       </div>
     );
@@ -52,110 +41,87 @@ const DoctorDetailPage = () => {
 
   if (!doctor) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '60vh'
-      }}>
+      <div className="flex justify-center items-center h-[60vh]">
         <div>Doctor not found</div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '20px'
-    }}>
-      <div style={{
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        borderRadius: '8px',
-        overflow: 'hidden'
-      }}>
-        <div style={{ padding: '20px' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <img 
-              src={doctor.avatar || '/default-avatar.png'} 
-              alt="Doctor Avatar"
-              style={{
-                width: '150px',
-                height: '150px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                marginBottom: '16px'
-              }}
-            />
-            <h1 style={{ margin: '8px 0' }}>Dr. {doctor.firstName} {doctor.lastName}</h1>
-            <p style={{ color: '#666', margin: '4px 0' }}>{doctor.email}</p>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-white shadow-md rounded-lg p-6 md:flex gap-8">
+        {/* Left - Avatar */}
+        <div className="md:w-1/3 flex flex-col items-center border-r border-gray-200">
+          <img
+            src={doctor.avatar || '/default-avatar.png'}
+            alt="Doctor Avatar"
+            className="w-64 h-80 object-cover rounded-lg shadow-md"
+          />
+          <div className="mt-4 text-center">
+            <h1 className="text-xl font-bold">Bác sĩ {doctor.fullName}</h1>
+            <p className="text-gray-500">{doctor.email}</p>
+          </div>
+        </div>
+
+        {/* Right - Info */}
+        <div className="md:w-2/3 mt-6 md:mt-0 space-y-6">
+          {/* Description */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Giới thiệu</h2>
+            <p className="text-gray-700 bg-gray-50 p-4 rounded-md whitespace-pre-line">
+              {doctor.profile.description || 'Không có mô tả'}
+            </p>
           </div>
 
-          <div style={{ marginTop: '20px' }}>
-            <h2 style={{ marginBottom: '16px' }}>Professional Information</h2>
-            <hr style={{ marginBottom: '20px' }} />
-
-            {doctor.profile.description && (
-              <div style={{
-                backgroundColor: '#f9f9f9',
-                padding: '16px',
-                borderRadius: '4px',
-                marginBottom: '20px'
-              }}>
-                <p>{doctor.profile.description}</p>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ marginRight: '8px' }}>🛠️</span>
-              <p style={{ margin: '0' }}>
-                <strong>Experience:</strong> {doctor.profile.yearsOfExperience} years
-              </p>
+          {/* Experience & Specialty on single lines */}
+          <div className="space-y-3">
+            {/* Experience */}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-800 font-semibold">Kinh nghiệm:</span>
+              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                {doctor.profile.yearsOfExperience} năm
+              </span>
             </div>
 
+            {/* Specialties */}
             {doctor.profile.specialties.length > 0 && (
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ marginBottom: '8px' }}><strong>Specializations:</strong></p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {doctor.profile.specialties.map((specialty) => (
-                    <div 
-                      key={specialty._id}
-                      style={{
-                        border: '1px solid #007bff',
-                        color: '#007bff',
-                        borderRadius: '16px',
-                        padding: '4px 12px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      {specialty.specialtyName}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {doctor.profile.certificates.length > 0 && (
-              <div>
-                <p style={{ marginBottom: '8px' }}><strong>Certifications:</strong></p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {doctor.profile.certificates.map((cert) => (
-                    <div key={cert._id} style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ marginRight: '8px' }}>📜</span>
-                      <p style={{ margin: '0' }}>
-                        {cert.type} - <a href={cert.url} target="_blank" rel="noopener noreferrer">View</a>
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-gray-800 font-semibold">Chuyên môn:</span>
+                {doctor.profile.specialties.map((spec) => (
+                  <span
+                    key={spec._id}
+                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    {spec.specialtyName}
+                  </span>
+                ))}
               </div>
             )}
           </div>
+
+          {/* Certificates */}
+          {doctor.profile.certificates.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">Chứng chỉ</h2>
+              <ul className="list-disc pl-6 text-gray-700 space-y-2">
+                {doctor.profile.certificates.map(cert => (
+                  <li key={cert._id}>
+                    {cert.type}{' '}
+                    {cert.url && (
+                      <a
+                        href={cert.url}
+                        className="text-blue-600 underline hover:text-blue-800"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        (Xem)
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
