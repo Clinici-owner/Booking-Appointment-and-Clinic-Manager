@@ -36,10 +36,9 @@ import Select from '@mui/material/Select';
 const ListMedicalStepsTodayByRoomPage = () => {
 
     const [todaySteps, setTodaySteps] = useState([]);
+    const [uploadedResults, setUploadedResults] = useState({}); // { [stepId]: true }
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedService, setSelectedService] = useState(null);
-    const [doctors, setDoctors] = useState([]);
-    const [selectedDoctor, setSelectedDoctor] = useState("");
     const [resultFiles, setResultFiles] = useState([]);
     const [diagnosis, setDiagnosis] = useState("");
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -48,6 +47,25 @@ const ListMedicalStepsTodayByRoomPage = () => {
         const fetchTodaySteps = async () => {
             const steps = await stepProcessService.getTodayProcessStepsByRoom();
             setTodaySteps(steps);
+
+            // Check for uploaded results for each step
+            const resultStatus = {};
+            await Promise.all(
+                steps.map(async (step) => {
+                    try {
+                        const res = await MedicalHistoryService.getMedicalHistoryByStepId(step._id);
+                        if (res && (Array.isArray(res) ? res.length > 0 : Object.keys(res).length > 0)) {
+                            resultStatus[step._id] = true;
+                        } else {
+                            resultStatus[step._id] = false;
+                        }
+                    } catch (e) {
+                        resultStatus[step._id] = false;
+                        console.error(`Error checking result for step ${step._id}:`, e);
+                    }
+                })
+            );
+            setUploadedResults(resultStatus);
         };
 
         fetchTodaySteps();
@@ -63,32 +81,16 @@ const ListMedicalStepsTodayByRoomPage = () => {
         return new Date(dateString).toLocaleDateString('vi-VN', options);
     };
 
-
-    // Lấy danh sách bác sĩ khi mở dialog
-    const fetchDoctors = async () => {
-        const doctorsData = await UserService.getAllDoctors();
-        if (doctorsData && Array.isArray(doctorsData)) {
-            setDoctors(doctorsData);
-            console.log("Doctors fetched successfully:", doctorsData);
-      }
-    };
-
     const handleUploadResult = (service) => {
         setSelectedService(service);
         setOpenDialog(true);
-        fetchDoctors();
     };
 
     const handleDialogClose = () => {
         setOpenDialog(false);
         setSelectedService(null);
-        setSelectedDoctor("");
         setResultFiles([]);
         setDiagnosis("");
-    };
-
-    const handleDoctorChange = (event) => {
-        setSelectedDoctor(event.target.value);
     };
 
     const handleFileChange = (event) => {
@@ -112,7 +114,6 @@ const ListMedicalStepsTodayByRoomPage = () => {
         }
 
         const payload = {
-            doctorId: selectedDoctor,
             resultFiles: fileIds,
             patientId: selectedService.patient._id,
             processStep: selectedService._id,
@@ -121,6 +122,10 @@ const ListMedicalStepsTodayByRoomPage = () => {
         try {
             await stepProcessService.updateProcessStepNotes(selectedService._id, diagnosis);
             await MedicalHistoryService.createMedicalHistory(payload);
+            setUploadedResults(prev => ({
+                ...prev,
+                [selectedService._id]: true
+            }));
             setSnackbar({ open: true, message: 'Tải lên kết quả thành công!', severity: 'success' });
             handleDialogClose();
         } catch (error) {
@@ -192,22 +197,26 @@ const ListMedicalStepsTodayByRoomPage = () => {
                                     {formatDate(service.createdAt)}
                                 </TableCell>
                         <TableCell>
-                            {service.isCompleted && (
-                                <button
-                                    style={{
-                                        background: '#1976d2',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: 4,
-                                        padding: '6px 12px',
-                                        cursor: 'pointer',
-                                        fontWeight: 500
-                                    }}
-                                    onClick={() => handleUploadResult(service)}
-                                >
-                                    Tải lên kết quả
-                                </button>
-                            )}
+                            {service.isCompleted ? (
+                                uploadedResults[service._id] ? (
+                                    <Chip label="Đã tải lên kết quả" color="info" size="small" />
+                                ) : (
+                                    <button
+                                        style={{
+                                            background: '#1976d2',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: 4,
+                                            padding: '6px 12px',
+                                            cursor: 'pointer',
+                                            fontWeight: 500
+                                        }}
+                                        onClick={() => handleUploadResult(service)}
+                                    >
+                                        Tải lên kết quả
+                                    </button>
+                                )
+                            ) : null}
                         </TableCell>
                             </TableRow>
                         ))}
@@ -220,20 +229,7 @@ const ListMedicalStepsTodayByRoomPage = () => {
                 <DialogTitle>Tải lên kết quả</DialogTitle>
                 <form onSubmit={handleDialogSubmit}>
                     <DialogContent>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel id="doctor-select-label">Chọn bác sĩ</InputLabel>
-                            <Select
-                                labelId="doctor-select-label"
-                                value={selectedDoctor}
-                                label="Chọn bác sĩ"
-                                onChange={handleDoctorChange}
-                                required
-                            >
-                                {doctors.map((doc) => (
-                                    <MenuItem key={doc._id} value={doc._id}>{doc.fullName} - {doc.email}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+
                         <TextField
                             fullWidth
                             margin="normal"
@@ -280,7 +276,7 @@ const ListMedicalStepsTodayByRoomPage = () => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleDialogClose}>Hủy</Button>
-                        <Button type="submit" variant="contained" disabled={!selectedDoctor || resultFiles.length === 0}>Tải lên</Button>
+                        <Button type="submit" variant="contained" disabled={resultFiles.length === 0}>Tải lên</Button>
                     </DialogActions>
                 </form>
             </Dialog>

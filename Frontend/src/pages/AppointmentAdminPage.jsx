@@ -15,8 +15,9 @@ function AppointmentAdminPage() {
       try {
         const data = await appointmentService.getAppointments()
         console.log("Fetched appointments:", data);
-        
-        setAppointments(data)
+        // Sort by booking date (appointment.time) descending (newest first)
+        const sortedData = [...data].sort((a, b) => new Date(b.time) - new Date(a.time))
+        setAppointments(sortedData)
       } catch (error) {
         console.error("Error fetching appointments:", error)
       }

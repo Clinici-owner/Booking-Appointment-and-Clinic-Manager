@@ -25,4 +25,26 @@ export const MedicalHistoryService = {
         );
     }
   },
+  getMedicalHistoryByStepId: async (stepId) => {
+    try {
+      const response = await axios.get(`${API_URL}/getByStepId/${stepId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching medical history by step ID:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch medical history by step ID"
+      );
+    }
+  },
+  getAllMedicalHistories: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/getAll`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching all medical histories:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch all medical histories"
+      );
+    }
+  }
 };
