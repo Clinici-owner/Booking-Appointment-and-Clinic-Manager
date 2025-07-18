@@ -23,18 +23,18 @@ class AppointmentController {
       res.status(500).json({ message: 'Lỗi khi tạo lịch hẹn', error: error.message });
     }
   }
-
+  
   // Lấy tất cả lịch hẹn
   async getAppointments(req, res) {
     try {
       const appointments = await Appointment.find()
-        .populate('patientId')
+      .populate('patientId')
         .populate('doctorId')
         .populate('specialties')
         .populate('healthPackage');
-
-      res.status(200).json(appointments);
-    } catch (error) {
+        
+        res.status(200).json(appointments);
+      } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy danh sách lịch hẹn', error });
     }
   }
@@ -44,19 +44,19 @@ class AppointmentController {
     try {
       const { id } = req.params;
       const appointment = await Appointment.findById(id)
-        .populate('patientId')
-        .populate('doctorId')
-        .populate('specialties')
-        .populate('healthPackage');
-
+      .populate('patientId')
+      .populate('doctorId')
+      .populate('specialties')
+      .populate('healthPackage');
+      
       if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
-
+      
       res.status(200).json(appointment);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn', error });
     }
   }
-
+  
   // Huỷ lịch hẹn
   async cancelAppointment(req, res) {
     try {
@@ -68,7 +68,7 @@ class AppointmentController {
       );
 
       if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
-
+      
       res.status(200).json({ message: 'Lịch hẹn đã được huỷ', appointment });
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi huỷ lịch hẹn', error });
@@ -79,45 +79,45 @@ class AppointmentController {
   async getHealthPackages(req, res) {
     try {
       const packages = await HealthPackage.find({ status: 'active' })
-        .populate('service', 'name description')
-        .populate('userId', 'name email');
-
+      .populate('service', 'name description')
+      .populate('userId', 'name email');
+      
       res.status(200).json({ success: true, data: packages });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Lỗi khi lấy gói khám', error });
     }
   }
-
+  
   // Lấy đặt lịch theo chuyên khoa
   async getAppointmentsBySpecialty(req, res) {
     try {
       const { specialtyId } = req.params;
       const appointments = await Appointment.find({ specialties: specialtyId })
-        .populate('doctorId')
-        .populate('specialties')
-        .populate('healthPackage');
-
+      .populate('doctorId')
+      .populate('specialties')
+      .populate('healthPackage');
+      
       res.status(200).json(appointments);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo chuyên khoa', error });
     }
   }
-
+  
   //lấy lịch hẹn theo bệnh nhân
   async getAppointmentsByPatient(req, res) {
     try {
       const { patientId } = req.params;
       const appointments = await Appointment.find({ patientId })
-        .populate('doctorId')
-        .populate('specialties')
-        .populate('healthPackage');
-
+      .populate('doctorId')
+      .populate('specialties')
+      .populate('healthPackage');
+      
       res.status(200).json(appointments);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo bệnh nhân', error });
     }
   }
-
+  
   async getAppointmentsToday(req, res) {
     try {
       const today = new Date();
@@ -129,10 +129,26 @@ class AppointmentController {
         time: { $gte: startOfDay, $lt: endOfDay },
         status: 'confirmed'
       })
-        .populate('patientId');
+      .populate('patientId');
       res.status(200).json(appointments);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn hôm nay', error });
+    }
+  }
+
+  // Xác nhận bệnh nhân đã tới khám (confirm)
+  async confirmAppointment(req, res) {
+    try {
+      const { id } = req.params;
+      const appointment = await Appointment.findByIdAndUpdate(
+        id,
+        { status: 'confirmed' },
+        { new: true }
+      );
+      if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+      res.status(200).json({ message: 'Đã xác nhận bệnh nhân tới khám', appointment });
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi xác nhận lịch hẹn', error });
     }
   }
 }

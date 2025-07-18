@@ -46,6 +46,7 @@ function AppointmentManageCard({ appointment, onClick }) {
           </h3>
         </div>
 
+        {!appointment.hideStatus && (
         <span
           className={`text-sm font-semibold px-3 py-1.5 rounded-full ${getStatusStyles(
             appointment.status
@@ -59,6 +60,7 @@ function AppointmentManageCard({ appointment, onClick }) {
             ? "Đã hủy"
             : "Đã khám xong"}
         </span>
+  )}
       </div>
 
       <div className="flex items-center space-x-2 mb-4">

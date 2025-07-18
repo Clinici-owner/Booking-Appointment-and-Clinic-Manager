@@ -1,11 +1,32 @@
+export const getAllReceptionists = async () => {
+    try {
+        const res = await axios.get('http://localhost:3000/api/schedules/receptionists');
+        if (!Array.isArray(res.data)) {
+            throw new Error('Dữ liệu lễ tân không hợp lệ.');
+        }
+        return res.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách lễ tân:', error);
+        throw error;
+    }
+};
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api/schedules';
 
 export const createSchedule = async (data) => {
     try {
-        // Nếu data.date là mảng, gửi như hiện tại, backend sẽ xử lý tạo nhiều lịch trình
-        const res = await axios.post(API_URL, data);
+        let payload = { ...data };
+        if (payload.userId) {
+            payload.userIds = Array.isArray(payload.userId) ? payload.userId : [payload.userId];
+            delete payload.userId;
+        }
+        if (payload.date) {
+            payload.dates = Array.isArray(payload.date) ? payload.date : [payload.date];
+            delete payload.date;
+        }
+        console.log('Payload gửi lên khi tạo lịch trình:', payload);
+        const res = await axios.post(API_URL, payload);
         return res.data;
     } catch (error) {
         console.error('Lỗi khi tạo lịch trình:', error);

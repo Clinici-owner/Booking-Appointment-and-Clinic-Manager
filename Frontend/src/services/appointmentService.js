@@ -88,6 +88,17 @@ const appointmentService = {
     }
   },
 
+  confirmAppointment: async (id) => {
+    try {
+      const response = await axios.put(`${API_URL}/${id}/confirm`);
+      return response.data;
+    } catch (error) {
+      console.error("Error confirming appointment:", error);
+      throw error;
+    }
+  },
+
+
 };
 
 export default appointmentService;

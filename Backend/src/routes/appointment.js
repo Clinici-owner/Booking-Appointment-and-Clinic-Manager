@@ -9,6 +9,7 @@ router.get('/patient/:patientId', appointmentController.getAppointmentsByPatient
 router.get('/specialty/:specialtyId', appointmentController.getAppointmentsBySpecialty);
 router.get('/:id', appointmentController.getAppointmentById);
 router.put('/:id/cancel', appointmentController.cancelAppointment);
+router.put('/:id/confirm', appointmentController.confirmAppointment);
 router.get('/health-packages', appointmentController.getHealthPackages); 
 
 module.exports = router;

@@ -6,6 +6,16 @@ const DoctorProfile = require("../models/DoctorProfile");
 const ParaclinicalService = require("../models/ParaclinicalService");
 
 class ScheduleController {
+
+  // Lấy tất cả lễ tân
+  async getAllReceptionists(req, res) {
+    try {
+      const receptionists = await User.find({ role: 'receptionist' }).select('_id fullName email phoneNumber');
+      res.status(200).json(receptionists);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
   
   async getAllSchedules(req, res) {
     try {

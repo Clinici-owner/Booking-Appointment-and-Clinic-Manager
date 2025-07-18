@@ -88,6 +88,10 @@ export const ROUTE_PATH = {
 
   //Appointment for admin
   APPOINTMENT_ADMIN: '/admin/appointment-admin',
+
+
+  //Appointment for receptionist
+  APPOINTMENT_RECEPTIONIST: '/receptionist/appointment-receptionist',
   // 404
   NOT_FOUND: '*',
 
