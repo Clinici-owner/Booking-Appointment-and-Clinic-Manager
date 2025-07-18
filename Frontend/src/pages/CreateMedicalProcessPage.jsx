@@ -36,9 +36,9 @@ const CreateMedicalProcessPage = () => {
   const [doctor, setDoctor] = useState(null);
   const [appointmentsToday, setAppointmentsToday] = useState([]);
   const [services, setServices] = useState([]);
-  const [patientInputValue, setPatientInputValue] = useState('');
+  const [appointmentInputValue, setAppointmentInputValue] = useState('');
   const [processStepsForm, setProcessStepsForm] = useState([{ id: 1, serviceId: '', notes: '' }]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -114,8 +114,8 @@ const CreateMedicalProcessPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!selectedPatient || !selectedPatient.patientId || !selectedPatient.patientId._id) {
-      showSnackbar('Vui lòng chọn bệnh nhân hợp lệ', 'error');
+    if (!selectedAppointment || !selectedAppointment._id || !selectedAppointment.patientId) {
+      showSnackbar('Vui lòng chọn lịch hẹn hợp lệ', 'error');
       return;
     }
 
@@ -131,9 +131,9 @@ const CreateMedicalProcessPage = () => {
       const processStepPromises = processStepsForm.map((step, idx) => 
         MedicalProcessService.createProcessStep({
           serviceId: step.serviceId,
-          notes: step.notes || '', // Ensure notes is at least empty string
-          patientId: selectedPatient.patientId._id,
-          isFirstStep: idx === 0 // chỉ bước đầu tiên là true
+          notes: step.notes || '',
+          patientId: selectedAppointment.patientId, // vẫn truyền patientId cho bước processStep nếu cần
+          isFirstStep: idx === 0
         }).catch(error => {
           console.error('Error creating process step:', error);
           throw new Error('Failed to create one or more process steps');
@@ -149,7 +149,7 @@ const CreateMedicalProcessPage = () => {
 
       // Create the main medical process
       await MedicalProcessService.createMedicalProcess({
-        patientId: selectedPatient.patientId._id,
+        appointmentId: selectedAppointment._id,
         doctorId: doctor?._id || '',
         processSteps: processStepIds
       });
@@ -166,8 +166,8 @@ const CreateMedicalProcessPage = () => {
 
   const resetForm = () => {
     setProcessStepsForm([{ id: 1, serviceId: '', notes: '' }]);
-    setSelectedPatient(null);
-    setPatientInputValue('');
+    setSelectedAppointment(null);
+    setAppointmentInputValue('');
   };
 
   // Loading state
@@ -200,23 +200,23 @@ const CreateMedicalProcessPage = () => {
                 {/* Patient Selection with null checks */}
                 <Box>
                   <Typography variant="subtitle1" className="font-medium text-gray-700 mb-2">
-                    Bệnh nhân <span className="text-red-500">*</span>
+                    Lịch hẹn <span className="text-red-500">*</span>
                   </Typography>
                   <Autocomplete
                     options={Array.isArray(appointmentsToday) ? appointmentsToday : []}
-                    getOptionLabel={(option) => option?.patientId.fullName || 'Không xác định'}
-                    inputValue={patientInputValue}
-                    value={selectedPatient}
+                    getOptionLabel={(option) => option?.patientId?.fullName || 'Không xác định'}
+                    inputValue={appointmentInputValue}
+                    value={selectedAppointment}
                     onInputChange={(event, newInputValue) => {
-                      setPatientInputValue(newInputValue || '');
+                      setAppointmentInputValue(newInputValue || '');
                     }}
                     onChange={(event, newValue) => {
-                      setSelectedPatient(newValue || null);
+                      setSelectedAppointment(newValue || null);
                     }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        placeholder="Tìm kiếm bệnh nhân..."
+                        placeholder="Tìm kiếm lịch hẹn..."
                         variant="outlined"
                         fullWidth
                         required
@@ -233,9 +233,9 @@ const CreateMedicalProcessPage = () => {
                     renderOption={(props, option) => (
                       <Box component="li" {...props} className="hover:bg-blue-50">
                         <Box className="flex justify-between w-full">
-                          <Typography>{option?.patientId.fullName || 'Không xác định'}</Typography>
+                          <Typography>{option?.patientId?.fullName || 'Không xác định'}</Typography>
                           <Typography variant="body2" className="text-gray-500">
-                            {option?.patientId.phone || 'Không có số điện thoại'}
+                            {option?.patientId?.phone || 'Không có số điện thoại'}
                           </Typography>
                         </Box>
                       </Box>
@@ -246,7 +246,7 @@ const CreateMedicalProcessPage = () => {
                       </Paper>
                     )}
                     popupIcon={<ExpandMoreIcon className="text-gray-400" />}
-                    noOptionsText="Không tìm thấy bệnh nhân"
+                    noOptionsText="Không tìm thấy lịch hẹn"
                   />
                 </Box>
                 

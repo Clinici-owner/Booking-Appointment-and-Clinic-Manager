@@ -157,19 +157,19 @@ const MedicalProcessDetailPage = () => {
                         <h2 className="text-lg font-medium text-gray-800 mb-3">Thông tin bệnh nhân</h2>
                         <div className="flex items-center">
                             <img
-                                src={process.patientId.avatar}
-                                alt={process.patientId.fullName}
+                                src={process.appointmentId?.patientId?.avatar}
+                                alt={process.appointmentId?.patientId?.fullName}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
                             />
                             <div className="ml-4">
                                 <h3
                                     className="text-lg font-semibold text-gray-800 "
                                 >
-                                    {process.patientId.fullName}
+                                    {process.appointmentId?.patientId?.fullName}
                                 </h3>
-                                <p className="text-sm text-gray-600">{process.patientId.email}</p>
+                                <p className="text-sm text-gray-600">{process.appointmentId?.patientId?.email}</p>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    Giới tính: {process.patientId.gender ? 'Nam' : 'Nữ'}
+                                    Giới tính: {process.appointmentId?.patientId?.gender ? 'Nam' : 'Nữ'}
                                 </p>
                             </div>
                         </div>

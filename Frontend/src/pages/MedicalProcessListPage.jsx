@@ -35,7 +35,7 @@ const MedicalProcessListPage = () => {
       setFilteredProcesses(processes);
     } else {
       const filtered = processes.filter(process =>
-        process.patientId.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        process.appointmentId?.patientId?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredProcesses(filtered);
     }
@@ -151,11 +151,11 @@ const MedicalProcessListPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <img className="h-10 w-10 rounded-full" src={process.patientId.avatar} alt={process.patientId.fullName} />
+                        <img className="h-10 w-10 rounded-full" src={process.appointmentId?.patientId?.avatar} alt={process.appointmentId?.patientId?.fullName} />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{process.patientId.fullName}</div>
-                        <div className="text-sm text-gray-500">{process.patientId.email}</div>
+                        <div className="text-sm font-medium text-gray-900">{process.appointmentId?.patientId?.fullName}</div>
+                        <div className="text-sm text-gray-500">{process.appointmentId?.patientId?.email}</div>
                       </div>
                     </div>
                   </td>
