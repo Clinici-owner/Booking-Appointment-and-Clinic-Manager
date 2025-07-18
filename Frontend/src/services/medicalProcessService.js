@@ -80,4 +80,15 @@ export const MedicalProcessService = {
     }
   },
 
+  updateMedicalProcessFinalResult: async (processId, finalResult) => {
+    try {
+      const response = await axios.post(`${API_URL}/update-final-result/${processId}`, { finalResult });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating medical process final result:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to update medical process final result"
+      );
+    }
+  },
 };
