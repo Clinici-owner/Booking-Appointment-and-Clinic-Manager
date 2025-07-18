@@ -180,8 +180,6 @@ const PatientDetail = () => {
                     </div>
                   </div>
                 )}
-
-                <p className="text-sm text-gray-500 mt-2">Bác sĩ: Bs. {record.doctorId?.fullName || 'N/A'}</p>
               </div>
             ))}
           </div>
