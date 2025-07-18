@@ -85,6 +85,9 @@ export const ROUTE_PATH = {
   APPOINTMENT_PAYMENT: '/appointment-payment',
   APPOINTMENT_PATIENT: '/appointment-patient',
   APPOINTMENT_DETAIL: '/appointment-patient/appointment-detail/:id',
+
+  //Appointment for admin
+  APPOINTMENT_ADMIN: '/admin/appointment-admin',
   // 404
   NOT_FOUND: '*',
 

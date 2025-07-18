@@ -29,7 +29,7 @@ const navItems = [
   { label: "Quản lý bệnh nhân", icon: <PersonalInjuryIcon />, path: "/admin/patients" },
   { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },
   { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedules/add" },
-  { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointments" },
+  { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointment-admin" },
   { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/createMedical" },
   { label: "Hồ sơ bệnh án", icon: <AssignmentIcon />, path: "/admin/records" },
   { label: "Tạo bài đăng", icon: <NewspaperIcon />, path: "/admin/news" },
