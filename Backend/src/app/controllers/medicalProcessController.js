@@ -336,6 +336,30 @@ class medicalProcessController {
       return res.status(500).json({ message: "Lỗi máy chủ." });
     }
   }
+
+  async updateMedicalProcessFinalResult(req, res) {
+    const { processId } = req.params;
+    const { finalResult } = req.body;
+
+    try {
+      const medicalProcess = await MedicalProcess.findById(processId);
+      if (!medicalProcess) {
+        return res
+          .status(404)
+          .json({ message: "Quy trình y tế không tồn tại." });
+      }
+
+      medicalProcess.finalResult = finalResult;
+      await medicalProcess.save();
+
+      return res
+        .status(200)
+        .json({ message: "Cập nhật kết quả cuối cùng của quy trình y tế thành công." });
+    } catch (error) {
+      console.error("Lỗi khi cập nhật kết quả cuối cùng của quy trình y tế:", error);
+      return res.status(500).json({ message: "Lỗi máy chủ." });
+    }
+  }
 }
 
 module.exports = new medicalProcessController();

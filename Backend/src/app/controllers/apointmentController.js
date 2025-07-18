@@ -135,29 +135,6 @@ class AppointmentController {
       res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn hôm nay', error });
     }
   }
-  // Lấy danh sách đặt lịch của bệnh nhân, có thể filter theo ngày
-  async getAppointmentsByPatientAndDate(req, res) {
-    try {
-      const { patientId } = req.params;
-      const { date } = req.query;
-      let query = { patientId };
-      if (date) {
-        // Lọc theo ngày (so sánh trong ngày đó)
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
-        query.time = { $gte: startOfDay, $lt: endOfDay };
-      }
-      const appointments = await Appointment.find(query)
-        .populate('doctorId')
-        .populate('specialties')
-        .populate('healthPackage');
-      res.status(200).json(appointments);
-    } catch (error) {
-      res.status(500).json({ message: 'Lỗi khi lấy lịch hẹn theo bệnh nhân và ngày', error });
-    }
-  }
 
   // Xác nhận bệnh nhân đã tới khám (confirm)
   async confirmAppointment(req, res) {

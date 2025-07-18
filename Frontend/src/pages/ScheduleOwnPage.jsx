@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import DoctorNavSidebar from '../components/DoctorNavSideBar';
 import TechnicianNavSidebar from '../components/TechnicianNavSidebar';
+import ReceptionistNavSidebar from '../components/ReceptionistNavSidebar';
 import { getOwnSchedules } from '../services/scheduleService';
 
 function ScheduleOwnPage() {
@@ -157,7 +158,13 @@ const [userInfo, setUserInfo] = useState(() => {
         return { ...day, shifts: ca };
     });
 
-    const SidebarComponent = userInfo?.role === 'technician' ? TechnicianNavSidebar : DoctorNavSidebar;
+    const SidebarComponent = userInfo?.role === 'technician'
+    ? TechnicianNavSidebar
+    : userInfo?.role === 'doctor'
+    ? DoctorNavSidebar
+    : userInfo?.role === 'receptionist'
+    ? ReceptionistNavSidebar
+    : null;
     // Render sidebar using portal to keep layout correct but not in JSX at line 190
     const sidebarPortal = typeof window !== 'undefined'
         ? createPortal(<SidebarComponent />, document.body)

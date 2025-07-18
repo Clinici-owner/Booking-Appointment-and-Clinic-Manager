@@ -20,7 +20,7 @@ const appointmentService = {
   getAppointments: async () => {
     try {
       console.log("Fetching all appointments");
-      const response = await axios.get(`${API_URL}/appointments`);
+      const response = await axios.get(`${API_URL}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -87,6 +87,17 @@ const appointmentService = {
       throw error;
     }
   },
+
+  confirmAppointment: async (id) => {
+    try {
+      const response = await axios.put(`${API_URL}/${id}/confirm`);
+      return response.data;
+    } catch (error) {
+      console.error("Error confirming appointment:", error);
+      throw error;
+    }
+  },
+
 
 };
 

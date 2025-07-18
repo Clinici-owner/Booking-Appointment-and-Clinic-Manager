@@ -3,12 +3,23 @@ const MedicalHistory = require("../models/MedicalHistory");
 const ProcessStep = require("../models/ProcessStep");
 const bcrypt = require("bcrypt");
 class medicalHistoryController {
+  async getAllMedicalHistories(req, res) {
+    try {
+      const medicalHistories = await MedicalHistory.find()
+        .populate({ path: "processStep", populate: { path: "serviceId" } })
+        .populate("resultFiles");
+      res.status(200).json(medicalHistories);
+    } catch (error) {
+      console.error("Error fetching all medical histories:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
   async createMedicalHistory(req, res) {
-    const { patientId, doctorId, processStep, resultFiles } = req.body;
+    const { patientId, processStep, resultFiles } = req.body;
     try {
       const medicalHistory = new MedicalHistory({
         patientId,
-        doctorId,
         processStep,
         resultFiles,
       });
@@ -24,7 +35,6 @@ class medicalHistoryController {
     const { id } = req.params;
     try {
       const medicalHistories = await MedicalHistory.find({ patientId: id })
-        .populate("doctorId")
         .populate({ path: "processStep", populate: { path: "serviceId" } })
         .populate("resultFiles");
       if (!medicalHistories || medicalHistories.length === 0) {
@@ -35,6 +45,24 @@ class medicalHistoryController {
       res.status(200).json(medicalHistories);
     } catch (error) {
       console.error("Error fetching medical history:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async getMedicalHistoryByStepId(req, res) {
+    const { stepId } = req.params;
+    try {
+      const medicalHistories = await MedicalHistory.find({ processStep: stepId })
+        .populate({ path: "processStep", populate: { path: "serviceId" } })
+        .populate("resultFiles");
+      if (!medicalHistories || medicalHistories.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No medical history found for this step" });
+      }
+      res.status(200).json(medicalHistories);
+    } catch (error) {
+      console.error("Error fetching medical history by step ID:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

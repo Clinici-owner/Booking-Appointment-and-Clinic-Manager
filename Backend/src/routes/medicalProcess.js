@@ -11,6 +11,7 @@ router.get('/:processId', medicalProcessController.getMedicalProcessById);
 router.post('/step/create', medicalProcessController.createProcessStep);
 router.post('/step/update-notes/:stepId', medicalProcessController.updateProcessStepNotes);
 router.post('/complete-step/:userId', medicalProcessController.completeCurrentStep);
+router.post('/update-final-result/:processId', medicalProcessController.updateMedicalProcessFinalResult);
 
 router.get('/process-steps/today/:roomId', medicalProcessController.getTodayProcessStepsByRoom);
 router.get("/my-process/:userId", medicalProcessController.getPatientMedicalProcess);

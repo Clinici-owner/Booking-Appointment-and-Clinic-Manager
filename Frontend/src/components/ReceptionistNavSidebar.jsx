@@ -17,7 +17,7 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 const drawerWidth = 240;
 
 const navItems = [
-  { label: "Danh sách đặt lịch của bệnh nhân", icon: <MedicalServicesIcon />, path: "/schedules/room" },
+  { label: "Danh sách đặt lịch của bệnh nhân", icon: <MedicalServicesIcon />, path: "/receptionist/appointment-receptionist" },
   { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
 ];
 

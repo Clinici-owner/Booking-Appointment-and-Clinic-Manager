@@ -53,6 +53,9 @@ export const UserService = {
             window.location.href = "/technician/createTechnicianProfile";
           }
           break;
+        case "receptionist":
+          window.location.href = "/receptionist/appointment-receptionist";
+          break;
         default:
           window.location.href = "/doctor/createMedicalProcess";
       }

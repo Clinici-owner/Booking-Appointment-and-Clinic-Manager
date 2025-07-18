@@ -4,6 +4,7 @@ import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
 import DoctorLayout from "../layouts/doctor-layout";
 import TechnicianLayout from "../layouts/technician-layout";
+import ReceptionistLayout from "../layouts/receptionist-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -75,6 +76,10 @@ const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSp
 const AppointmentPaymentPage = React.lazy(() => import("../pages/AppointmentPayment"));
 const AppointmentPatientPage = React.lazy(() => import("../pages/AppointmentPatientPage"));
 const AppointmentDetailPatientPage = React.lazy(() => import("../pages/AppointmentDetailPatientPage"));
+
+const AppointmentAdminPage = React.lazy(() => import("../pages/AppointmentAdminPage"));
+
+const AppointmentReceptionistPage = React.lazy(() => import("../pages/AppointmentReceptionistPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -171,6 +176,11 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_PATIENT, page: AppointmentPatientPage, layout: MainLayout },
   { path: ROUTE_PATH.APPOINTMENT_DETAIL, page: AppointmentDetailPatientPage, layout: MainLayout },
 
+  //Appointment for admin
+  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout },
+
+  //Appointment for receptionist
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout },
 
   //Booking from package
 
