@@ -364,16 +364,13 @@ function ScheduleAddPage() {
             })();
             const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
             const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
-            for (const uid of userIds) {
-                for (const date of selectedDates) {
-                    await createSchedule({
-                        userId: uid,
-                        room: currentRoom,
-                        shift: formData.shift,
-                        date
-                    });
-                }
-            }
+            // Gửi đúng format cho backend: userIds, room, shift, dates
+            await createSchedule({
+                userIds,
+                room: currentRoom,
+                shift: formData.shift,
+                dates: selectedDates
+            });
             const updated = await import('../services/scheduleService').then(m => m.getAllSchedules());
             setServerSchedules(updated);
             toast.success('Tạo lịch trình thành công!', {
@@ -479,12 +476,16 @@ function ScheduleAddPage() {
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [roomError, setRoomError] = useState(null);
     const [doctors, setDoctors] = useState([]);
+    const [receptionists, setReceptionists] = useState([]);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
     const [doctorError, setDoctorError] = useState(null);
+    
+
+
 
     // Fetch rooms and doctors when department (specialty) changes
     useEffect(() => {
-        const fetchRoomsAndDoctors = async () => {
+        const fetchRoomsDoctors = async () => {
             if (!formData.department || formData.department.length === 0) {
                 setRooms([]);
                 setDoctors([]);
@@ -527,8 +528,22 @@ function ScheduleAddPage() {
                 setLoadingDoctors(false);
             }
         };
-        fetchRoomsAndDoctors();
+        fetchRoomsDoctors();
     }, [formData.department]);
+
+    // Fetch all lễ tân (receptionist) khi mở trang
+    useEffect(() => {
+        const fetchReceptionists = async () => {
+            try {
+                const { getAllReceptionists } = await import('../services/scheduleService');
+                const users = await getAllReceptionists();
+                setReceptionists(users);
+            } catch {
+                setReceptionists([]);
+            }
+        };
+        fetchReceptionists();
+    }, []);
 
     if (fetchError || roomError || doctorError) {
         return (
@@ -837,7 +852,7 @@ function ScheduleAddPage() {
                                                             // const userNames = s.fullName ? s.fullName.split('_') : [];
                                                             // Hiển thị mỗi user là 1 block, hover vào block sẽ highlight toàn bộ vùng (không bị cắt nửa)
                                                             const displayName = s.fullName || '';
-                                                            const displayRole = s.userId?.role === 'doctor' ? 'Bác sĩ' : (s.userId?.role === 'technician' ? 'Kỹ thuật viên' : (s.userId?.role === 'nursing' ? 'Điều dưỡng' : 'Nhân viên'));
+                                                            const displayRole = s.userId?.role === 'doctor' ? 'Bác sĩ' : (s.userId?.role === 'technician' ? 'Kỹ thuật viên' : (s.userId?.role === 'nursing' ? 'Điều dưỡng' : (s.userId?.role === 'receptionist' ? 'Lễ tân' : 'Nhân Viên')));
                                                             return (
                                                                 <div
                                                                     key={idx}
@@ -1035,6 +1050,19 @@ function ScheduleAddPage() {
                                             }
                                             return booked;
                                         })()}
+                                        editMode={!!modalForm._id}
+                                    />
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Lễ tân</label>
+                                    <MultiSelectDropdown
+                                        users={receptionists}
+                                        selected={modalForm.userId}
+                                        onChange={newSelected =>
+                                            modalForm._id
+                                                ? setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))
+                                                : setModalForm(prev => ({ ...prev, userId: newSelected }))
+                                        }
+                                        placeholder="Chọn lễ tân"
+                                        bookedUserIds={[]}
                                         editMode={!!modalForm._id}
                                     />
                                     <div className="text-xs text-gray-500 mt-1">Có thể chọn nhiều nhân viên cho ca làm này</div>
