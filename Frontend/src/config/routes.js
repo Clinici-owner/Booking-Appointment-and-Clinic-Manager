@@ -76,6 +76,8 @@ const AppointmentPaymentPage = React.lazy(() => import("../pages/AppointmentPaym
 const AppointmentPatientPage = React.lazy(() => import("../pages/AppointmentPatientPage"));
 const AppointmentDetailPatientPage = React.lazy(() => import("../pages/AppointmentDetailPatientPage"));
 
+const AppointmentAdminPage = React.lazy(() => import("../pages/AppointmentAdminPage"));
+
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
 const DoctorListPage = React.lazy(() => import("../pages/DoctorListPage"));
@@ -171,6 +173,8 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_PATIENT, page: AppointmentPatientPage, layout: MainLayout },
   { path: ROUTE_PATH.APPOINTMENT_DETAIL, page: AppointmentDetailPatientPage, layout: MainLayout },
 
+  //Appointment for admin
+  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout },
 
   //Booking from package
 

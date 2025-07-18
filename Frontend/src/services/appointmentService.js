@@ -20,7 +20,7 @@ const appointmentService = {
   getAppointments: async () => {
     try {
       console.log("Fetching all appointments");
-      const response = await axios.get(`${API_URL}/appointments`);
+      const response = await axios.get(`${API_URL}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching appointments:", error);
