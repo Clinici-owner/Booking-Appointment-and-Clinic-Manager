@@ -38,14 +38,14 @@ class medicalProcessController {
       const stepIds = filteredSteps.map((step) => step._id);
       const medicalProcesses = await MedicalProcess.find({
         processSteps: { $in: stepIds },
-      }).populate("patientId");
+      }).populate({ path: "appointmentId", populate: { path: "patientId" } });
 
-      // Map stepId -> patient
+      // Map stepId -> patient (lấy từ appointmentId.patientId)
       const stepIdToPatient = {};
       medicalProcesses.forEach((mp) => {
         mp.processSteps.forEach((psId) => {
           if (stepIds.find((id) => String(id) === String(psId))) {
-            stepIdToPatient[String(psId)] = mp.patientId;
+            stepIdToPatient[String(psId)] = mp.appointmentId?.patientId || null;
           }
         });
       });
@@ -95,7 +95,7 @@ class medicalProcessController {
   async getAllMedicalProcesses(req, res) {
     try {
       const medicalProcesses = await MedicalProcess.find()
-        .populate("patientId")
+        .populate({ path: "appointmentId", populate: { path: "patientId" } })
         .populate("doctorId")
         .populate({
           path: "processSteps",
@@ -112,15 +112,26 @@ class medicalProcessController {
   }
 
   async createMedicalProcess(req, res) {
-    const { patientId, doctorId, processSteps } = req.body;
+    const { appointmentId, doctorId, processSteps, currentStep, finalResult, status } = req.body;
     try {
       const medicalProcess = new MedicalProcess({
-        patientId,
+        appointmentId,
         doctorId,
         processSteps,
+        currentStep,
+        finalResult,
+        status
       });
       await medicalProcess.save();
-      res.status(201).json(medicalProcess);
+      // Populate appointmentId -> patientId, doctorId, and processSteps for response
+      const populatedProcess = await MedicalProcess.findById(medicalProcess._id)
+        .populate({
+          path: 'appointmentId',
+          populate: { path: 'patientId', select: 'fullName email phoneNumber' }
+        })
+        .populate('doctorId', 'fullName email phoneNumber')
+        .populate('processSteps');
+      res.status(201).json(populatedProcess);
     } catch (error) {
       console.error("Error creating medical process:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -169,7 +180,7 @@ class medicalProcessController {
     const { processId } = req.params;
     try {
       const medicalProcess = await MedicalProcess.findById(processId)
-        .populate("patientId")
+        .populate({ path: "appointmentId", populate: { path: "patientId" } })
         .populate("doctorId")
         .populate({
           path: "processSteps",
@@ -191,10 +202,18 @@ class medicalProcessController {
   };
   async completeCurrentStep(req, res) {
     const { userId } = req.params;
-
     try {
+      // Tìm appointmentId mới nhất của bệnh nhân
+      const Appointment = require("../models/Appointment");
+      const latestAppointment = await Appointment.findOne({ patientId: userId })
+        .sort({ createdAt: -1 });
+      if (!latestAppointment) {
+        return res.status(404).json({ message: "Không tìm thấy lịch hẹn cho bệnh nhân." });
+      }
+      const appointmentId = latestAppointment._id;
+      // Tìm MedicalProcess theo appointmentId
       const medicalProcess = await MedicalProcess.findOne({
-        patientId: userId,
+        appointmentId,
         status: "in_progress",
       }).populate({
         path: "processSteps",
@@ -203,41 +222,33 @@ class medicalProcessController {
           populate: { path: "room" },
         },
       });
-
       if (!medicalProcess) {
         return res
           .status(404)
           .json({ message: "Không tìm thấy quy trình đang hoạt động." });
       }
-
       const currentStepIndex = medicalProcess.currentStep - 1;
-
       if (currentStepIndex >= medicalProcess.processSteps.length) {
         return res
           .status(400)
           .json({ message: "Bước hiện tại vượt quá số bước." });
       }
-
       const currentStep = medicalProcess.processSteps[currentStepIndex];
-
       await ProcessStep.findByIdAndUpdate(currentStep._id, {
         isCompleted: true,
       });
-
       const currentRoom = currentStep.serviceId?.room;
       if (currentRoom) {
         await Room.findByIdAndUpdate(currentRoom._id, {
           $pull: { patientQueue: userId },
         });
       }
-
       const isLastStep =
         medicalProcess.currentStep === medicalProcess.processSteps.length;
       if (isLastStep) {
         medicalProcess.status = "completed";
       } else {
         medicalProcess.currentStep += 1;
-
         const nextStep = medicalProcess.processSteps[currentStepIndex + 1];
         const nextRoom = nextStep.serviceId?.room;
         if (nextRoom) {
@@ -246,9 +257,7 @@ class medicalProcessController {
           });
         }
       }
-
       await medicalProcess.save();
-
       return res
         .status(200)
         .json({ message: "Cập nhật bước khám thành công." });
@@ -259,30 +268,39 @@ class medicalProcessController {
   };
 
   async getPatientMedicalProcess(req, res) {
-  const { userId } = req.params; 
-
+  const { userId } = req.params;
   try {
+    // Tìm appointmentId mới nhất của bệnh nhân
+    const Appointment = require("../models/Appointment");
+    const latestAppointment = await Appointment.findOne({ patientId: userId })
+      .sort({ createdAt: -1 });
+    if (!latestAppointment) {
+      return res.status(404).json({ message: "Không tìm thấy lịch hẹn cho bệnh nhân." });
+    }
+    const appointmentId = latestAppointment._id;
+    // Tìm MedicalProcess theo appointmentId
     const medicalProcess = await MedicalProcess.findOne({
-      patientId: userId,
+      appointmentId,
     })
       .sort({ createdAt: -1 })
-      .populate("doctorId", "fullName email avatar") 
+      .populate("doctorId", "fullName email avatar")
       .populate({
         path: "processSteps",
         populate: {
           path: "serviceId",
           populate: { path: "room" },
         },
-      });
-
+      })
+      .populate({ path: "appointmentId", populate: { path: "patientId" } });
     if (!medicalProcess) {
       return res
         .status(404)
         .json({ message: "Không tìm thấy tiến trình khám bệnh." });
     }
-
     const processInfo = {
       processId: medicalProcess._id,
+      appointmentId: appointmentId,
+      patient: medicalProcess.appointmentId?.patientId || null,
       doctor: {
         fullName: medicalProcess.doctorId.fullName,
         email: medicalProcess.doctorId.email,
@@ -304,7 +322,6 @@ class medicalProcessController {
       startedAt: medicalProcess.createdAt,
       updatedAt: medicalProcess.updatedAt,
     };
-
     return res.status(200).json(processInfo);
   } catch (error) {
     console.error("Lỗi khi lấy tiến trình của bệnh nhân:", error);

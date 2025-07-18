@@ -61,7 +61,12 @@ const ListMedicalStepsTodayByRoomPage = () => {
                         }
                     } catch (e) {
                         resultStatus[step._id] = false;
-                        console.error(`Error checking result for step ${step._id}:`, e);
+                        // Nếu là lỗi 404 thì chỉ log warning, không log lỗi lớn
+                        if (e.message && e.message.includes('No medical history found')) {
+                            console.warn(`No medical history for step ${step._id}`);
+                        } else {
+                            console.error(`Error checking result for step ${step._id}:`, e);
+                        }
                     }
                 })
             );

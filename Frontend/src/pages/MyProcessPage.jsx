@@ -58,6 +58,25 @@ const MyProcessPage = () => {
         Tiến trình khám bệnh
       </Typography>
 
+      {/* Thông tin bệnh nhân */}
+      {process.patient && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar
+              alt={process.patient.fullName}
+              src={process.patient.avatar}
+              sx={{ width: 56, height: 56 }}
+            />
+            <Box>
+              <Typography variant="subtitle1">Bệnh nhân: {process.patient.fullName}</Typography>
+              <Typography color="text.secondary" variant="body2">
+                Email: {process.patient.email}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Thông tin bác sĩ */}
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
