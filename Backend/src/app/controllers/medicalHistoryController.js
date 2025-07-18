@@ -4,11 +4,10 @@ const ProcessStep = require("../models/ProcessStep");
 const bcrypt = require("bcrypt");
 class medicalHistoryController {
   async createMedicalHistory(req, res) {
-    const { patientId, doctorId, processStep, resultFiles } = req.body;
+    const { patientId, processStep, resultFiles } = req.body;
     try {
       const medicalHistory = new MedicalHistory({
         patientId,
-        doctorId,
         processStep,
         resultFiles,
       });
@@ -24,7 +23,6 @@ class medicalHistoryController {
     const { id } = req.params;
     try {
       const medicalHistories = await MedicalHistory.find({ patientId: id })
-        .populate("doctorId")
         .populate({ path: "processStep", populate: { path: "serviceId" } })
         .populate("resultFiles");
       if (!medicalHistories || medicalHistories.length === 0) {
