@@ -11,5 +11,6 @@ router.get('/:id', appointmentController.getAppointmentById);
 router.put('/:id/cancel', appointmentController.cancelAppointment);
 router.put('/:id/confirm', appointmentController.confirmAppointment);
 router.get('/health-packages', appointmentController.getHealthPackages); 
+router.post('/update-status/:id', appointmentController.updateAppointmentStatus);
 
 module.exports = router;
