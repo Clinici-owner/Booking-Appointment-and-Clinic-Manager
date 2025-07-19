@@ -3,6 +3,18 @@ import axios from "axios";
 const API_URL = "http://localhost:3000/api/medicalProcess";
 
 export const MedicalProcessService = {
+  // Lấy quy trình khám theo appointmentId
+  getMedicalProcessByAppointmentId: async (appointmentId) => {
+    try {
+      const response = await axios.get(`${API_URL}/by-appointment/${appointmentId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching medical process by appointmentId:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch medical process by appointmentId"
+      );
+    }
+  },
   createProcessStep: async (processStep) => {
     try {
       const response = await axios.post(`${API_URL}/step/create`, processStep);

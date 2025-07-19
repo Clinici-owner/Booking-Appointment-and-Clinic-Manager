@@ -377,6 +377,30 @@ class medicalProcessController {
       return res.status(500).json({ message: "Lỗi máy chủ." });
     }
   }
+
+  // Lấy quy trình khám theo appointmentId
+  async getMedicalProcessByAppointmentId(req, res) {
+    const { appointmentId } = req.params;
+    try {
+      const medicalProcess = await MedicalProcess.findOne({ appointmentId })
+        .populate({ path: "appointmentId", populate: { path: "patientId" } })
+        .populate("doctorId")
+        .populate({
+          path: "processSteps",
+          populate: {
+            path: "serviceId",
+            populate: { path: "room" },
+          },
+        });
+      if (!medicalProcess) {
+        return res.status(404).json({ message: "Medical process not found" });
+      }
+      res.status(200).json(medicalProcess);
+    } catch (error) {
+      console.error("Error fetching medical process by appointmentId:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
 }
 
 module.exports = new medicalProcessController();
