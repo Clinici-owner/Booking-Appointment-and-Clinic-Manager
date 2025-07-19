@@ -14,8 +14,7 @@ const scheduleRouter = require('./schedule')
 const appointmentRouter = require('./appointment');
 const roomRouter = require('./room');
 const payosRouter = require('./payos');
-// const stepProcessRouter = require('./stepProcess');
-
+const chatRouter = require('./chat');
 function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
@@ -33,7 +32,7 @@ function route(app) {
     app.use('/api/appointments', appointmentRouter);
     app.use('/api/room', roomRouter);
     app.use('/api/payos', payosRouter);
-    // app.use('/api/stepProcess', stepProcessRouter);
+    app.use('/api/chat', chatRouter);
 }
 
 module.exports = route
