@@ -1,22 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PatientService } from '../services/patientService';
 import appointmentService from '../services/appointmentService';
 import { MedicalProcessService } from '../services/medicalProcessService';
 import { MedicalHistoryService } from '../services/medicalHistoryService';
 
-const PatientDetail = () => {
-  const navigate = useNavigate();
+const PatientMedicalHistoryDetailPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const patientId = location.state?.patientId;
 
-  // const [medicalHistory, setMedicalHistory] = useState([]);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
-  const [processes, setProcesses] = useState({}); // { appointmentId: processData }
-  const [stepHistories, setStepHistories] = useState({}); // { stepId: medicalHistory }
-  const patientId = location.state?.patientId;
+  const [processes, setProcesses] = useState({});
+  const [stepHistories, setStepHistories] = useState({});
 
   useEffect(() => {
     if (patientId) {
@@ -24,12 +22,9 @@ const PatientDetail = () => {
         try {
           const data = await PatientService.getPatientById(patientId);
           setPatient(data);
-          // Lấy tất cả lịch hẹn của bệnh nhân
           const appts = await appointmentService.getAppointmentsByPatient(patientId);
           setAppointments(appts);
-          // Lấy process cho từng lịch hẹn
           const processMap = {};
-          // Lấy process và medicalHistory cho từng step
           const stepHistoryMap = {};
           await Promise.all(
             appts.map(async (appt) => {
@@ -47,7 +42,6 @@ const PatientDetail = () => {
                           stepHistoryMap[step._id] = null;
                         }
                       } catch (err) {
-                        // Không có history cho step này
                         console.error(`No medical history found for step ${step._id}:`, err);
                         stepHistoryMap[step._id] = null;
                       }
@@ -55,8 +49,7 @@ const PatientDetail = () => {
                   );
                 }
               } catch (err) {
-                // Không có process cho lịch hẹn này
-                console.error(`No process found for appointment ${appt._id}:`, err);
+                console.error(`No medical process found for appointment ${appt._id}:`, err);
                 processMap[appt._id] = null;
               }
             })
@@ -64,7 +57,8 @@ const PatientDetail = () => {
           setProcesses(processMap);
           setStepHistories(stepHistoryMap);
         } catch (err) {
-          console.error("Error fetching patient data:", err);
+            console.error('Error fetching patient data:', err);
+          setPatient(null);
         } finally {
           setLoading(false);
         }
@@ -75,19 +69,16 @@ const PatientDetail = () => {
     }
   }, [patientId]);
 
-  // Function to format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('vi-VN');
     } catch {
-      return dateString; // Return original if can't parse
+      return dateString;
     }
   };
 
-  // Function to display gender
   const displayGender = (gender) => {
     if (gender === true) return 'Nam';
     if (gender === false) return 'Nữ';
@@ -95,17 +86,13 @@ const PatientDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-4 text-center">
-        <p>Loading patient data...</p>
-      </div>
-    );
+    return <div className="container mx-auto p-4 text-center">Đang tải dữ liệu...</div>;
   }
 
   if (!patient) {
     return (
       <div className="container mx-auto p-4 text-center">
-        <p>No patient data found</p>
+        <p>Không tìm thấy thông tin bệnh nhân</p>
         <button
           onClick={() => navigate(-1)}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -118,32 +105,20 @@ const PatientDetail = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Thông tin chi tiết bệnh nhân
-      </h1>
-
-      {/* Patient Information Section */}
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Lịch sử khám bệnh của bệnh nhân</h1>
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col items-center mb-6">
-          {/* Avatar Image with fallback */}
           <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-blue-100 mb-4">
             <img
               src={patient.avatar || "https://randomuser.me/api/portraits/men/32.jpg"}
-              alt={`${patient.fullName || 'Patient'}'s avatar`}
+              alt={patient.fullName || 'Patient'}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.src = "https://randomuser.me/api/portraits/men/32.jpg";
-              }}
+              onError={e => { e.target.src = "https://randomuser.me/api/portraits/men/32.jpg"; }}
             />
           </div>
-          <h2 className="text-xl font-semibold text-gray-700 text-center">
-            {patient.fullName || 'Unknown Name'}
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-700 text-center">{patient.fullName || 'Unknown Name'}</h2>
         </div>
-
-        {/* Personal Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">Số điện thoại</h3>
@@ -151,34 +126,26 @@ const PatientDetail = () => {
                 <p className="text-gray-800">{patient.phone || 'N/A'}</p>
               </div>
             </div>
-
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">Ngày sinh</h3>
               <p className="text-gray-800 col-span-2">{formatDate(patient.dob)}</p>
             </div>
-
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">Email</h3>
               <p className="text-gray-800 col-span-2">{patient.email || 'N/A'}</p>
             </div>
           </div>
-
-          {/* Right Column */}
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">CMND/CCCD</h3>
               <div className="col-span-2">
-                <p className="text-gray-800">
-                  {patient.cidNumber || 'N/A'}
-                </p>
+                <p className="text-gray-800">{patient.cidNumber || 'N/A'}</p>
               </div>
             </div>
-
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">Địa chỉ</h3>
               <p className="text-gray-800 col-span-2">{patient.address || 'N/A'}</p>
             </div>
-
             <div className="grid grid-cols-3 gap-2">
               <h3 className="text-sm font-medium text-gray-500 col-span-1">Giới tính</h3>
               <p className="text-gray-800 col-span-2">{displayGender(patient.gender)}</p>
@@ -186,9 +153,6 @@ const PatientDetail = () => {
           </div>
         </div>
       </div>
-
-
-      {/* Medical History by Appointment Section */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Lịch sử khám theo từng lịch hẹn</h2>
         {appointments.length > 0 ? (
@@ -233,7 +197,6 @@ const PatientDetail = () => {
                                         <a href={file.file_path} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 underline mb-1">
                                           Xem kết quả {fidx + 1}
                                         </a>
-                                        {/* Hiển thị hình ảnh nếu là file ảnh */}
                                         {file.file_path && (/(.jpg|.jpeg|.png|.gif|.bmp|.webp)$/i).test(file.file_path) && (
                                           <img
                                             src={file.file_path}
@@ -253,7 +216,6 @@ const PatientDetail = () => {
                           <div className="text-gray-500 italic">Không có bước nào</div>
                         )}
                       </div>
-                      {/* Kết luận cuối cùng */}
                       {process.finalResult && (
                         <div className="mt-2 text-green-700 font-semibold">Kết luận cuối cùng: {process.finalResult}</div>
                       )}
@@ -269,8 +231,6 @@ const PatientDetail = () => {
           <p className="text-gray-500">Không có lịch sử khám bệnh</p>
         )}
       </div>
-
-      {/* Back Button */}
       <div className="flex justify-end">
         <button
           onClick={() => navigate(-1)}
@@ -283,4 +243,4 @@ const PatientDetail = () => {
   );
 };
 
-export default PatientDetail;
+export default PatientMedicalHistoryDetailPage;

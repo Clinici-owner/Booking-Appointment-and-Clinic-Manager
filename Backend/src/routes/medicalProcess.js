@@ -3,6 +3,7 @@ const router = express.Router();
 const medicalProcessController = require('../app/controllers/medicalProcessController');
 
 router.get('/getAll', medicalProcessController.getAllMedicalProcesses);
+router.get('/by-appointment/:appointmentId', medicalProcessController.getMedicalProcessByAppointmentId);
 router.post('/create', medicalProcessController.createMedicalProcess);
 router.post('/update/:processId', medicalProcessController.updateMedicalProcess);
 router.post('/updateStatus/:processId', medicalProcessController.updateMedicalProcessStatus);
