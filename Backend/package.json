@@ -12,7 +12,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@payos/node": "^1.0.10",
+    "axios": "^1.10.0",
     "backend": "file:",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
