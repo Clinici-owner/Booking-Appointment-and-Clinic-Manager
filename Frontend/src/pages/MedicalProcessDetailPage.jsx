@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MedicalProcessService } from '../services/medicalProcessService';
 import { MedicalHistoryService } from '../services/medicalHistoryService';
+import appointmentService from "../services/appointmentService";
 
 const MedicalProcessDetailPage = () => {
     const { state } = useLocation();
@@ -117,6 +118,7 @@ const MedicalProcessDetailPage = () => {
         try {
             await MedicalProcessService.updateMedicalProcessFinalResult(process._id, finalResultInput);
             setProcess({ ...process, finalResult: finalResultInput });
+            await appointmentService.updateAppointmentStatus(process.appointmentId._id, 'completed');
         } catch (err) {
             setFinalResultError(err.message || 'Có lỗi khi lưu kết quả cuối cùng');
         } finally {
