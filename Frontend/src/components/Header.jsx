@@ -1,7 +1,8 @@
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, IconButton, Badge, Tooltip } from "@mui/material";
 import { useLocation } from "react-router-dom"; // Thêm useNavigate
 import { Link } from "react-router-dom";
+import NotificationDropdown from "../components/NotificationDropdown";
 
 import PersonIcon from "@mui/icons-material/Person";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -11,13 +12,17 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
-import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
+import LogoMini from "../assets/images/LogoMini.png";
 
 function Header() {
   const location = useLocation();
 
   const userData = JSON.parse(sessionStorage.getItem("user"));
+
+
+
   const isActive = (path) => location.pathname === path;
+
 
   return (
     <div>
@@ -98,7 +103,7 @@ function Header() {
               Tin tức
             </Link>
           </li> */}
-          <li>
+          <li className="flex items-center space-x-2">
             {userData ? (
               <Menu as="div" className="relative inline-block text-left">
                 <div>
@@ -197,6 +202,7 @@ function Header() {
                 </Button>
               </Link>
             )}
+            {userData?.role === "patient" && <NotificationDropdown />}
           </li>
         </ul>
       </nav>
