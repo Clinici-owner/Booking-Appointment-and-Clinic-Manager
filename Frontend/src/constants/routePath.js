@@ -107,6 +107,7 @@ export const ROUTE_PATH = {
   //Patient
 
   PATIENT_MY_PROCESS: '/MyProcess',
+  PATIENT_MY_MEDICAL_HISTORY: '/patient-medical-history',
 
   //Patient for receptionist
   PATIENT_LIST: '/receptionist/patients',
