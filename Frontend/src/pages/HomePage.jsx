@@ -1,4 +1,6 @@
+
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import Banner from "../assets/images/Banner.png";
 
@@ -13,6 +15,7 @@ import {
 } from "@mui/icons-material";
 
 function HomePage() {
+  const navigate = useNavigate();
   return (
     <div>
       <div
@@ -34,12 +37,18 @@ function HomePage() {
             nhất.
           </p>
           <div className="flex space-x-4">
-            <button className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-custom-bluehover2 transition duration-300 hover:cursor-pointer">
-              Đặt khám ngay
-            </button>
-            <button className="bg-white text-custom-blue font-semibold px-6 py-2 rounded-xl shadow hover:bg-gray-100 transition duration-300">
-              Xem dịch vụ
-            </button>
+          <button
+            className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-custom-bluehover2 transition duration-300 hover:cursor-pointer"
+            onClick={() => navigate("/specialties")}
+          >
+            Đặt khám ngay
+          </button>
+          <button
+            className="bg-white text-custom-blue font-semibold px-6 py-2 rounded-xl shadow hover:bg-gray-100 transition duration-300"
+            onClick={() => navigate("/health-packages")}
+          >
+            Xem dịch vụ
+          </button>
           </div>
         </div>
       </div>

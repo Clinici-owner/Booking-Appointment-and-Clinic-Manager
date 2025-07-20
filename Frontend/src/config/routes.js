@@ -59,6 +59,9 @@ const CreateDoctorProfilePage = React.lazy(() => import("../pages/CreateDoctorPr
 const CreateMedicalProcessPage = React.lazy(() => import("../pages/CreateMedicalProcessPage"));
 const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessListPage"));
 const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
+const PatientMedicalHistoryListPage = React.lazy(() => import("../pages/PatientMedicalHistoryListPage"));
+const PatientMedicalHistoryDetailPage = React.lazy(() => import("../pages/PatientMedicalHistoryDetailPage"));
+const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppointmentListPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -71,6 +74,7 @@ const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
 const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
 const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
+const MyMedicalHistoryPage = React.lazy(() => import("../pages/MyMedicalHistoryPage"));
 
 const AppointmentSpecialtyPage = React.lazy(() => import("../pages/AppointmentSpecialtyPage"));
 const AppointmentPaymentPage = React.lazy(() => import("../pages/AppointmentPayment"));
@@ -160,10 +164,16 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout },
+
+
 
 
   //Patient
   { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_MEDICAL_HISTORY, page: MyMedicalHistoryPage, layout: MainLayout },
 
   // Technician
   { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },

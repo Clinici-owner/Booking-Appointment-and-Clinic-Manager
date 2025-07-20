@@ -98,6 +98,15 @@ const appointmentService = {
     }
   },
 
+  updateAppointmentStatus: async (id, status) => {
+    try {
+      const response = await axios.post(`${API_URL}/update-status/${id}`, { status });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating appointment status:", error);
+      throw error;
+    }
+  }
 
 };
 

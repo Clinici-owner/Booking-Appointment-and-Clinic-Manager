@@ -12,7 +12,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@payos/node": "^1.0.10",
+    "axios": "^1.10.0",
     "backend": "file:",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
@@ -30,6 +32,8 @@
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "react-markdown": "^10.1.0",
+    "socket.io": "^4.8.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
