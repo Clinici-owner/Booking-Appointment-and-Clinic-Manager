@@ -12,6 +12,7 @@ const healthPackageRouter = require('./healthPackage')
 const newsRouter = require('./news');
 const scheduleRouter = require('./schedule')
 const appointmentRouter = require('./appointment');
+const notificationRouter = require('./notification');
 const roomRouter = require('./room');
 const payosRouter = require('./payos');
 const chatRouter = require('./chat');
@@ -30,6 +31,7 @@ function route(app) {
     app.use('/api/news', newsRouter);
     app.use('/api/schedules', scheduleRouter);
     app.use('/api/appointments', appointmentRouter);
+    app.use('/api/notifications', notificationRouter);
     app.use('/api/room', roomRouter);
     app.use('/api/payos', payosRouter);
     app.use('/api/chat', chatRouter);

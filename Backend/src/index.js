@@ -11,6 +11,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const nodemailer = require('nodemailer');
 const passport = require('./config/passport/passport-config');
+const setupSocket = require('./config/socket/socketHandler');
 
 
 // Load biến môi trường
@@ -24,6 +25,9 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Ứng dụng đang chạy trên cổng ${PORT}`);
 });
+
+// Khởi động socket sau khi server đã listen
+setupSocket(server);
 
 // Middleware
 app.use(cors());
