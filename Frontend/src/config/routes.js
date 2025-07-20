@@ -61,6 +61,7 @@ const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessL
 const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 const PatientMedicalHistoryListPage = React.lazy(() => import("../pages/PatientMedicalHistoryListPage"));
 const PatientMedicalHistoryDetailPage = React.lazy(() => import("../pages/PatientMedicalHistoryDetailPage"));
+const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppointmentListPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -163,6 +164,9 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout },
+
+
 
 
   //Patient
