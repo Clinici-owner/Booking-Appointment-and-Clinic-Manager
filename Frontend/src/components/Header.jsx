@@ -12,7 +12,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
-import LogoMini from "../assets/images/LogoMini.png";
+import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
+import { HistoryIcon } from "lucide-react";
 
 function Header() {
   const location = useLocation();
@@ -160,6 +161,19 @@ function Header() {
                           <ReceiptOutlinedIcon />
                         </div>
                         Phiếu khám bệnh
+                      </a>
+                    </MenuItem>
+                  </div>
+                  <div className="py-1">
+                    <MenuItem>
+                      <a
+                        href="/patient-medical-history"
+                        className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                      >
+                        <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
+                          <HistoryIcon />
+                        </div>
+                        Lịch sử khám bệnh
                       </a>
                     </MenuItem>
                   </div>

@@ -151,6 +151,30 @@ class AppointmentController {
       res.status(500).json({ message: 'Lỗi khi xác nhận lịch hẹn', error });
     }
   }
+
+  async updateAppointmentStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+      }
+
+      const appointment = await Appointment.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
+
+      if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+
+      res.status(200).json({ message: `Đã cập nhật trạng thái lịch hẹn thành ${status}`, appointment });
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi cập nhật trạng thái lịch hẹn', error });
+    }
+  }
 }
 
 module.exports = new AppointmentController();
