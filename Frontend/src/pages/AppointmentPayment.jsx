@@ -20,6 +20,7 @@ import { Toaster, toast } from "sonner";
 function AppointmentPayment() {
   const location = useLocation();
   const {
+    user,
     doctorId,
     scheduleId,
     timeRange,
@@ -44,7 +45,7 @@ function AppointmentPayment() {
     symptoms: symptoms || "",
   });
 
-  const user = JSON.parse(sessionStorage.getItem("user")) || {};
+  // const user = JSON.parse(sessionStorage.getItem("user")) || {};
 
   const pollingRef = useRef(null);
 

@@ -89,6 +89,8 @@ const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTech
 
 const DoctorListPage = React.lazy(() => import("../pages/DoctorListPage"));
 const DoctorDetailPage = React.lazy(() => import("../pages/DoctorDetailPage"));
+const PatientListPage = React.lazy(() => import("../pages/PatientListPage"));
+const AppointmentBookingPage = React.lazy(() => import("../pages/AppoinmentBookingPage"));
 
 // Cấu hình route
 const AppRoute = [
@@ -203,6 +205,9 @@ const AppRoute = [
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
   {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
   {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout},
+  //Patient for receptionist
+  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout},
+  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout},
   
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

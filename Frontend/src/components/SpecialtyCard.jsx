@@ -1,16 +1,19 @@
 import React from "react";
 
-function SpecialtiesCard({ id, name, description, logo }) {
+function SpecialtiesCard({ id, name, description, logo, showDetailButton = true, onClick }) {
   const cleanedDescription = description.replace("Giới thiệu chung", "");
-
+  
   const user = JSON.parse(sessionStorage.getItem("user"));
   
   return (
-    <div className="max-w-xs w-full h-74 border border-gray-300 rounded-2xl p-6 text-center font-inter shadow-sm bg-white hover:shadow-lg transition duration-300 hover:bg-custom-bluehover">
+    <div 
+      className="max-w-xs w-full h-74 border border-gray-300 rounded-2xl p-6 text-center font-inter shadow-sm bg-white hover:shadow-lg transition duration-300 hover:bg-custom-bluehover cursor-pointer"
+      onClick={onClick}
+    >
       <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-[#9B7E3F] flex items-center justify-center">
         <img
           alt="Detailed illustration of a human heart anatomical icon in white on brown circular background"
-          className="w-10 h-10  rounded-full object-cover"
+          className="w-10 h-10 rounded-full object-cover"
           src={logo}
         />
       </div>
@@ -18,16 +21,18 @@ function SpecialtiesCard({ id, name, description, logo }) {
         KHOA {name}
       </h2>
       <p
-        className="text-slate-600 text-base text-sm leading-relaxed mb-3 px-2 font-inter  overflow-hidden text-ellipsis line-clamp-3"
+        className="text-slate-600 text-base text-sm leading-relaxed mb-3 px-2 font-inter overflow-hidden text-ellipsis line-clamp-3"
         dangerouslySetInnerHTML={{ __html: cleanedDescription }}
       ></p>
-      <p className="text-custom-blue font-semibold text-base cursor-pointer hover:underline transition">
-        {user?.role === "admin" ? (
-          <a href={`/admin/specialties/${id}`}>Xem chi tiết</a>
-        ) : (
-          <a href={`/specialties/${id}`}>Xem chi tiết</a>
-        )}
-      </p>
+      {showDetailButton && (
+        <p className="text-custom-blue font-semibold text-base cursor-pointer hover:underline transition">
+          {user?.role === "admin" ? (
+            <a href={`/admin/specialties/${id}`}>Xem chi tiết</a>
+          ) : (
+            <a href={`/specialties/${id}`}>Xem chi tiết</a>
+          )}
+        </p>
+      )}
     </div>
   );
 }

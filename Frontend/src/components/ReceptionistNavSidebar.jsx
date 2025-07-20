@@ -13,12 +13,14 @@ import { Link } from "react-router-dom";
 
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import BallotIcon from '@mui/icons-material/Ballot';
 
 const drawerWidth = 240;
 
 const navItems = [
   { label: "Danh sách đặt lịch của bệnh nhân", icon: <MedicalServicesIcon />, path: "/receptionist/appointment-receptionist" },
   { label: "Xem lịch trình làm việc", icon: <AssignmentIcon />, path: "/schedules/own" },
+  { label: "Danh sách bệnh nhân đặt lịch", icon: <BallotIcon />, path: "/receptionist/patients" },
 ];
 
 export default function ReceptionistNavSidebar({ children }) {
