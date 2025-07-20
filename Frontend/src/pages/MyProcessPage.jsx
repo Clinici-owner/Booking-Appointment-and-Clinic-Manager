@@ -96,16 +96,13 @@ const MyProcessPage = () => {
 
       {/* Stepper */}
       <Stepper activeStep={activeStep} alternativeLabel>
+        {/* Các bước từ API */}
         {process.steps.map((step, index) => (
           <Step key={index} completed={step.isCompleted}>
             <StepLabel
               sx={{
-                "& .MuiStepLabel-label.Mui-completed": {
-                  color: "green", // Hoàn thành
-                },
-                "& .MuiStepLabel-label.Mui-active": {
-                  color: "blue", // Bước hiện tại
-                },
+                "& .MuiStepLabel-label.Mui-completed": { color: "green" },
+                "& .MuiStepLabel-label.Mui-active": { color: "blue" },
               }}
             >
               {step.serviceName}
@@ -118,6 +115,30 @@ const MyProcessPage = () => {
             </StepLabel>
           </Step>
         ))}
+
+        {/* Bước cứng: Trở về phòng chẩn đoán */}
+        <Step completed={process.status === "completed"}>
+          <StepLabel
+            sx={{
+              "& .MuiStepLabel-label.Mui-completed": { color: "green" },
+              "& .MuiStepLabel-label.Mui-active": { color: "blue" },
+              "& .MuiStepLabel-label": {
+                color: process.status === "completed" ? "green" : "gray",
+              },
+            }}
+          >
+            Trở về phòng chẩn đoán
+            <Typography variant="caption" display="block">
+              Phòng chẩn đoán tổng quát
+            </Typography>
+            <Typography
+              variant="caption"
+              display="block"
+              color={process.status === "completed" ? "success.main" : "text.secondary"}
+            >
+            </Typography>
+          </StepLabel>
+        </Step>
       </Stepper>
 
       {/* Trạng thái quy trình */}
@@ -128,8 +149,8 @@ const MyProcessPage = () => {
             {process.status === "completed"
               ? "Đã hoàn tất"
               : process.status === "in_progress"
-              ? "Đang thực hiện"
-              : "Khác"}
+                ? "Đang thực hiện"
+                : "Khác"}
           </strong>
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={1}>
