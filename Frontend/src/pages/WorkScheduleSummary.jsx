@@ -9,8 +9,10 @@ import {
   ListItemText,
   Button,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import { Toaster, toast } from "sonner";
+import socket from "../lib/socket";
 
 const WorkScheduleSummary = () => {
   const [roomData, setRoomData] = useState(null);
@@ -34,6 +36,12 @@ const WorkScheduleSummary = () => {
 
   useEffect(() => {
     fetchRoomInfo();
+
+    // 👉 Đăng ký userId với socket server
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    if (user?._id) {
+      socket.emit("register", user._id);
+    }
   }, []);
 
   const handleCompleteStep = async (patientId) => {
@@ -51,6 +59,12 @@ const WorkScheduleSummary = () => {
     } finally {
       setProcessingId(null);
     }
+  };
+
+  // 👉 Gửi socket để mời bệnh nhân
+  const handleInvitePatient = (patientId) => {
+    socket.emit("invite_patient", { userId: patientId });
+    toast.success("📢 Đã gửi lời mời vào phòng.");
   };
 
   return (
@@ -86,6 +100,7 @@ const WorkScheduleSummary = () => {
             <Typography variant="h6" sx={{ mb: 1 }}>
               Danh sách bệnh nhân trong phòng
             </Typography>
+            
 
             {!Array.isArray(roomData.patientQueue) ||
             roomData.patientQueue.length === 0 ? (
@@ -109,17 +124,27 @@ const WorkScheduleSummary = () => {
                       primary={`${index + 1}. ${patient.fullName}`}
                       secondary={patient.email}
                     />
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleCompleteStep(patient._id)}
-                      disabled={processingId === patient._id}
-                    >
-                      {processingId === patient._id
-                        ? "Đang xử lý..."
-                        : "Hoàn tất"}
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => handleInvitePatient(patient._id)}
+                      >
+                        Mời vào phòng
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        onClick={() => handleCompleteStep(patient._id)}
+                        disabled={processingId === patient._id}
+                      >
+                        {processingId === patient._id
+                          ? "Đang xử lý..."
+                          : "Hoàn tất"}
+                      </Button>
+                    </Stack>
                   </ListItem>
                 ))}
               </List>
