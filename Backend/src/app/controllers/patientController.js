@@ -25,5 +25,27 @@ class patientController {
             res.status(500).json({ message: "Internal server error" });
         }
     }
+    async createPatient(req, res) {
+        const { fullName,  cidNumber } = req.body;
+        try {
+            const existingPatient = await User.findOne({       
+                cidNumber: cidNumber,
+                role: "patient"
+            });
+            if (existingPatient) {
+                return res.status(400).json({ message: "Patient already exists" });
+            }
+            const newPatient = new User({
+                fullName,
+                cidNumber,
+                role: "patient"
+            });
+            await newPatient.save();
+            res.status(201).json({ message: "Patient created successfully" });
+        } catch (error) {
+            console.error("Error creating patient:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
 }
 module.exports = new patientController();

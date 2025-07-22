@@ -21,6 +21,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PeopleIcon from "@mui/icons-material/People";
 import PersonalInjuryIcon from '@mui/icons-material/PersonalInjury';
 import SettingsIcon from "@mui/icons-material/Settings";
+
 const drawerWidth = 240;
 
 const navItems = [
@@ -48,25 +49,49 @@ export default function AdminNavSidebar({ children }) {
           width: drawerWidth,
           flexShrink: 0,
           marginTop: "66px",
-
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: "border-box",
           },
         }}
       >
-        <List>
-          {navItems.map((item, index) => (
-            <ListItemButton
-              key={index}
-              component={Link}
-              to={item.path}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
-        </List>
+        <Box 
+          sx={{
+            height: 'calc(100vh - 140px)',
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '6px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f1f1f1',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#888',
+              borderRadius: '3px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#555',
+            },
+          }}
+        >
+          <List>
+            {navItems.map((item, index) => (
+              <ListItemButton
+                key={index}
+                component={Link}
+                to={item.path}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#e0e0e0',
+                  }
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
       </Drawer>
 
       {/* Content bên phải */}

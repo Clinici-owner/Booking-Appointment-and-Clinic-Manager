@@ -61,6 +61,7 @@ const MedicalProcessListPage = React.lazy(() => import("../pages/MedicalProcessL
 const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProcessDetailPage"));
 const PatientMedicalHistoryListPage = React.lazy(() => import("../pages/PatientMedicalHistoryListPage"));
 const PatientMedicalHistoryDetailPage = React.lazy(() => import("../pages/PatientMedicalHistoryDetailPage"));
+const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppointmentListPage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -88,6 +89,8 @@ const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTech
 
 const DoctorListPage = React.lazy(() => import("../pages/DoctorListPage"));
 const DoctorDetailPage = React.lazy(() => import("../pages/DoctorDetailPage"));
+const PatientListPage = React.lazy(() => import("../pages/PatientListPage"));
+const AppointmentBookingPage = React.lazy(() => import("../pages/AppoinmentBookingPage"));
 
 // Cấu hình route
 const AppRoute = [
@@ -139,8 +142,8 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL_USER, page: HealthPackageDetailPatientPage, layout: MainLayout},
 
   //Service Manager
-  {path: ROUTE_PATH.SERVICES_CREATE, page: CreateMedical, layout: AdminLayout},
-  {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout},
+  {path: ROUTE_PATH.SERVICES_CREATE, page: CreateMedical, layout: AdminLayout, allowedRoles: ["admin"] },
+  {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout,  allowedRoles: ["admin"] },
 
   // Specialty Manager
   { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
@@ -154,7 +157,7 @@ const AppRoute = [
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
   { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout},
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout , allowedRoles: ["doctor", "technician"]},
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout, allowedRoles: ["doctor"] },
@@ -163,10 +166,13 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
+  { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout },
+
+
 
 
   //Patient
-  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout , allowedRoles: ["patient"] },
   { path: ROUTE_PATH.PATIENT_MY_MEDICAL_HISTORY, page: MyMedicalHistoryPage, layout: MainLayout, allowedRoles: ["patient"] },
 
   // Technician
@@ -193,12 +199,15 @@ const AppRoute = [
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
   // Create Medical History
-  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout, allowedRoles: ["technician"] },
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout, allowedRoles: ["doctor","technician"]  },
 
   //News Manager 
-  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
-  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
-  {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout},
+  {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout , allowedRoles: ["admin"] },
+  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout, allowedRoles: ["admin"] },
+  {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  //Patient for receptionist
+  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout},
+  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout},
   
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

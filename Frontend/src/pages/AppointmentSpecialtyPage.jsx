@@ -123,6 +123,7 @@ function AppointmentSpecialtyPage() {
       // Có thể set vào context hoặc global state tại đây nếu cần
       navigate("/appointment-payment", {
         state: {
+          user: user,
           doctorId: selectedDoctorId,
           scheduleId: selectedTime.scheduleId,
           timeRange: selectedTime.timeRange,
