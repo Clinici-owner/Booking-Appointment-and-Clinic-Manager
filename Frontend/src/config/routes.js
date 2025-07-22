@@ -157,20 +157,20 @@ const AppRoute = [
   { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout},
 
   // Doctor
-  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_CREATE_MEDICAL_PROCESS, page: CreateMedicalProcessPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
-  { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout },
-  { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
-  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout },
-  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_ALL_MEDICAL_PROCESS, page: MedicalProcessListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
+  { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
+  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
+  { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
 
 
   //Patient
   { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout },
-  { path: ROUTE_PATH.PATIENT_MY_MEDICAL_HISTORY, page: MyMedicalHistoryPage, layout: MainLayout },
+  { path: ROUTE_PATH.PATIENT_MY_MEDICAL_HISTORY, page: MyMedicalHistoryPage, layout: MainLayout, allowedRoles: ["patient"] },
 
   // Technician
-  { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout },
+  { path: ROUTE_PATH.TECHNICIAN_PROFILE_CREATE, page: CreateTechnicianProfilePage, layout: TechnicianLayout, allowedRoles: ["technician"] },
 
   //Booking from package
 
@@ -193,7 +193,7 @@ const AppRoute = [
   { path: ROUTE_PATH.PACKAGE_LIST, page: HealthPackageList },
 
   // Create Medical History
-  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout },
+  { path: ROUTE_PATH.LIST_MEDICAL_STEPS_TODAY_BY_ROOM, page: ListMedicalStepsTodayByRoomPage, layout: TechnicianLayout, allowedRoles: ["technician"] },
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout},
