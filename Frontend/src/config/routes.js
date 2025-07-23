@@ -1,10 +1,10 @@
 import React from "react";
 import { ROUTE_PATH } from "../constants/routePath";
-import MainLayout from "../layouts/main-layout";
 import AdminLayout from "../layouts/admin-layout";
 import DoctorLayout from "../layouts/doctor-layout";
-import TechnicianLayout from "../layouts/technician-layout";
+import MainLayout from "../layouts/main-layout";
 import ReceptionistLayout from "../layouts/receptionist-layout";
+import TechnicianLayout from "../layouts/technician-layout";
 
 // Lazy load các trang
 const HomePage = React.lazy(() => import("../pages/HomePage"));
@@ -112,10 +112,10 @@ const AppRoute = [
   { path: ROUTE_PATH.RESET_PASSWORD, page: ResetPasswordPage },
 
   // Staff
-  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout },
-  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout },
-  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.STAFF_LIST, page: StaffListPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout },
   { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout },
 
@@ -155,9 +155,9 @@ const AppRoute = [
   { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
   
   // Schedule Manager
-  { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout},
+  { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: DoctorLayout, allowedRoles: ["doctor", "technician", "receptionist", "nursing"] },
+  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout },
 
   // Doctor
   { path: ROUTE_PATH.DOCTOR_PROFILE_CREATE, page: CreateDoctorProfilePage, layout: DoctorLayout },
@@ -166,7 +166,7 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_MEDICAL_PROCESS_DETAIL, page: MedicalProcessDetailPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout },
-  { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout },
+  { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
 
 
 
@@ -192,7 +192,7 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout },
 
   //Appointment for receptionist
-  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
 
   //Booking from package
 

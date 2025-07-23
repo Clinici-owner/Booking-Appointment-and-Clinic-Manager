@@ -17,28 +17,38 @@ const DoctorAppointmentListPage = () => {
     console.error('❌ Lỗi khi lấy user từ sessionStorage:', err);
   }
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        console.log('🔁 Fetching all appointments...');
-        const allAppointments = await appointmentService.getAppointments();
-        const filtered = allAppointments.filter(
-          (a) => a.status === 'confirmed' && a.doctorId?._id === user._id
-        );
-        setAppointments(filtered);
-      } catch (err) {
-        console.error('Lỗi lấy lịch hẹn:', err);
-      } finally {
-        setLoading(false);
-        setHasFetched(true);
-      }
-    };
+ useEffect(() => {
+  const fetchAppointments = async () => {
+    try {
+      console.log('🔁 Fetching all appointments...');
+      const allAppointments = await appointmentService.getAppointments();
 
-    if (user?._id && !hasFetched) {
-      socket.emit('register', user._id);
-      fetchAppointments();
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+      const filtered = allAppointments.filter(
+        (a) =>
+          a.status === 'confirmed' &&
+          a.doctorId?._id === user._id &&
+          new Date(a.time) >= startOfDay &&
+          new Date(a.time) <= endOfDay
+      );
+
+      setAppointments(filtered);
+    } catch (err) {
+      console.error('Lỗi lấy lịch hẹn:', err);
+    } finally {
+      setLoading(false);
+      setHasFetched(true);
     }
-  }, [user, hasFetched]);
+  };
+
+  if (user?._id && !hasFetched) {
+    socket.emit('register', user._id);
+    fetchAppointments();
+  }
+}, [user, hasFetched]);
 
   const handleInvite = (appointment) => {
     const patientId = appointment.patientId?._id;
