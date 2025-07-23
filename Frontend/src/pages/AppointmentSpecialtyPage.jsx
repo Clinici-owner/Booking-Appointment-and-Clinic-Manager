@@ -206,7 +206,7 @@ function AppointmentSpecialtyPage() {
     };
 
     if (id) {
-      fetchData(); // chỉ gọi khi có id
+      fetchData(); 
       fetchDoctors();
       fetchSchedules();
     }
@@ -370,6 +370,7 @@ function AppointmentSpecialtyPage() {
                             <CheckIcon className="w-5 h-5" />
                           </div>
                         )}
+                        
 
                         {/* Avatar hình tròn */}
                         <img
