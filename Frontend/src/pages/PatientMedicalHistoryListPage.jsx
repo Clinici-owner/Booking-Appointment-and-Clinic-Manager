@@ -7,6 +7,12 @@ const PatientMedicalHistoryListPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  // Pagination and filter states
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -26,22 +32,63 @@ const PatientMedicalHistoryListPage = () => {
     navigate('/doctor/patient-medical-history', { state: { patientId } });
   };
 
-  // Lọc danh sách bệnh nhân theo tên
-  const filteredPatients = patients.filter((patient) =>
-    patient.fullName?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Lọc danh sách bệnh nhân theo tên và ngày sinh
+  const filteredPatients = patients.filter((patient) => {
+    const nameMatch = patient.fullName?.toLowerCase().includes(search.toLowerCase());
+    let dobMatch = true;
+    if (startDate && (!patient.dob || new Date(patient.dob) < new Date(startDate))) dobMatch = false;
+    if (endDate && (!patient.dob || new Date(patient.dob) > new Date(endDate))) dobMatch = false;
+    return nameMatch && dobMatch;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPatients.length / pageSize);
+  const paginatedPatients = filteredPatients.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Danh sách bệnh nhân</h1>
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
         <input
           type="text"
           className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Tìm kiếm theo tên bệnh nhân..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
         />
+        <div className="flex items-center gap-2">
+          <label htmlFor="start-date" className="text-gray-600">Ngày sinh từ:</label>
+          <input
+            id="start-date"
+            type="date"
+            value={startDate}
+            onChange={e => { setStartDate(e.target.value); setPage(1); }}
+            className="border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="end-date" className="text-gray-600">Đến:</label>
+          <input
+            id="end-date"
+            type="date"
+            value={endDate}
+            onChange={e => { setEndDate(e.target.value); setPage(1); }}
+            className="border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <label htmlFor="page-size" className="text-gray-600">Số bệnh nhân/trang:</label>
+          <select
+            id="page-size"
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="border rounded px-2 py-1"
+          >
+            {[10, 20, 50].map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
       </div>
       {loading ? (
         <div className="text-center">Đang tải danh sách bệnh nhân...</div>
@@ -61,7 +108,7 @@ const PatientMedicalHistoryListPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredPatients.map((patient) => (
+              {paginatedPatients.map((patient) => (
                 <tr key={patient._id} className="hover:bg-blue-50 cursor-pointer" onClick={() => handlePatientClick(patient._id)}>
                   <td className="px-4 py-2">
                     <img
@@ -80,6 +127,24 @@ const PatientMedicalHistoryListPage = () => {
               ))}
             </tbody>
           </table>
+          {/* Pagination controls */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="font-medium">Trang {page} / {totalPages}</span>
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages || totalPages === 0}
+              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
         </div>
       )}
     </div>

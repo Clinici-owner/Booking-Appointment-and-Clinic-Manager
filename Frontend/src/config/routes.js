@@ -28,6 +28,7 @@ const UpdateStaffPage = React.lazy(() => import("../pages/StaffUpdatePage"));
 const StaffDetailPage = React.lazy(() => import("../pages/StaffDetailPage"));
 const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
 const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
+const StatisticalPage = React.lazy(() => import("../pages/StatisticalPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
 const HealthPackageList = React.lazy(() => import("../components/HealthPackageList"));
@@ -135,6 +136,7 @@ const AppRoute = [
   {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout},
   {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout},
+  {path: ROUTE_PATH.STATISTICAL, page: StatisticalPage, layout: AdminLayout, allowedRoles: ["admin"]},
   //Health package component
   {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
@@ -167,9 +169,6 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
-
-
-
 
   //Patient
   { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout , allowedRoles: ["patient"] },
