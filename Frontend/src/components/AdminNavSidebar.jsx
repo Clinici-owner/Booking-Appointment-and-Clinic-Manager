@@ -25,7 +25,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 const drawerWidth = 240;
 
 const navItems = [
-  { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/dashboard" },
+  { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/statistical" },
   { label: "Quản lý nhân viên", icon: <PeopleIcon />, path: "/admin/staffs" },
   { label: "Quản lý bệnh nhân", icon: <PersonalInjuryIcon />, path: "/admin/patients" },
   { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },

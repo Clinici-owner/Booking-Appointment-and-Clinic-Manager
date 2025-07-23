@@ -53,6 +53,9 @@ const GoogleAuthCallback = () => {
               });
             }
             break;
+          case 'patient':
+            navigate('/');
+            break;
           default:
             navigate('/');
         }
