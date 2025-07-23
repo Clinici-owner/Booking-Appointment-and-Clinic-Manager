@@ -46,6 +46,14 @@ const WorkScheduleSummary = () => {
     if (user?._id) {
       socket.emit("register", user._id);
     }
+    // Lắng nghe realtime cập nhật hàng đợi bệnh nhân
+    const handleQueueUpdate = () => {
+      fetchRoomInfo();
+    };
+    socket.on('patient_queue_updated', handleQueueUpdate);
+    return () => {
+      socket.off('patient_queue_updated', handleQueueUpdate);
+    };
   }, []);
 
   const handleCompleteStep = async (patientId) => {

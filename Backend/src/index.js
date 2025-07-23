@@ -27,7 +27,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 // Khởi động socket sau khi server đã listen
-setupSocket(server);
+const io = setupSocket(server);
+app.set('io', io);
 
 // Middleware
 app.use(cors());

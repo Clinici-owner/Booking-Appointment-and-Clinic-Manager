@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { MedicalProcessService } from '../services/medicalProcessService';
 import { MedicalHistoryService } from '../services/medicalHistoryService';
 import appointmentService from "../services/appointmentService";
+import socket from '../lib/socket';
 
 const MedicalProcessDetailPage = () => {
     const { state } = useLocation();
@@ -41,6 +42,14 @@ const MedicalProcessDetailPage = () => {
             }
         };
         fetchProcess();
+        // Lắng nghe realtime khi hoàn tất bước khám
+        const handleProcessUpdate = () => {
+            fetchProcess();
+        };
+        socket.on('medical_process_updated', handleProcessUpdate);
+        return () => {
+            socket.off('medical_process_updated', handleProcessUpdate);
+        };
     }, [id]);
 
     // Format date
