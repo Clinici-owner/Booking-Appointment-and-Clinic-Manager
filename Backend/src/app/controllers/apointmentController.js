@@ -18,7 +18,18 @@ class AppointmentController {
       });
 
       const savedAppointment = await newAppointment.save();
-      res.status(201).json(savedAppointment);
+      // Populate các trường liên kết trước khi emit và trả về
+      const populatedAppointment = await Appointment.findById(savedAppointment._id)
+        .populate('patientId')
+        .populate('doctorId')
+        .populate('specialties')
+        .populate('healthPackage');
+      // Emit socket event khi tạo lịch hẹn thành công
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('appointment_created', populatedAppointment);
+      }
+      res.status(201).json(populatedAppointment);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi tạo lịch hẹn', error: error.message });
     }
@@ -144,8 +155,17 @@ class AppointmentController {
         id,
         { status: 'confirmed' },
         { new: true }
-      );
+      )
+      .populate('patientId')
+      .populate('doctorId')
+      .populate('specialties')
+      .populate('healthPackage');
       if (!appointment) return res.status(404).json({ message: 'Không tìm thấy lịch hẹn' });
+      // Emit event realtime
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('appointment_confirmed', appointment);
+      }
       res.status(200).json({ message: 'Đã xác nhận bệnh nhân tới khám', appointment });
     } catch (error) {
       res.status(500).json({ message: 'Lỗi khi xác nhận lịch hẹn', error });
