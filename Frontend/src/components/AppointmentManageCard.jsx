@@ -1,7 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getScheduleByDoctorAndShiftAndDate } from "../services/scheduleService";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 function AppointmentManageCard({ appointment, onClick }) {
+  const [schedule, setSchedule] = React.useState(null);
+
   const formatVietnameseDate = (dateStr) => {
     const date = new Date(dateStr);
     const weekdays = [
@@ -17,6 +25,39 @@ function AppointmentManageCard({ appointment, onClick }) {
       date.getMonth() + 1
     } năm ${date.getFullYear()}`;
   };
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (appointment && appointment.doctorId && appointment.time) {
+        try {
+          const utcTime = dayjs(appointment.time).utc();
+
+          const hour = utcTime.hour(); // kiểu số: 0 → 23
+          const minute   = utcTime.minute(); // kiểu số: 0 → 59
+
+          const utcDate = new Date(appointment.time);
+          const vnDate = new Date(utcDate.getTime());
+          const formattedDate = vnDate.toISOString().split("T")[0];
+
+          const totalMinutes = hour * 60 + minute;
+
+
+          let shift = "AFTERNOON";
+          if (totalMinutes >= 420 && totalMinutes < 690) shift = "MORNING";
+          else if (totalMinutes >= 690 && totalMinutes < 810) shift = "NOON";
+          const schedule = await getScheduleByDoctorAndShiftAndDate(
+            appointment.doctorId._id,
+            shift,
+            formattedDate
+          );
+          setSchedule(schedule);
+        } catch (error) {
+          console.error("Lỗi khi lấy lịch trình:", error);
+        }
+      }
+    };
+    fetchSchedule();
+  }, [appointment]);
 
   const getStatusStyles = (status) => {
     switch (status) {
@@ -97,7 +138,12 @@ function AppointmentManageCard({ appointment, onClick }) {
           {formatVietnameseDate(appointment.time)}
         </p>
       </div>
-
+      {/* Phòng Khám */}
+      <div className="flex items-center space-x-2 mb-4">
+        <p className="text-gray-700 whitespace-nowrap">
+          <strong>Phòng khám: {schedule?.room.roomNumber}</strong>
+        </p>
+      </div>
       {/* Chuyên khoa */}
       {appointment.specialties?.length > 0 && (
         <div className="flex items-center space-x-2 mb-4">

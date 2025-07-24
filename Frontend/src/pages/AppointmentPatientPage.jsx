@@ -32,7 +32,7 @@ function AppointmentPatientPage() {
   const getFilteredAppointments = () => {
     if (filteredStatus === "pending") {
       return appointments.filter((a) =>
-        a.status === "pending" || a.status === "confirmed"
+        a.status === "pending" || a.status === "confirmed" || a.status === "in-progress"
       );
     }
     return appointments.filter((a) => a.status === filteredStatus);
