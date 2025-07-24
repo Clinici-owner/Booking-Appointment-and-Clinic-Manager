@@ -85,6 +85,7 @@ const AppointmentDetailPatientPage = React.lazy(() => import("../pages/Appointme
 const AppointmentAdminPage = React.lazy(() => import("../pages/AppointmentAdminPage"));
 
 const AppointmentReceptionistPage = React.lazy(() => import("../pages/AppointmentReceptionistPage"));
+const AppointmentDetailReceptionistPage = React.lazy(() => import("../pages/AppointmentDetailReceptionistPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -192,6 +193,7 @@ const AppRoute = [
 
   //Appointment for receptionist
   { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST_DETAIL, page: AppointmentDetailReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
 
   //Booking from package
 

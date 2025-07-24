@@ -177,7 +177,7 @@ class AppointmentController {
       const { id } = req.params;
       const { status } = req.body;
 
-      const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+      const validStatuses = ['pending', 'confirmed', 'in-progress', 'cancelled', 'completed'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
       }

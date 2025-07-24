@@ -6,6 +6,7 @@ import { getSpecialtyById } from "../services/specialtyService";
 import { getScheduleById } from "../services/scheduleService";
 import { healthPackageService } from "../services/healthPackageService";
 import appointmentService from "../services/appointmentService";
+import { createPayment } from "../services/paymentService";
 
 import napas247 from "../assets/images/napas247.png";
 import mbbank from "../assets/images/mbbank.jpg";
@@ -153,10 +154,19 @@ function AppointmentPayment() {
 
         if (response.status === "PAID") {
           try {
-            console.log(appointmentData);
+            const appointment = await appointmentService.createAppointment(appointmentData);
 
-            await appointmentService.createAppointment(appointmentData);
+            const paymentData = {
+              appointmentId: appointment._id,
+              examinationFee: specialty.medicalFee,
+              serviceFee: {
+                serviceId: null,
+                fee: 0,
+              },
+              methodExam: "banking",
+            };
 
+            await createPayment(paymentData);
             clearInterval(pollingRef.current);
 
             let countdown = 5;
@@ -187,7 +197,7 @@ function AppointmentPayment() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [appointmentData, orderCode]);
+  }, [appointmentData, orderCode, specialty.medicalFee, healthPackage]);
 
   useEffect(() => {
     if (doctorId && scheduleId && specialtyId) {

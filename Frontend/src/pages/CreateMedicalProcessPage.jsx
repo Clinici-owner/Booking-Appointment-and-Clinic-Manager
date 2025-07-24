@@ -31,6 +31,7 @@ import { PatientService } from '../services/patientService';
 import { listService } from '../services/medicalService';
 import { MedicalProcessService } from '../services/medicalProcessService';
 import  appointmentService  from '../services/appointmentService';
+import { getPaymentByAppointmentId, updatePayment } from '../services/paymentService';
 
 const CreateMedicalProcessPage = () => {
   // State management with safe initial values
@@ -184,6 +185,24 @@ const CreateMedicalProcessPage = () => {
         doctorId: doctor?._id || '',
         processSteps: processStepIds
       });
+      const paymentData = await getPaymentByAppointmentId(selectedAppointment._id);
+      
+      const paymentUpdateData = {
+        appointmentId: selectedAppointment._id,
+        examinationFee: paymentData.examinationFee || 0,
+        serviceFee: processStepsForm.map(step => ({
+          serviceId: step.serviceId,
+          fee: services.find(service => service._id === step.serviceId)?.paraPrice || 0
+        })),
+        methodExam: paymentData.methodExam || 'banking',
+        methodService: paymentData.methodService || 'none',
+      };
+
+      console.log('Updating payment with data:', paymentUpdateData);
+      await updatePayment(paymentData._id, paymentUpdateData);
+
+      await appointmentService.updateAppointmentStatus(selectedAppointment._id, 'in-progress');
+
 
       showSnackbar('Tạo tiến trình khám thành công!');
       resetForm();
