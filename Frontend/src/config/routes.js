@@ -205,8 +205,8 @@ const AppRoute = [
   {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
   {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout, allowedRoles: ["admin"] },
   //Patient for receptionist
-  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout},
-  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout},
+  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"]},
+  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"]},
   
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },
