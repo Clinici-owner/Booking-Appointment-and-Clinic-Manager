@@ -84,7 +84,7 @@ function AppointmentAdminPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Quản lý lịch hẹn</h1>
+        <h1 className="text-3xl font-bold mb-2 text-custom-blue">Quản lý lịch hẹn</h1>
         <p className="text-gray-600">
           Tổng cộng: {filteredAppointments.length} lịch hẹn
           {filteredAppointments.length !== appointments.length && ` (từ ${appointments.length} lịch hẹn)`}

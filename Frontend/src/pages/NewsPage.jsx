@@ -40,7 +40,7 @@ function NewsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Tin tức mới nhất</h1>
+      <h1 className="text-3xl font-bold mb-4 text-custom-blue">Tin tức mới nhất</h1>
       <p className="mb-8">Cập nhật các tin tức và thông báo từ hệ thống.</p>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
