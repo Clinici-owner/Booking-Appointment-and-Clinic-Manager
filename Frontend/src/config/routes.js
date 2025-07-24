@@ -117,8 +117,8 @@ const AppRoute = [
   { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
-  { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout },
-  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
@@ -131,11 +131,11 @@ const AppRoute = [
   { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
   { path: ROUTE_PATH.UPDATE_PASSWORD, page: UpdatepasswordPage, layout: MainLayout },
   // Admin Manage Health Package
-  {path: ROUTE_PATH.HEALTH_PACKAGE_MANAGER, page: AdminHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_CREATE, page: CreateHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_MANAGER, page: AdminHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_CREATE, page: CreateHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
   {path: ROUTE_PATH.STATISTICAL, page: StatisticalPage, layout: AdminLayout, allowedRoles: ["admin"]},
   //Health package component
   {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
@@ -148,10 +148,10 @@ const AppRoute = [
   {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout,  allowedRoles: ["admin"] },
 
   // Specialty Manager
-  { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout },
-  { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
-  { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
 
   // Specialty for user
   { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
@@ -188,7 +188,7 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_DETAIL, page: AppointmentDetailPatientPage, layout: MainLayout },
 
   //Appointment for admin
-  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout },
+  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout, allowedRoles: ["admin"]},
 
   //Appointment for receptionist
   { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
@@ -202,7 +202,7 @@ const AppRoute = [
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout , allowedRoles: ["admin"] },
-  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout, allowedRoles: ["admin"] },
+  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
   {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout, allowedRoles: ["admin"] },
   //Patient for receptionist
   {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout},
