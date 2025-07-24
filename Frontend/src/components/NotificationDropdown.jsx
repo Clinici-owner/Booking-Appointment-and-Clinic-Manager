@@ -9,9 +9,9 @@ import {
   Popover,
   Typography,
 } from "@mui/material";
-import { getNotificationsByUser } from "../services/notificationService";
 import { useCallback, useEffect, useState } from "react";
 import socket from "../lib/socket";
+import { getNotificationsByUser } from "../services/notificationService";
 
 const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
@@ -46,8 +46,16 @@ const NotificationDropdown = () => {
         setJustReceived(true);
       });
 
+      socket.on("complete_step", (data) => {
+      console.log("📥 Nhận socket: complete_step", data);
+      setHasNew(true);
+      setJustReceived(true);
+
+    });
+
       return () => {
         socket.off("invited_to_room");
+        socket.off("complete_step");
       };
     }
   }, [fetchNotifications, user?.role, user?._id]);

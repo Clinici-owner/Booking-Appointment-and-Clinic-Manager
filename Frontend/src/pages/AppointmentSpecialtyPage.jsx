@@ -207,7 +207,7 @@ function AppointmentSpecialtyPage() {
     };
 
     if (id) {
-      fetchData(); // chỉ gọi khi có id
+      fetchData(); 
       fetchDoctors();
       fetchSchedules();
     }
@@ -371,6 +371,7 @@ function AppointmentSpecialtyPage() {
                             <CheckIcon className="w-5 h-5" />
                           </div>
                         )}
+                        
 
                         {/* Avatar hình tròn */}
                         <img
@@ -401,7 +402,7 @@ function AppointmentSpecialtyPage() {
 
                         {/* Nút thông tin thêm */}
                         <Link
-                          to={`/appointment/${doctor.doctorId._id}`}
+                          to={`/doctors/${doctor.doctorId._id}`}
                           className="block mx-auto w-fit px-4 py-1.5 text-white text-sm bg-gradient-to-r from-blue-500 to-blue-700 
                       hover:from-blue-600 hover:to-blue-800 rounded-full shadow hover:shadow-md transition duration-300"
                         >

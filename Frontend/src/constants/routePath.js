@@ -21,6 +21,7 @@ export const ROUTE_PATH = {
   ADD_STAFF: '/admin/staffs/add',
   UPDATE_STAFF: '/admin/staffs/update',
   STAFF_DETAIL: '/admin/staffs/detail',
+  STATISTICAL: '/admin/statistical',
 
   LIST_PATIENTS: '/admin/patients',
   PATIENT_DETAIL: '/admin/patient/detail',

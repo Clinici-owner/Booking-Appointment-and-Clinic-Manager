@@ -13,6 +13,7 @@ import {
   Container,
 } from "@mui/material";
 import { MedicalProcessService } from "../services/medicalProcessService";
+import socket from "../lib/socket";
 
 const MyProcessPage = () => {
   const [process, setProcess] = useState(null);
@@ -29,6 +30,17 @@ const MyProcessPage = () => {
     };
 
     fetchProcess();
+
+    // Lắng nghe realtime khi có tiến trình mới hoặc cập nhật hàng đợi
+    const handleQueueUpdate = () => {
+      fetchProcess();
+    };
+    socket.on('patient_queue_updated', handleQueueUpdate);
+    socket.on('medical_process_updated', handleQueueUpdate);
+    return () => {
+      socket.off('patient_queue_updated', handleQueueUpdate);
+      socket.off('medical_process_updated', handleQueueUpdate);
+    };
   }, []);
 
   if (error) {
