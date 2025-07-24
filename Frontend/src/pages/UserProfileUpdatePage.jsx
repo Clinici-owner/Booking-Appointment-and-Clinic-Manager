@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { UserService } from "../services/userService"
-
+import { uploadCCCDImage } from "../services/chatService";
 function UserProfileUpdatePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -25,6 +25,17 @@ function UserProfileUpdatePage() {
     phone: "",
     cidNumber: "",
   })
+  function convertToDateFormat(dateStr) {
+  const match = dateStr.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (!match) return "";
+
+  const [_, day, month, year] = match;
+
+  const d = day.padStart(2, "0");
+  const m = month.padStart(2, "0");
+
+  return `${year}-${m}-${d}`;
+}
 
   const CLOUDINARY_CLOUD_NAME = "dqncabikk"
 
@@ -262,6 +273,29 @@ function UserProfileUpdatePage() {
       setUpdateLoading(false)
     }
   }
+  
+
+  const handleCCCDImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const parsed = await uploadCCCDImage(file);
+    const dobFormatted = convertToDateFormat(parsed.dob || "");
+
+    setEditForm((prev) => ({
+      ...prev,
+      fullName: parsed.full_name || prev.fullName,
+      cidNumber: parsed.id_number || prev.cidNumber,
+      dob: dobFormatted || prev.dob,
+    }));
+
+    setDetailAddress(parsed.address || detailAddress);
+  } catch (err) {
+    console.error("Lỗi phân tích JSON từ ảnh CCCD:", err);
+    setError("Không thể đọc thông tin từ ảnh CCCD. Vui lòng thử ảnh rõ nét hơn.");
+  }
+};
 
   useEffect(() => {
     if (!hasInitialized.current) {
@@ -486,6 +520,15 @@ function UserProfileUpdatePage() {
                       </div>
                     )}
                   </label>
+                </div>
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ảnh CCCD (tự động điền thông tin)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCCCDImageUpload}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
                 </div>
 
                 {uploadError && <p className="mt-2 text-sm text-red-600">{uploadError}</p>}
