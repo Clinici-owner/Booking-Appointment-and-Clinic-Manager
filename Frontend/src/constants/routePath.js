@@ -47,7 +47,7 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL_PATIENT: '/specialties/:id',
 
   //Schedule manager
-  ADD_SCHEDULE: '/admin/schedules/add',
+  MANAGE_SCHEDULE: '/admin/schedules/manage',
   OWN_SCHEDULE: '/schedules/own',
   ROOM_SCHEDULE: '/schedules/room',
   
