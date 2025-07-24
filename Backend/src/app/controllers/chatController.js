@@ -1,16 +1,20 @@
 const axios = require("axios");
-const { getValidKey } = require("../utils/geminiKeyManager");
-
+const { getValidKey, getValidImageKey } = require("../utils/geminiKeyManager");
+const fs = require("fs");
 class ChatController {
   async askGemini(req, res) {
     const { prompt } = req.body;
     const apiKey = getValidKey();
 
     if (!apiKey) {
-      return res.status(429).json({ error: "Tất cả API key đã hết lượt trong ngày. Vui lòng thử lại sau." });
+      return res
+        .status(429)
+        .json({
+          error: "Tất cả API key đã hết lượt trong ngày. Vui lòng thử lại sau.",
+        });
     }
 
-    if (!prompt || typeof prompt !== "string") {
+    if (!prompt || typeof prompt !== "strin g") {
       return res.status(400).json({ error: "Thiếu nội dung prompt." });
     }
 
@@ -33,11 +37,11 @@ class ChatController {
    - Xử lý tạm thời
    - Cảnh báo
 
-Triệu chứng người dùng: ${prompt}`
-                }
-              ]
-            }
-          ]
+Triệu chứng người dùng: ${prompt}`,
+                },
+              ],
+            },
+          ],
         },
         {
           headers: {
@@ -49,15 +53,89 @@ Triệu chứng người dùng: ${prompt}`
       const reply = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!reply) {
-        return res.status(500).json({ error: "Không nhận được phản hồi từ Gemini." });
+        return res
+          .status(500)
+          .json({ error: "Không nhận được phản hồi từ Gemini." });
       }
 
       return res.status(200).json({ reply });
-
     } catch (err) {
       console.error("Lỗi gọi Gemini:", err.response?.data || err.message);
       return res.status(500).json({
         error: "Không thể xử lý yêu cầu.",
+        detail: err.response?.data || err.message,
+      });
+    }
+  }
+
+  async uploadCCCD(req, res) {
+    const apiKey = getValidImageKey();
+    if (!apiKey) {
+      return res
+        .status(429)
+        .json({ error: "API key xử lý ảnh đã hết lượt trong ngày." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Không có ảnh CCCD được gửi lên." });
+    }
+
+    try {
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const base64Image = imageBuffer.toString("base64");
+
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: "image/jpeg",
+                    data: base64Image,
+                  },
+                },
+                {
+                  text: `Hãy trích xuất các thông tin sau từ ảnh CCCD/CMND:
+- Họ tên
+- Số CMND hoặc CCCD
+- Ngày sinh
+- Địa chỉ thường trú
+
+Trả kết quả ở dạng JSON như sau:
+{
+  "full_name": "...",
+  "id_number": "...",
+  "dob": "...",
+  "address": "..."
+}`,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      fs.unlinkSync(req.file.path);
+
+      const reply = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!reply) {
+        return res
+          .status(500)
+          .json({ error: "Không nhận được phản hồi từ Gemini." });
+      }
+
+      return res.status(200).json({ result: reply });
+    } catch (err) {
+      console.error("Lỗi xử lý ảnh CCCD:", err.response?.data || err.message);
+      return res.status(500).json({
+        error: "Không thể xử lý ảnh CCCD.",
         detail: err.response?.data || err.message,
       });
     }
