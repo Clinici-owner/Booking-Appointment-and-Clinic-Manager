@@ -73,7 +73,7 @@ const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 
 
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
-const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
+const ScheduleManagePage = React.lazy(() => import("../pages/ScheduleManagePage"));
 const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
 const MyMedicalHistoryPage = React.lazy(() => import("../pages/MyMedicalHistoryPage"));
 
@@ -158,7 +158,7 @@ const AppRoute = [
   
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: DoctorLayout, allowedRoles: ["doctor", "technician", "receptionist", "nursing"] },
-  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.MANAGE_SCHEDULE, page: ScheduleManagePage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout  , allowedRoles: ["doctor", "technician"]},
 
   // Doctor
