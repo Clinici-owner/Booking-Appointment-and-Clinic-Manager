@@ -314,14 +314,10 @@ class ScheduleController {
   async getSchedulesBySpecialtyAndDate(req, res) {
     try {
       const { specialtyId } = req.params;
-
-      const now = new Date();
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
-
-      //lấy tất cả các lịch
+      const { date } = req.query;
+      
       const schedules = await Schedule.find({
-        date: { $gte: startOfDay },
+        date: { $gt: date },
       })
         .populate("userId")
         .populate("room");
@@ -339,9 +335,6 @@ class ScheduleController {
       const filteredSchedules = schedules.filter((schedule) => {
         return doctorIdStrings.includes(schedule.userId._id.toString());
       });
-
-      console.log("filteredSchedules:", filteredSchedules.length);
-
       // lấy lịch theo role là bác sĩ
       const schedulesByDoctor = filteredSchedules.filter((schedule) => {
         return schedule.userId.role === "doctor";

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import socket from '../lib/socket';
 
 import AppointmentFilter from '../components/AppointmentFilter'
 import AppointmentManageCard from '../components/AppointmentManageCard'
@@ -25,6 +26,16 @@ function AppointmentReceptionistPage() {
     }
 
     fetchAppointments()
+
+    // Lắng nghe sự kiện realtime khi có lịch hẹn mới
+    socket.on('appointment_created', (newAppointment) => {
+      setAppointments(prev => [newAppointment, ...prev])
+    });
+
+    // Cleanup khi unmount
+    return () => {
+      socket.off('appointment_created');
+    };
   }, [])
 
   const handleConfirm = async (appointmentId) => {

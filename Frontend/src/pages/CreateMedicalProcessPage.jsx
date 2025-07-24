@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import socket from '../lib/socket';
 
 import { 
   Add as AddIcon, 
@@ -80,6 +81,36 @@ const CreateMedicalProcessPage = () => {
     
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện xác nhận lịch hẹn
+    socket.on('appointment_confirmed', (confirmedAppointment) => {
+      setAppointmentsToday(prev => {
+        const exists = prev.some(appt => appt._id === confirmedAppointment._id);
+        if (exists) {
+          return prev.map(appt =>
+            appt._id === confirmedAppointment._id ? confirmedAppointment : appt
+          );
+        } else {
+          return [...prev, confirmedAppointment];
+        }
+      });
+    });
+    return () => {
+      socket.off('appointment_confirmed');
+    };
+  }, []);
+
+  useEffect(() => {
+    // Khi danh sách appointmentsToday thay đổi, đồng bộ lại selectedAppointment nếu cần
+    if (selectedAppointment) {
+      const updated = appointmentsToday.find(appt => appt._id === selectedAppointment._id);
+      if (updated && updated !== selectedAppointment) {
+        setSelectedAppointment(updated);
+      }
+    }
+    // eslint-disable-next-line
+  }, [appointmentsToday]);
 
   // Helper functions
   const showSnackbar = (message, severity = 'success') => {
@@ -203,7 +234,7 @@ const CreateMedicalProcessPage = () => {
                     Lịch hẹn <span className="text-red-500">*</span>
                   </Typography>
                   <Autocomplete
-                    options={Array.isArray(appointmentsToday) ? appointmentsToday : []}
+                    options={appointmentsToday.filter(appt => appt.status === 'confirmed')}
                     getOptionLabel={(option) => option?.patientId?.fullName || 'Không xác định'}
                     inputValue={appointmentInputValue}
                     value={selectedAppointment}
