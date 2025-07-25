@@ -16,6 +16,8 @@ const notificationRouter = require('./notification');
 const roomRouter = require('./room');
 const payosRouter = require('./payos');
 const chatRouter = require('./chat');
+const paymentRouter = require('./payment');
+
 function route(app) {
     app.use('/api/user', userRouter);
     app.use('/api/staff', staffRouter);
@@ -35,6 +37,7 @@ function route(app) {
     app.use('/api/room', roomRouter);
     app.use('/api/payos', payosRouter);
     app.use('/api/chat', chatRouter);
+    app.use('/api/payments', paymentRouter);
 }
 
-module.exports = route
+module.exports = route;

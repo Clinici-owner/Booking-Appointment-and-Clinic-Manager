@@ -21,3 +21,32 @@ export function isPromptValid(prompt) {
   const lowerPrompt = prompt.toLowerCase();
   return !bannedKeywords.some((word) => lowerPrompt.includes(word));
 }
+
+export const uploadCCCDImage = async (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await axios.post("http://localhost:3000/api/chat/cccd", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  let resultText = response.data.result;
+
+  resultText = resultText.trim();
+  if (resultText.startsWith("```json") || resultText.startsWith("```")) {
+    resultText = resultText.replace(/```json|```/g, "").trim();
+  }
+
+  if (typeof resultText === "object") {
+    return resultText;
+  }
+
+  if (!resultText.startsWith("{") || !resultText.endsWith("}")) {
+    throw new Error("Ảnh không hợp lệ hoặc không đọc được thông tin từ CCCD. Vui lòng thử lại với ảnh rõ nét.");
+  }
+
+  return JSON.parse(resultText);
+};
+

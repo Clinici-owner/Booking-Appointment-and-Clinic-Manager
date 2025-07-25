@@ -87,7 +87,7 @@ export const MedicalProcessService = {
       console.error("Error fetching patient's medical process:", error);
       throw new Error(
         error.response?.data?.message ||
-          "Failed to fetch patient's process"
+          "Hiện tại bạn chưa có tiến trình nào"
       );
     }
   },

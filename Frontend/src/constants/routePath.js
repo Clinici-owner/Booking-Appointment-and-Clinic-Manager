@@ -96,6 +96,7 @@ export const ROUTE_PATH = {
 
   //Appointment for receptionist
   APPOINTMENT_RECEPTIONIST: '/receptionist/appointment-receptionist',
+  APPOINTMENT_RECEPTIONIST_DETAIL: '/receptionist/appointment-receptionist/detail/:id',
   // 404
   NOT_FOUND: '*',
 
