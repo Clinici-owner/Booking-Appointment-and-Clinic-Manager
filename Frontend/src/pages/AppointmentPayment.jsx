@@ -175,6 +175,7 @@ function AppointmentPayment() {
           }
 
             if (typeAppointment === "healthPackage") {
+
               const processStepPromises = healthPackage.service.map(
                 async (service, index) => {
                   const stepData = {
@@ -218,7 +219,6 @@ function AppointmentPayment() {
               })),
               methodExam: "banking",
             };
-            
 
             await createPayment(paymentData);
             }

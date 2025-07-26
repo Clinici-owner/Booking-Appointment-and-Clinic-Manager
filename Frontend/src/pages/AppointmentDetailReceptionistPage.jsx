@@ -12,6 +12,7 @@ import vietQR from "../assets/images/vietQR.png";
 import QRCode from "qrcode";
 
 import { Toaster, toast } from "sonner";
+import { MedicalProcessService } from "../services/medicalProcessService";
 
 function AppointmentDetailReceptionistPage() {
   const [payment, setPayment] = useState(null);
@@ -72,6 +73,41 @@ function AppointmentDetailReceptionistPage() {
     fetchPayOSAndGenerateQR();
   }, [payment]);
 
+  const createProcessStep = async (payment) => {
+
+    if (!payment || !payment.serviceFee || payment.serviceFee.length === 0) {
+      throw new Error("Không có dịch vụ cận lâm sàng để tạo tiến trình khám.");
+    }
+
+    const processStepPromises = payment.serviceFee.map((step, idx) =>
+      MedicalProcessService.createProcessStep({
+        serviceId: step.serviceId,
+        notes: step.notes || "",
+        patientId: payment.appointmentId.patientId, // vẫn truyền patientId cho bước processStep nếu cần
+        isFirstStep: idx === 0,
+      }).catch((error) => {
+        console.error("Error creating process step:", error);
+        throw new Error("Failed to create one or more process steps");
+      })
+    );
+
+    const createdSteps = await Promise.all(processStepPromises);
+    const processStepIds = createdSteps
+      .map((step) => step?._id)
+      .filter(Boolean);
+
+    if (processStepIds.length !== payment.serviceFee.length) {
+      throw new Error("Some process steps failed to create");
+    }
+
+      await MedicalProcessService.createMedicalProcess({
+            appointmentId: payment.appointmentId?._id,
+            doctorId: payment.appointmentId?.doctorId || '',
+            processSteps: processStepIds
+      });
+
+    return processStepIds;
+  }
   useEffect(() => {
     if (!orderCode) return;
 
@@ -84,6 +120,8 @@ function AppointmentDetailReceptionistPage() {
             const paymentUpdateData = {
               methodService: "banking",
             };
+
+            await createProcessStep(payment);
 
             await updatePayment(payment._id, paymentUpdateData);
             clearInterval(pollingRef.current);
@@ -227,6 +265,15 @@ function AppointmentDetailReceptionistPage() {
                 </p>
               </div>
             ))}
+            <p className="font-semibold">
+              Tổng phí dịch vụ cận lâm sàng:{" "}
+              <div className="text-blue-600">
+                {payment.serviceFee
+                  .reduce((sum, item) => sum + (item.fee || 0), 0)
+                  .toLocaleString()}{" "}
+                VND
+              </div>
+            </p>
           </div>
         ) : (
           <p className="italic text-gray-500">
@@ -348,6 +395,7 @@ function AppointmentDetailReceptionistPage() {
                   try {
                     const paymentUpdateData = { methodService: "cash" };
                     await updatePayment(payment._id, paymentUpdateData);
+                    await createProcessStep(payment);
                     toast.success("Thanh toán thành công!");
                     setTimeout(() => {
                       window.location.href = `/receptionist/appointment-receptionist/detail/${appointment._id}`;
