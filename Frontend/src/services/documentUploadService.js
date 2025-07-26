@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/documents";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/documents";
 
 export const uploadDocument = async (file_path) => {
   try {
