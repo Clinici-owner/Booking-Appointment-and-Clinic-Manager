@@ -42,3 +42,13 @@ export const getPaymentByAppointmentId = async (appointmentId) => {
     throw error;
   }
 }
+
+export const getAllPayments = async () => {
+  try {
+    const response = await axios.get(API_URL);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all payments:", error);
+    throw error;
+  }
+}
