@@ -2,7 +2,7 @@ import React from "react";
 import BannerName from "../components/BannerName";
 import { Container } from "@mui/material";
 
-import HinhThanhvaPhatTrien from "../assets/images/HinhThanhvaPhatTrien.jpg";
+import HinhThanhvaPhatTrien from "../assets/images/HinhThanhVaPhatTrien.jpg";
 import PhuongCham1 from "../assets/images/PhuongCham1.jpg";
 import TamNhin from "../assets/images/TamNhin.jpg";
 import GiaTriCotLoi from "../assets/images/GiaTriCotLoi.jpg";
