@@ -198,7 +198,6 @@ const CreateMedicalProcessPage = () => {
         methodService: paymentData.methodService || 'none',
       };
 
-      console.log('Updating payment with data:', paymentUpdateData);
       await updatePayment(paymentData._id, paymentUpdateData);
 
       await appointmentService.updateAppointmentStatus(selectedAppointment._id, 'in-progress');
