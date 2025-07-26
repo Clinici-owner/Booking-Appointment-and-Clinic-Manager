@@ -67,7 +67,7 @@ const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppoin
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
-const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
+const CreateNewspage = React.lazy(() => import("../pages/createNews"));
 const Newspaperpage = React.lazy(() => import("../pages/NewPaper"));
 const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 
