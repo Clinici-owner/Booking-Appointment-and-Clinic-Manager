@@ -1,6 +1,6 @@
 import React from "react";
 
-import BannerNameImg from "../assets/images/BannerName.png";
+import BannerNameImg from "../assets/images/bannerName.png";
 
 function BannerName({Text}) {
   return (
