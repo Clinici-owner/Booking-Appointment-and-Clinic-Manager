@@ -25,7 +25,7 @@ const LoginPage = () => {
   };
 
    const handleGoogleLogin = () => {
-        window.location.href = 'http://localhost:3000/auth/google';
+        window.location.href = 'https://booking-appointment-be.up.railway.app/auth/google';
   };
 
   useEffect(() => {

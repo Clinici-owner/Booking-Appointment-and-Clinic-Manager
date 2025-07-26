@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/auth/google/callback": {
-        target: "http://localhost:3000",
+        target: "https://booking-appointment-be.up.railway.app",
         changeOrigin: true,
         secure: false,
       }
