@@ -106,7 +106,7 @@ function ScheduleAddPage() {
             }
 
             try {
-                const specialtiesData = await fetch('http://localhost:3000/api/specialty').then(res => {
+                const specialtiesData = await fetch('https://booking-appointment-be.up.railway.app/api/specialty').then(res => {
                     if (!res.ok) throw new Error('Không thể tải danh sách chuyên khoa.');
                     return res.json();
                 });
@@ -497,7 +497,7 @@ function ScheduleAddPage() {
             try {
                 let allRooms = [];
                 for (const dep of departmentArr) {
-                    const specialtyRes = await fetch(`http://localhost:3000/api/specialty/${dep}`);
+                    const specialtyRes = await fetch(`https://booking-appointment-be.up.railway.app/api/specialty/${dep}`);
                     if (specialtyRes.ok) {
                         const specialty = await specialtyRes.json();
                         if (Array.isArray(specialty.room)) {

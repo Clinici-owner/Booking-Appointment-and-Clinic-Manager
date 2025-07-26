@@ -126,8 +126,8 @@ function AppointmentPayment() {
           orderCode: orderCode,
           amount: specialty.medicalFee,
           description: "Thanh toán phí khám bệnh",
-          returnUrl: "http://localhost:3000/payment-success",
-          cancelUrl: "http://localhost:3000/payment-cancel",
+          returnUrl: "https://booking-appointment-be.up.railway.app/payment-success",
+          cancelUrl: "https://booking-appointment-be.up.railway.app/payment-cancel",
         };
 
         const result = await PayOSService.createPayment(paymentData);
@@ -253,6 +253,7 @@ function AppointmentPayment() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentData, orderCode, specialty.medicalFee, healthPackage]);
 
   useEffect(() => {

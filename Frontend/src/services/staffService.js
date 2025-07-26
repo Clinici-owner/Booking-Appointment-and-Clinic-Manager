@@ -18,7 +18,7 @@ export const listStaff = async () => {
 export const toggleLockStatus = async (id, currentStatus) => {
   const newStatus = currentStatus === 'locked' ? 'active' : 'locked';
   try {
-    const res = await axios.put(`http://localhost:3000/api/staff/lock/${id}`, { status: newStatus });
+    const res = await axios.put(`https://booking-appointment-be.up.railway.app/api/staff/lock/${id}`, { status: newStatus });
     return res.data;
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái:', error);
