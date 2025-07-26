@@ -278,7 +278,6 @@ function AppointmentDetailPatientPage() {
           {appointment.healthPackage && (
             <Box sx={{ mt: 2 }}>
               <Typography><strong>Tên gói khám:</strong> {appointment.healthPackage.packageName}</Typography>
-              <Typography><strong>Mô tả gói:</strong> {appointment.healthPackage.description}</Typography>
             </Box>
           )}
         </Box>

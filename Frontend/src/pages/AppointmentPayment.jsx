@@ -7,6 +7,7 @@ import { getScheduleById } from "../services/scheduleService";
 import { healthPackageService } from "../services/healthPackageService";
 import appointmentService from "../services/appointmentService";
 import { createPayment } from "../services/paymentService";
+import { MedicalProcessService } from "../services/medicalProcessService";
 
 import napas247 from "../assets/images/napas247.png";
 import mbbank from "../assets/images/mbbank.jpg";
@@ -154,8 +155,11 @@ function AppointmentPayment() {
 
         if (response.status === "PAID") {
           try {
-            const appointment = await appointmentService.createAppointment(appointmentData);
+            const appointment = await appointmentService.createAppointment(
+              appointmentData
+            );
 
+            if (typeAppointment !== "healthPackage") {
             const paymentData = {
               appointmentId: appointment._id,
               examinationFee: specialty.medicalFee,
@@ -165,8 +169,60 @@ function AppointmentPayment() {
               },
               methodExam: "banking",
             };
+            
 
             await createPayment(paymentData);
+          }
+
+            if (typeAppointment === "healthPackage") {
+              const processStepPromises = healthPackage.service.map(
+                async (service, index) => {
+                  const stepData = {
+                    serviceId: service._id,
+                    note: "",
+                    patientId: appointment.patientId,
+                    isFirstStep: index === 0,
+                  };
+                  const result = await MedicalProcessService.createProcessStep(
+                    stepData
+                  );
+                  console.log("Created step:", result);
+                  return result;
+                }
+              );
+
+              console.log(processStepPromises);
+
+              const createdSteps = await Promise.all(processStepPromises);
+              const processStepIds = createdSteps
+                .map((step) => step?._id)
+                .filter(Boolean);
+
+              if (processStepIds.length !== healthPackage.service.length) {
+                throw new Error("Some process steps failed to create");
+              }
+
+              // Create the main medical process
+              await MedicalProcessService.createMedicalProcess({
+                appointmentId: appointment._id,
+                doctorId: doctor?._id || "",
+                processSteps: processStepIds,
+              });
+
+              const paymentData = {
+              appointmentId: appointment._id,
+              examinationFee: specialty.medicalFee,
+              serviceFee: healthPackage.service.map((service) => ({
+                serviceId: service._id,
+                fee: service.fee,
+              })),
+              methodExam: "banking",
+            };
+            
+
+            await createPayment(paymentData);
+            }
+
             clearInterval(pollingRef.current);
 
             let countdown = 5;
@@ -285,7 +341,8 @@ function AppointmentPayment() {
             {formatVietnameseDate(schedule?.date)}
           </p>
           <p>
-            <strong>Triệu chứng:</strong> {symptoms ? symptoms : "Chưa cung cấp"}
+            <strong>Triệu chứng:</strong>{" "}
+            {symptoms ? symptoms : "Chưa cung cấp"}
           </p>
           {typeAppointment == "healthPackage" ? (
             <p>
@@ -304,7 +361,7 @@ function AppointmentPayment() {
               {healthPackage.packageName || "Không có gói khám nào"}
             </p>
           )}
-          </div>
+        </div>
       </div>
 
       {/* Thanh toán */}
@@ -318,9 +375,9 @@ function AppointmentPayment() {
             <span className="text-red-600 font-bold">
               {specialty?.medicalFee?.toLocaleString("vi-VN")} VNĐ
             </span>
-          
             <span className="text-gray-500">
-              {" "}Chưa bao gồm chi phí xét nghiệm, cận lâm sàng nếu có
+              {" "}
+              Chưa bao gồm chi phí xét nghiệm, cận lâm sàng nếu có
             </span>
           </p>
           <p>
