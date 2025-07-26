@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/payments";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/payments";
 
 export const createPayment = async (paymentData) => {
   try {

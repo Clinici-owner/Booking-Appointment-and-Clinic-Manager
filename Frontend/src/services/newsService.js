@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/news";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/news";
 
 export const uploadToCloudinary = async (file) => {
   const formData = new FormData();

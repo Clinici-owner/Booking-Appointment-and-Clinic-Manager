@@ -55,8 +55,8 @@ function AppointmentDetailReceptionistPage() {
           orderCode: orderCode,
           amount: totalServiceFee || 0,
           description: "Thanh toán phí dịch vụ",
-          returnUrl: "http://localhost:3000/payment-success",
-          cancelUrl: "http://localhost:3000/payment-cancel",
+          returnUrl: "https://booking-appointment-be.up.railway.app/payment-success",
+          cancelUrl: "https://booking-appointment-be.up.railway.app/payment-cancel",
         };
 
         const result = await PayOSService.createPayment(paymentRequest);

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { DoctorService } from "./doctorService";
 
-const API_URL = "http://localhost:3000/api/user";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/user";
 
 export const UserService = {
   login: async (email, password) => {

@@ -1,6 +1,6 @@
 export const getAllReceptionists = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/api/schedules/receptionists');
+        const res = await axios.get('https://booking-appointment-be.up.railway.app/api/schedules/receptionists');
         if (!Array.isArray(res.data)) {
             throw new Error('Dữ liệu lễ tân không hợp lệ.');
         }
@@ -12,7 +12,7 @@ export const getAllReceptionists = async () => {
 };
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/schedules';
+const API_URL = 'https://booking-appointment-be.up.railway.app/api/schedules';
 
 export const createSchedule = async (data) => {
     try {
@@ -139,7 +139,7 @@ export const getScheduleByDoctorAndShiftAndDate = async (doctorId, shift, date) 
 };
 
 export const importSchedulesFromExcel = async (file) => {
-    const API_URL = 'http://localhost:3000/api/schedules/import-excel';
+    const API_URL = 'https://booking-appointment-be.up.railway.app/api/schedules/import-excel';
     const formData = new FormData();
     formData.append('file', file);
     try {
