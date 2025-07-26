@@ -1,4 +1,4 @@
-const DocumentUpload = require("../models/documentUpload");
+const DocumentUpload = require("../models/DocumentUpload");
 
 class DocumentUploadController {
   async uploadDocument(req, res) {

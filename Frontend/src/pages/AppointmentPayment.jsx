@@ -126,8 +126,8 @@ function AppointmentPayment() {
           orderCode: orderCode,
           amount: specialty.medicalFee,
           description: "Thanh toán phí khám bệnh",
-          returnUrl: "http://localhost:3000/payment-success",
-          cancelUrl: "http://localhost:3000/payment-cancel",
+          returnUrl: "https://booking-appointment-be.up.railway.app/payment-success",
+          cancelUrl: "https://booking-appointment-be.up.railway.app/payment-cancel",
         };
 
         const result = await PayOSService.createPayment(paymentData);
@@ -175,17 +175,51 @@ function AppointmentPayment() {
           }
 
             if (typeAppointment === "healthPackage") {
-            
+
+              const processStepPromises = healthPackage.service.map(
+                async (service, index) => {
+                  const stepData = {
+                    serviceId: service._id,
+                    note: "",
+                    patientId: appointment.patientId,
+                    isFirstStep: index === 0,
+                  };
+                  const result = await MedicalProcessService.createProcessStep(
+                    stepData
+                  );
+                  console.log("Created step:", result);
+                  return result;
+                }
+              );
+
+              console.log(processStepPromises);
+
+              const createdSteps = await Promise.all(processStepPromises);
+              const processStepIds = createdSteps
+                .map((step) => step?._id)
+                .filter(Boolean);
+
+              if (processStepIds.length !== healthPackage.service.length) {
+                throw new Error("Some process steps failed to create");
+              }
+
+              // Create the main medical process
+              await MedicalProcessService.createMedicalProcess({
+                appointmentId: appointment._id,
+                doctorId: doctor?._id || "",
+                processSteps: processStepIds,
+              });
+
               const paymentData = {
               appointmentId: appointment._id,
               examinationFee: specialty.medicalFee,
               serviceFee: healthPackage.service.map((service) => ({
                 serviceId: service._id,
-                fee: service.paraPrice || 0,
+                fee: service.fee,
               })),
               methodExam: "banking",
             };
-            
+
             await createPayment(paymentData);
             }
 
@@ -219,7 +253,7 @@ function AppointmentPayment() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentData, orderCode, specialty.medicalFee, healthPackage]);
 
   useEffect(() => {

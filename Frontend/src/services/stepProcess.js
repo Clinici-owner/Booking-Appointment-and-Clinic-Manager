@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const SCHEDULE_API_URL = "http://localhost:3000/api/schedules";
-const PROCESS_API_URL = "http://localhost:3000/api/medicalProcess";
+const SCHEDULE_API_URL = "https://booking-appointment-be.up.railway.app/api/schedules";
+const PROCESS_API_URL = "https://booking-appointment-be.up.railway.app/api/medicalProcess";
 
 const stepProcessService = {
 
