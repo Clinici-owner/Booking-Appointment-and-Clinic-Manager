@@ -323,44 +323,53 @@ class ScheduleController {
   }
 
   // Lấy lịch trình của tất cả bác sĩ theo chuyên khoa và theo ngày hiện tại trở về sau và sắp xếp theo ngày
-  async getSchedulesBySpecialtyAndDate(req, res) {
-    try {
-      const { specialtyId } = req.params;
-      const { date } = req.query;
-      
-      const schedules = await Schedule.find({
-        date: { $gt: date },
-      })
-        .populate("userId")
-        .populate("room");
+ async getSchedulesBySpecialtyAndDate(req, res) {
+  try {
+    const { specialtyId } = req.params;
+    const { date } = req.query;
 
-      // Lấy thông tin doctorProfile và specialty
-      const doctorProfiles = await DoctorProfile.find({
-        specialties: specialtyId,
-      }).populate("specialties");
-
-      // Lấy danh sách bác sĩ theo chuyên khoa
-      const doctorIds = doctorProfiles.map((profile) => profile.doctorId);
-
-      // Lọc lịch trình theo danh sách bác sĩ
-      const doctorIdStrings = doctorIds.map((id) => id.toString());
-      const filteredSchedules = schedules.filter((schedule) => {
-        return doctorIdStrings.includes(schedule.userId._id.toString());
-      });
-      // lấy lịch theo role là bác sĩ
-      const schedulesByDoctor = filteredSchedules.filter((schedule) => {
-        return schedule.userId.role === "doctor";
-      });
-
-      // Sắp xếp lịch trình theo ngày
-      schedulesByDoctor.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      res.status(200).json(schedulesByDoctor);
-    } catch (error) {
-      console.error("Lỗi khi lấy lịch trình:", error);
-      res.status(500).json({ message: "Lỗi máy chủ" });
+    // Kiểm tra date hợp lệ
+    if (!date) {
+      return res.status(400).json({ message: "Thiếu tham số date" });
     }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: "Giá trị ngày không hợp lệ" });
+    }
+
+    // Lấy các lịch trình sau thời điểm truyền vào
+    const schedules = await Schedule.find({
+      date: { $gt: parsedDate },
+    })
+      .populate("userId")
+      .populate("room");
+
+    // Lấy các bác sĩ thuộc chuyên khoa
+    const doctorProfiles = await DoctorProfile.find({
+      specialties: specialtyId,
+    }).populate("specialties");
+
+    const doctorIds = doctorProfiles.map((profile) => profile.doctorId.toString());
+
+    // Lọc các lịch trình của bác sĩ và có role là doctor
+    const filteredSchedules = schedules.filter(
+      (schedule) =>
+        schedule.userId &&
+        doctorIds.includes(schedule.userId._id.toString()) &&
+        schedule.userId.role === "doctor"
+    );
+
+    // Sắp xếp theo thời gian tăng dần
+    filteredSchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    res.status(200).json(filteredSchedules);
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch trình:", error);
+    res.status(500).json({ message: "Lỗi máy chủ" });
   }
+}
+
 
   //lấy chính xác lịch trình theo id, shift, date của bác sĩ
   async getScheduleByIdAndShiftAndDate(req, res) {
