@@ -400,7 +400,7 @@ function ScheduleAddPage() {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setOpen(true);
+                setOpen(false);
             }
         };
 
