@@ -1,5 +1,5 @@
 const Specialty = require("../models/Specialty");
-const DocumentUpload = require("../models/documentUpload");
+const DocumentUpload = require("../models/DocumentUpload");
 
 class SpecialtyController {
   async createSpecialty(req, res) {

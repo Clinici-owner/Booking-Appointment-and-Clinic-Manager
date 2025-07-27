@@ -1,7 +1,7 @@
 import { Login } from '@mui/icons-material';
 import axios from 'axios';
 
-const API_URL = "http://localhost:3000/api/appointments";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/appointments";
 
 
 const appointmentService = {

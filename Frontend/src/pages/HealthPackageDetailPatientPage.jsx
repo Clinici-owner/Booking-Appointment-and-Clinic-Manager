@@ -34,7 +34,7 @@ function HealthPackageDetailPatientPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-md mt-10 mb-10">
       <button
-        className="fixed bottom-6 right-6 md:right-20 flex items-center gap-3 px-6 py-3
+        className="fixed bottom-6 right-16 md:right-30 flex items-center gap-3 px-6 py-3
              bg-gradient-to-r from-blue-500 to-blue-700 text-white
              rounded-full shadow-xl text-base font-semibold
              hover:scale-105 hover:shadow-2xl hover:from-blue-600 hover:to-blue-800

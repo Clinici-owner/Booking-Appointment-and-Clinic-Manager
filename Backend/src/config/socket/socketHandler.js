@@ -23,7 +23,7 @@ function setupSocket(server) {
       const targetSocketId = userSocketMap.get(userId);
 
       try {
-        const res = await axios.get(`http://localhost:3000/api/medicalProcess/my-process/${userId}`);
+        const res = await axios.get(`https://booking-appointment-be.up.railway.app/api/medicalProcess/my-process/${userId}`);
         const process = res.data;
 
         let message = "Bác sĩ đã mời bạn vào phòng khám, vui lòng đến phòng khám."; // Mặc định
@@ -43,7 +43,7 @@ function setupSocket(server) {
           console.log(`Mời bệnh nhân ${userId}:`, message);
         }
 
-        const saveRes = await axios.post("http://localhost:3000/api/notifications", {
+        const saveRes = await axios.post("https://booking-appointment-be.up.railway.app/api/notifications", {
           userId,
           title: "Mời vào phòng khám",
           message,
@@ -91,7 +91,8 @@ function setupSocket(server) {
           console.log(`Gửi thông báo hoàn tất bước đến bệnh nhân ${userId}`);
         }
 
-        await axios.post("http://localhost:3000/api/notifications", {
+
+        await axios.post("https://booking-appointment-be.up.railway.app/api/notifications", {
           userId,
           title: "Hoàn tất bước khám",
           message: message || "Bạn đã hoàn thành bước khám này, vui lòng chờ bước tiếp theo.",

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/service';
-const ROOM_API_URL = 'http://localhost:3000/api/room';
-const SPECIALY_API_URL = 'http://localhost:3000/api/specialty';
+const API_URL = 'https://booking-appointment-be.up.railway.app/api/service';
+const ROOM_API_URL = 'https://booking-appointment-be.up.railway.app/api/room';
+const SPECIALY_API_URL = 'https://booking-appointment-be.up.railway.app/api/specialty';
 
 export const createMedicalService = async (data) => {
   try {

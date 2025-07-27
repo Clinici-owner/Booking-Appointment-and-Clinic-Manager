@@ -131,7 +131,7 @@ function CreateDoctorProfilePage() {
       setSuccess(true);
 
       // Redirect sau 1.5s thay vì 3s
-      setTimeout(() => navigate("/doctor/dashboard"), 1500);
+      setTimeout(() => navigate("/doctor/createMedicalProcess"), 1500);
     } catch (error) {
       console.error("Error:", error);
       setError(error.message || "Có lỗi xảy ra khi tạo hồ sơ. Vui lòng thử lại.");

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/notifications"; 
+const API_URL = "https://booking-appointment-be.up.railway.app/api/notifications"; 
 
 
 export const getNotificationsByUser = async (userId) => {

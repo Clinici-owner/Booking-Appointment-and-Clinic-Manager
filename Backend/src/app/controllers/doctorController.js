@@ -21,8 +21,12 @@ class doctorController {
 
   async updateDoctorProfile(req, res) {
     const { id } = req.params;
-    const { certificateId, description, yearsOfExperience, specialties } =
-      req.body;
+    const {
+      certificateId,
+      description,
+      yearsOfExperience,
+      specialties,
+    } = req.body;
     try {
       const doctorProfile = await DoctorProfile.findOne({ doctorId: id });
       if (!doctorProfile) {
