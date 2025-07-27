@@ -14,6 +14,17 @@ function AppointmentReceptionistPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const isTodayVN = (dateStr) => {
+  const nowVN = new Date();
+  nowVN.setHours(0, 0, 0, 0); // đầu ngày hôm nay theo giờ máy (giả định là GMT+7)
+
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0); // chuẩn hóa phần giờ
+
+  return nowVN.getTime() === target.getTime();
+};
+
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -142,16 +153,18 @@ function AppointmentReceptionistPage() {
                 onClick={handleAppointmentClick}
               />
               {appointment.status !== "confirmed" &&
-                appointment.status !== "in-progress" && (
-                  <div className="absolute top-4 right-4">
-                    <button
-                      onClick={() => handleConfirm(appointment._id)}
-                      className="px-4 py-1.5 rounded-full border border-blue-300 bg-blue-400 text-white text-sm font-semibold hover:bg-blue-500 transition"
-                    >
-                      Xác nhận đã tới khám
-                    </button>
-                  </div>
-                )}
+ appointment.status !== "in-progress" &&
+ isTodayVN(appointment.time) && (
+  <div className="absolute top-4 right-4">
+    <button
+      onClick={() => handleConfirm(appointment._id)}
+      className="px-4 py-1.5 rounded-full border border-blue-300 bg-blue-400 text-white text-sm font-semibold hover:bg-blue-500 transition"
+    >
+      Xác nhận đã tới khám
+    </button>
+  </div>
+)}
+
             </div>
           ))
         ) : (
