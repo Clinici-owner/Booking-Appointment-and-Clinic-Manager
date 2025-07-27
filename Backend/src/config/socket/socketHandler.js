@@ -26,18 +26,21 @@ function setupSocket(server) {
         const res = await axios.get(`http://localhost:3000/api/medicalProcess/my-process/${userId}`);
         const process = res.data;
 
-        const currentStep = process.steps.find((step) => !step.isCompleted) || process.steps[0];
-        const roomNumber = currentStep?.roomNumber || "không xác định";
-        const roomName = currentStep?.roomName || "";
+        let message = "Bác sĩ đã mời bạn vào phòng khám, vui lòng đến phòng khám."; // Mặc định
 
-        const message = `Bạn đã được mời vào phòng ${roomNumber} ${roomName ? `(${roomName})` : ""}, vui lòng đến gặp bác sĩ.`;
+        if (process && process.steps && process.steps.length > 0) {
+          const currentStep = process.steps.find((step) => !step.isCompleted) || process.steps[0];
+          const roomNumber = currentStep?.roomNumber || "không xác định";
+          const roomName = currentStep?.roomName || "";
+          message = `Bạn đã được mời vào phòng ${roomNumber} ${roomName ? `(${roomName})` : ""}, vui lòng đến gặp bác sĩ.`;
+        }
 
         if (targetSocketId) {
           io.to(targetSocketId).emit("invited_to_room", {
             message,
             timestamp: new Date(),
           });
-          console.log(`Mời bệnh nhân ${userId} đến phòng ${roomNumber}`);
+          console.log(`Mời bệnh nhân ${userId}:`, message);
         }
 
         const saveRes = await axios.post("http://localhost:3000/api/notifications", {
@@ -52,10 +55,31 @@ function setupSocket(server) {
         if (err.response?.data) {
           console.error("Response data:", err.response.data);
         }
+
+        const fallbackMessage = "Bác sĩ đã mời bạn vào phòng khám, vui lòng đến phòng khám.";
+
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("invited_to_room", {
+            message: fallbackMessage,
+            timestamp: new Date(),
+          });
+          console.log(`(Fallback) Mời bệnh nhân ${userId}:`, fallbackMessage);
+        }
+
+        try {
+          const saveRes = await axios.post("http://localhost:3000/api/notifications", {
+            userId,
+            title: "Mời vào phòng khám",
+            message: fallbackMessage,
+          });
+
+          console.log("Lưu thông báo fallback:", saveRes.data);
+        } catch (saveErr) {
+          console.error("Lỗi khi lưu thông báo fallback:", saveErr.message);
+        }
       }
     });
 
-    
     socket.on("complete_step", async ({ userId, message }) => {
       const targetSocketId = userSocketMap.get(userId);
       try {
@@ -67,7 +91,6 @@ function setupSocket(server) {
           console.log(`Gửi thông báo hoàn tất bước đến bệnh nhân ${userId}`);
         }
 
-        
         await axios.post("http://localhost:3000/api/notifications", {
           userId,
           title: "Hoàn tất bước khám",
