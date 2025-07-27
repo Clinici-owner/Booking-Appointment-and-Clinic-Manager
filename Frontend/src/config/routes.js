@@ -28,6 +28,7 @@ const UpdateStaffPage = React.lazy(() => import("../pages/StaffUpdatePage"));
 const StaffDetailPage = React.lazy(() => import("../pages/StaffDetailPage"));
 const ListPatientsPage = React.lazy(() => import("../pages/ListPatientPage"));
 const PatientDetailPage = React.lazy(() => import("../pages/PatientDetailPage"));
+const StatisticalPage = React.lazy(() => import("../pages/StatisticalPage"));
 
 const GoogleAuthCallback = React.lazy(() => import("../components/GoogleAuthCallback"));
 const HealthPackageList = React.lazy(() => import("../components/HealthPackageList"));
@@ -62,17 +63,18 @@ const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProces
 const PatientMedicalHistoryListPage = React.lazy(() => import("../pages/PatientMedicalHistoryListPage"));
 const PatientMedicalHistoryDetailPage = React.lazy(() => import("../pages/PatientMedicalHistoryDetailPage"));
 const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppointmentListPage"));
+const ViewDoctorProfilePage = React.lazy(() => import("../pages/ViewDoctorProfilePage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
 
-const CreateNewspage = React.lazy(() => import("../pages/CreateNews"));
+const CreateNewspage = React.lazy(() => import("../pages/createNews"));
 const Newspaperpage = React.lazy(() => import("../pages/NewPaper"));
 const NewsEditPage  = React.lazy(() => import("../pages/NewsEditPage"));
 
 
 const ScheduleOwnPage = React.lazy(() => import("../pages/ScheduleOwnPage"));
-const ScheduleAddPage = React.lazy(() => import("../pages/ScheduleAddPage"));
+const ScheduleManagePage = React.lazy(() => import("../pages/ScheduleManagePage"));
 const ScheduleRoomPage = React.lazy(() => import("../pages/WorkScheduleSummary"));
 const MyMedicalHistoryPage = React.lazy(() => import("../pages/MyMedicalHistoryPage"));
 
@@ -84,6 +86,7 @@ const AppointmentDetailPatientPage = React.lazy(() => import("../pages/Appointme
 const AppointmentAdminPage = React.lazy(() => import("../pages/AppointmentAdminPage"));
 
 const AppointmentReceptionistPage = React.lazy(() => import("../pages/AppointmentReceptionistPage"));
+const AppointmentDetailReceptionistPage = React.lazy(() => import("../pages/AppointmentDetailReceptionistPage"));
 
 const CreateTechnicianProfilePage = React.lazy(() => import("../pages/CreateTechnicianProfilePage"));
 
@@ -116,8 +119,8 @@ const AppRoute = [
   { path: ROUTE_PATH.ADD_STAFF, page: AddStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.UPDATE_STAFF, page: UpdateStaffPage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.STAFF_DETAIL, page: StaffDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
-  { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout },
-  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.LIST_PATIENTS, page: ListPatientsPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.PATIENT_DETAIL, page: PatientDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
 
   // OAuth callback
   { path: ROUTE_PATH.GOOGLE_AUTH_CALLBACK, page: GoogleAuthCallback },
@@ -130,11 +133,12 @@ const AppRoute = [
   { path: ROUTE_PATH.USER_PROFILE_UPDATE, page: UserProfileUpdatePage, layout: MainLayout },
   { path: ROUTE_PATH.UPDATE_PASSWORD, page: UpdatepasswordPage, layout: MainLayout },
   // Admin Manage Health Package
-  {path: ROUTE_PATH.HEALTH_PACKAGE_MANAGER, page: AdminHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_CREATE, page: CreateHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout},
-  {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_MANAGER, page: AdminHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_CREATE, page: CreateHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_DETAIL, page: AdminHealthPackageDetailPage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_UPDATE, page: UpdateHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.HEALTH_PACKAGE_lOCK_STATUS, page: LockHealthPackagePage, layout: AdminLayout, allowedRoles: ["admin"]},
+  {path: ROUTE_PATH.STATISTICAL, page: StatisticalPage, layout: AdminLayout, allowedRoles: ["admin"]},
   //Health package component
   {path: ROUTE_PATH.HEALTH_PACKAGE_LIST, page: HealthPackagePage},
   //Health package for user
@@ -146,17 +150,17 @@ const AppRoute = [
   {path: ROUTE_PATH.SERVICES_LIST, page: listMedical, layout: AdminLayout,  allowedRoles: ["admin"] },
 
   // Specialty Manager
-  { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout },
-  { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout },
-  { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout },
-  { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout },
+  { path: ROUTE_PATH.SPECIALTIES_LIST, page: SpecialtiesListPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.ADD_SPECIALTY, page: AddSpecialtyPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.UPDATE_SPECIALTY, page: UpdateSpecialtyPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.SPECIALTY_DETAIL, page: SpecialtyDetailPage, layout: AdminLayout, allowedRoles: ["admin"] },
 
   // Specialty for user
   { path: ROUTE_PATH.SPECIALTY_DETAIL_PATIENT, page: SpecialtyDetailPatientPage, layout: MainLayout },
   
   // Schedule Manager
   { path: ROUTE_PATH.OWN_SCHEDULE, page: ScheduleOwnPage, layout: DoctorLayout, allowedRoles: ["doctor", "technician", "receptionist", "nursing"] },
-  { path: ROUTE_PATH.ADD_SCHEDULE, page: ScheduleAddPage, layout: AdminLayout, allowedRoles: ["admin"] },
+  { path: ROUTE_PATH.MANAGE_SCHEDULE, page: ScheduleManagePage, layout: AdminLayout, allowedRoles: ["admin"] },
   { path: ROUTE_PATH.ROOM_SCHEDULE, page: ScheduleRoomPage, layout: TechnicianLayout  , allowedRoles: ["doctor", "technician"]},
 
   // Doctor
@@ -167,9 +171,7 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
-
-
-
+  { path: ROUTE_PATH.VIEW_DOCTOR_PROFILE, page: ViewDoctorProfilePage, layout: DoctorLayout, allowedRoles: ["doctor"] },
 
   //Patient
   { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout , allowedRoles: ["patient"] },
@@ -189,10 +191,11 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_DETAIL, page: AppointmentDetailPatientPage, layout: MainLayout },
 
   //Appointment for admin
-  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout },
+  { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout, allowedRoles: ["admin"]},
 
   //Appointment for receptionist
-  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist", "admin"] },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST_DETAIL, page: AppointmentDetailReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist", "admin"] },
 
   //Booking from package
 
@@ -203,11 +206,11 @@ const AppRoute = [
 
   //News Manager 
   {path: ROUTE_PATH.CREATE_NEWS, page: CreateNewspage, layout: AdminLayout , allowedRoles: ["admin"] },
-  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout, allowedRoles: ["admin"] },
+  {path: ROUTE_PATH.NEWS_PAPER, page: Newspaperpage, layout: MainLayout},
   {path: ROUTE_PATH.NEWS_EDIT, page: NewsEditPage, layout: AdminLayout, allowedRoles: ["admin"] },
   //Patient for receptionist
-  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout},
-  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout},
+  {path: ROUTE_PATH.PATIENT_LIST, page: PatientListPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"]},
+  {path: ROUTE_PATH.APPOINTMENT_BOOKING, page: AppointmentBookingPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"]},
   
   //404 Not Found
   { path: ROUTE_PATH.NOT_FOUND, page: NotFoundPage },

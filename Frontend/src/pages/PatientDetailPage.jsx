@@ -17,6 +17,12 @@ const PatientDetail = () => {
   const [processes, setProcesses] = useState({}); // { appointmentId: processData }
   const [stepHistories, setStepHistories] = useState({}); // { stepId: medicalHistory }
   const patientId = location.state?.patientId;
+  // Pagination and filter states
+  const PAGE_SIZE = 5;
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     if (patientId) {
@@ -74,6 +80,18 @@ const PatientDetail = () => {
       setLoading(false);
     }
   }, [patientId]);
+
+  // Filter, sort, and paginate appointments
+  const filteredAppointments = appointments
+    .filter(appt => {
+      if (startDate && new Date(appt.time) < new Date(startDate)) return false;
+      if (endDate && new Date(appt.time) > new Date(endDate)) return false;
+      return true;
+    })
+    .sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  const totalPages = Math.ceil(filteredAppointments.length / pageSize);
+  const paginatedAppointments = filteredAppointments.slice((page - 1) * pageSize, page * pageSize);
 
   // Function to format date
   const formatDate = (dateString) => {
@@ -191,9 +209,45 @@ const PatientDetail = () => {
       {/* Medical History by Appointment Section */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Lịch sử khám theo từng lịch hẹn</h2>
-        {appointments.length > 0 ? (
+        {/* Filter UI */}
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="start-date" className="text-gray-600">Từ ngày:</label>
+            <input
+              id="start-date"
+              type="date"
+              value={startDate}
+              onChange={e => { setStartDate(e.target.value); setPage(1); }}
+              className="border rounded px-2 py-1"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="end-date" className="text-gray-600">Đến ngày:</label>
+            <input
+              id="end-date"
+              type="date"
+              value={endDate}
+              onChange={e => { setEndDate(e.target.value); setPage(1); }}
+              className="border rounded px-2 py-1"
+            />
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <label htmlFor="page-size" className="text-gray-600">Số lịch/trang:</label>
+            <select
+              id="page-size"
+              value={pageSize}
+              onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+              className="border rounded px-2 py-1"
+            >
+              {[5, 10, 20].map(size => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {filteredAppointments.length > 0 ? (
           <div className="space-y-6">
-            {appointments.map((appt) => {
+            {paginatedAppointments.map((appt) => {
               const process = processes[appt._id];
               return (
                 <div key={appt._id} className="border-l-4 border-blue-500 pl-4 py-2">
@@ -264,6 +318,24 @@ const PatientDetail = () => {
                 </div>
               );
             })}
+            {/* Pagination controls */}
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+              >
+                Trước
+              </button>
+              <span className="font-medium">Trang {page} / {totalPages}</span>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPages || totalPages === 0}
+                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+              >
+                Sau
+              </button>
+            </div>
           </div>
         ) : (
           <p className="text-gray-500">Không có lịch sử khám bệnh</p>

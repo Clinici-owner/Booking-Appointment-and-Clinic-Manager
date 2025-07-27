@@ -1,12 +1,12 @@
+import { Login } from '@mui/icons-material';
 import axios from 'axios';
 
-const API_URL = "http://localhost:3000/api/appointments";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/appointments";
 
 
 const appointmentService = {
   createAppointment: async (appointmentData) => {
     try {
-      console.log("Creating appointment with data:", appointmentData);
       const response = await axios.post(`${API_URL}/create`, {
         appointmentData
       });

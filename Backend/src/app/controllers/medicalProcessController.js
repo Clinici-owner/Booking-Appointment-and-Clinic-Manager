@@ -131,6 +131,11 @@ class medicalProcessController {
         })
         .populate('doctorId', 'fullName email phoneNumber')
         .populate('processSteps');
+      // Emit event realtime cập nhật hàng đợi bệnh nhân
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('patient_queue_updated');
+      }
       res.status(201).json(populatedProcess);
     } catch (error) {
       console.error("Error creating medical process:", error);
@@ -258,6 +263,11 @@ class medicalProcessController {
         }
       }
       await medicalProcess.save();
+      // Emit event realtime cập nhật tiến trình khám
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('medical_process_updated');
+      }
       return res
         .status(200)
         .json({ message: "Cập nhật bước khám thành công." });

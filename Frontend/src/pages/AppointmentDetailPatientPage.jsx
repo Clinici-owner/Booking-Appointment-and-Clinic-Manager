@@ -27,6 +27,11 @@ import appointmentService from "../services/appointmentService";
 import { getScheduleByDoctorAndShiftAndDate } from "../services/scheduleService";
 import { DoctorService } from "../services/doctorService";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
+
 function AppointmentDetailPatientPage() {
   const [appointment, setAppointment] = useState(null);
   const [schedule, setSchedule] = useState(null);
@@ -72,17 +77,21 @@ function AppointmentDetailPatientPage() {
     const fetchSchedule = async () => {
       if (appointment && appointment.doctorId && appointment.time) {
         try {
+          const utcTime = dayjs(appointment.time).utc();
+
+          const hour = utcTime.hour(); // kiểu số: 0 → 23
+          const minute   = utcTime.minute(); // kiểu số: 0 → 59
+
           const utcDate = new Date(appointment.time);
-          const vnDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+          const vnDate = new Date(utcDate.getTime());
           const formattedDate = vnDate.toISOString().split("T")[0];
-          const hour = vnDate.getHours();
-          const minute = vnDate.getMinutes();
+
           const totalMinutes = hour * 60 + minute;
+
 
           let shift = "AFTERNOON";
           if (totalMinutes >= 420 && totalMinutes < 690) shift = "MORNING";
           else if (totalMinutes >= 690 && totalMinutes < 810) shift = "NOON";
-
           const schedule = await getScheduleByDoctorAndShiftAndDate(
             appointment.doctorId._id,
             shift,
@@ -269,7 +278,6 @@ function AppointmentDetailPatientPage() {
           {appointment.healthPackage && (
             <Box sx={{ mt: 2 }}>
               <Typography><strong>Tên gói khám:</strong> {appointment.healthPackage.packageName}</Typography>
-              <Typography><strong>Mô tả gói:</strong> {appointment.healthPackage.description}</Typography>
             </Box>
           )}
         </Box>

@@ -16,6 +16,7 @@ function AppointmentFilter({
     { value: "", label: "Tất cả trạng thái" },
     { value: "pending", label: "Chờ xác nhận" },
     { value: "confirmed", label: "Đã xác nhận" },
+    { value: "in-progress", label: "Đang khám" },
     { value: "cancelled", label: "Đã hủy" },
     { value: "completed", label: "Đã khám xong" },
   ]

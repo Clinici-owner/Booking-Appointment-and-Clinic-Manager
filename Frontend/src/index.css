@@ -99,6 +99,6 @@
 
 
 }
-  .css-1lwhjos-MuiPaper-root-MuiDrawer-paper{
-    margin-top: 120px;
-  }
+.MuiDrawer-paper {
+  margin-top: 120px;
+}

@@ -21,6 +21,7 @@ export const ROUTE_PATH = {
   ADD_STAFF: '/admin/staffs/add',
   UPDATE_STAFF: '/admin/staffs/update',
   STAFF_DETAIL: '/admin/staffs/detail',
+  STATISTICAL: '/admin/statistical',
 
   LIST_PATIENTS: '/admin/patients',
   PATIENT_DETAIL: '/admin/patient/detail',
@@ -46,7 +47,7 @@ export const ROUTE_PATH = {
   SPECIALTY_DETAIL_PATIENT: '/specialties/:id',
 
   //Schedule manager
-  ADD_SCHEDULE: '/admin/schedules/add',
+  MANAGE_SCHEDULE: '/admin/schedules/manage',
   OWN_SCHEDULE: '/schedules/own',
   ROOM_SCHEDULE: '/schedules/room',
   
@@ -59,6 +60,7 @@ export const ROUTE_PATH = {
   DOCTOR_PATIENT_MEDICAL_HISTORY_LIST: '/doctor/patient-medical-histories',
   DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL: '/doctor/patient-medical-history',
   DOCTOR_APPOINTMENT_LIST: '/doctor/appointment-list',
+  VIEW_DOCTOR_PROFILE: '/doctor/profile/:doctorId',
 
   //News manager
   CREATE_NEWS: '/admin/news',
@@ -95,6 +97,7 @@ export const ROUTE_PATH = {
 
   //Appointment for receptionist
   APPOINTMENT_RECEPTIONIST: '/receptionist/appointment-receptionist',
+  APPOINTMENT_RECEPTIONIST_DETAIL: '/receptionist/appointment-receptionist/detail/:id',
   // 404
   NOT_FOUND: '*',
 

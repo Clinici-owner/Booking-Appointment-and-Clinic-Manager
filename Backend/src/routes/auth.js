@@ -8,14 +8,14 @@ router.get(
 );
 router.get(
   "/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:5173/login" }),
+  passport.authenticate("google", { failureRedirect: "https://phuchungclinic.vercel.app/login" }),
   (req, res) => {
     // Thành công, trả về thông tin người dùng dưới dạng JSON
     const userData = {
       ...req.user._doc,
       expiresAt: Date.now() + 3600000 // 1 giờ
     };
-    const redirectUrl = `http://localhost:5173/google-auth-success?user=${encodeURIComponent(JSON.stringify(userData))}`;
+    const redirectUrl = `https://phuchungclinic.vercel.app/google-auth-success?user=${encodeURIComponent(JSON.stringify(userData))}`;
     res.redirect(redirectUrl);
   }
 );

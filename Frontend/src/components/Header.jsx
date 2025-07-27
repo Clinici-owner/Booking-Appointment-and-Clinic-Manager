@@ -19,12 +19,14 @@ function Header() {
   const userData = JSON.parse(sessionStorage.getItem("user"));
 
   const isActive = (path) => location.pathname === path;
+
   const hiddenForRoles = ["doctor", "admin", "technician", "receptionist", "nursing"];
   const shouldHideMenu = hiddenForRoles.includes(userData?.role);
 
   return (
     <div>
       <nav className="px-18 bg-white shadow-lg rounded-b-xl px-4 py-3 flex items-center justify-between mb-4">
+
         <div className="flex items-center space-x-3">
           <img
             src={LogoMini}
@@ -38,6 +40,7 @@ function Header() {
         </div>
 
         <ul className="hidden md:flex items-center gap-6 font-semibold text-base">
+
           {!shouldHideMenu && (
             <>
               <li>
@@ -93,10 +96,12 @@ function Header() {
             </>
           )}
 
+
           <li className="flex items-center space-x-2">
             {userData ? (
               <Menu as="div" className="relative inline-block text-left">
                 <div>
+
                   <MenuButton className="rounded-full py-1 px-3 font-semibold cursor-pointer transition duration-300 hover:shadow-md hover:bg-[#eff6ff] normal-case border border-blue-500 text-custom-blue flex items-center focus:outline-none">
                     <PersonIcon className="inline-block mr-2" />
                     {userData.fullName || userData.email}
@@ -104,17 +109,20 @@ function Header() {
                 </div>
 
                 <MenuItems className="absolute right-0 z-10 mt-2 w-80 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
+
                   <div className="py-1">
                     <MenuItem>
                       <a
                         href="#"
                         className="flex flex-row align-center block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                       >
+
                         <AccountCircleIcon className=" mr-2 text-custom-blue" style={{ fontSize: "46px" }} />
                         <div>
                           <span className="font-normal">Xin chào,</span>
                           <br />
                           <span className="text-custom-blue font-semibold text-lg">
+
                             {userData.fullName || userData.email}
                           </span>
                         </div>
@@ -135,6 +143,7 @@ function Header() {
                       </a>
                     </MenuItem>
                   </div>
+
 
                   {!shouldHideMenu && (
                     <>
@@ -168,11 +177,14 @@ function Header() {
                     </>
                   )}
 
+
                   <div className="py-1">
                     <MenuItem>
                       <a
                         href="#"
+
                         className="group block px-4 py-2 text-sm text-custom-red data-focus:bg-gray-100 data-focus:outline-hidden"
+
                         onClick={() => {
                           sessionStorage.removeItem("user");
                           window.location.href = "/";

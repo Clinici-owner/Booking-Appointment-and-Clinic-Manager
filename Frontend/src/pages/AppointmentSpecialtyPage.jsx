@@ -164,8 +164,6 @@ function AppointmentSpecialtyPage() {
   };
 
   const selectTime = (scheduleId, timeRange) => {
-    console.log("Selected time range:", scheduleId, timeRange);
-
     setSelectedTime({ scheduleId, timeRange });
   };
 
@@ -195,9 +193,12 @@ function AppointmentSpecialtyPage() {
     };
     const fetchSchedules = async () => {
       try {
-        const response = await getSchedulesBySpecialtyAndDate(
+      const date = new Date();
+      console.log("Current date:", date);
+      
+      const response = await getSchedulesBySpecialtyAndDate(
           id,
-          new Date().toISOString().split("T")[0]
+          date
         );
         setSchedules(response);
       } catch (err) {
@@ -206,7 +207,7 @@ function AppointmentSpecialtyPage() {
     };
 
     if (id) {
-      fetchData(); // chỉ gọi khi có id
+      fetchData(); 
       fetchDoctors();
       fetchSchedules();
     }
@@ -370,6 +371,7 @@ function AppointmentSpecialtyPage() {
                             <CheckIcon className="w-5 h-5" />
                           </div>
                         )}
+                        
 
                         {/* Avatar hình tròn */}
                         <img
