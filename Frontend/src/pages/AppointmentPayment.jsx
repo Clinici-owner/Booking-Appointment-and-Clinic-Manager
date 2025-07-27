@@ -323,7 +323,8 @@ function AppointmentPayment() {
             <strong>Chuyên khoa:</strong> {specialty?.specialtyName}
           </p>
           <p>
-            <strong>Mô tả:</strong> {doctor?.description}
+            <strong>Mô tả:</strong> 
+            <span dangerouslySetInnerHTML={{ __html: doctor?.description }} />
           </p>
         </div>
       </div>
