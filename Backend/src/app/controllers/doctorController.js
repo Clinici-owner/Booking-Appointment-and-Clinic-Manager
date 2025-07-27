@@ -21,8 +21,12 @@ class doctorController {
 
   async updateDoctorProfile(req, res) {
     const { id } = req.params;
-    const { certificateId, description, yearsOfExperience, specialties } =
-      req.body;
+    const {
+      certificateId,
+      description,
+      yearsOfExperience,
+      specialties,
+    } = req.body;
     try {
       const doctorProfile = await DoctorProfile.findOne({ doctorId: id });
       if (!doctorProfile) {
@@ -169,7 +173,7 @@ class doctorController {
       }
       const doctorProfile = await DoctorProfile.findOne({ doctorId: id })
         .populate('specialties', 'specialtyName logo')
-        .populate('certificateId', 'url type')
+        .populate('certificateId')
         .lean();
       if (!doctorProfile) {
         return res.status(404).json({ message: "Doctor profile not found" });
@@ -180,7 +184,7 @@ class doctorController {
           description: doctorProfile.description || '',
           yearsOfExperience: doctorProfile.yearsOfExperience || 0,
           specialties: doctorProfile.specialties || [],
-          certificates: doctorProfile.certificateId || []
+          certificateId: doctorProfile.certificateId || []
         }
       });
     }

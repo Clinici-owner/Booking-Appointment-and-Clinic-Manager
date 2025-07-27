@@ -16,6 +16,18 @@ class ScheduleController {
       res.status(500).json({ error: error.message });
     }
   }
+
+ async getAllNursing(req, res) {
+  try {
+    const nursingStaff = await User.find({ role: 'nursing' });
+    res.status(200).json(nursingStaff);
+  } catch (error) {
+    console.error("Lỗi getAllNursing:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
   
   async getAllSchedules(req, res) {
     try {
@@ -268,9 +280,9 @@ class ScheduleController {
           .json({ message: "Bạn không có quyền truy cập." });
       }
 
-      const now = new Date();
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+      const moment = require('moment-timezone');
+    const startOfDay = moment().tz('Asia/Ho_Chi_Minh').startOf('day').toDate();
+    const endOfDay = moment().tz('Asia/Ho_Chi_Minh').endOf('day').toDate();
 
       const todaySchedule = await Schedule.findOne({
         userId: userId,
@@ -314,14 +326,10 @@ class ScheduleController {
   async getSchedulesBySpecialtyAndDate(req, res) {
     try {
       const { specialtyId } = req.params;
-
-      const now = new Date();
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
-
-      //lấy tất cả các lịch
+      const { date } = req.query;
+      
       const schedules = await Schedule.find({
-        date: { $gte: startOfDay },
+        date: { $gt: date },
       })
         .populate("userId")
         .populate("room");
@@ -339,9 +347,6 @@ class ScheduleController {
       const filteredSchedules = schedules.filter((schedule) => {
         return doctorIdStrings.includes(schedule.userId._id.toString());
       });
-
-      console.log("filteredSchedules:", filteredSchedules.length);
-
       // lấy lịch theo role là bác sĩ
       const schedulesByDoctor = filteredSchedules.filter((schedule) => {
         return schedule.userId.role === "doctor";

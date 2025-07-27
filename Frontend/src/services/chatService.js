@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const askMedicalAI = async (prompt) => {
-  const res = await axios.post("http://localhost:3000/api/chat/ask", { prompt });
+  const res = await axios.post("https://booking-appointment-be.up.railway.app/api/chat/ask", { prompt });
   return res.data.reply;
 };
 
@@ -26,7 +26,7 @@ export const uploadCCCDImage = async (file) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await axios.post("http://localhost:3000/api/chat/cccd", formData, {
+  const response = await axios.post("https://booking-appointment-be.up.railway.app/api/chat/cccd", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

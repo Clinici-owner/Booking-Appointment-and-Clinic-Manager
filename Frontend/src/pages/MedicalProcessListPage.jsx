@@ -9,6 +9,12 @@ const MedicalProcessListPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  // Pagination and filter states
+  const PAGE_SIZE = 5;
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // Fetch all medical processes
   useEffect(() => {
@@ -29,17 +35,30 @@ const MedicalProcessListPage = () => {
     fetchProcesses();
   }, []);
 
-  // Filter processes based on search term
+  // Filter, sort, and search processes
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredProcesses(processes);
-    } else {
-      const filtered = processes.filter(process =>
+    let filtered = processes;
+    // Filter by date
+    filtered = filtered.filter(proc => {
+      if (startDate && new Date(proc.createdAt) < new Date(startDate)) return false;
+      if (endDate && new Date(proc.createdAt) > new Date(endDate)) return false;
+      return true;
+    });
+    // Search by patient name
+    if (searchTerm.trim() !== '') {
+      filtered = filtered.filter(process =>
         process.appointmentId?.patientId?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredProcesses(filtered);
     }
-  }, [searchTerm, processes]);
+    // Sort by newest
+    filtered = filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    setFilteredProcesses(filtered);
+    setPage(1); // Reset to first page when filter/search changes
+  }, [searchTerm, processes, startDate, endDate]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredProcesses.length / pageSize);
+  const paginatedProcesses = filteredProcesses.slice((page - 1) * pageSize, page * pageSize);
 
   // Format date
   const formatDate = (dateString) => {
@@ -100,10 +119,42 @@ const MedicalProcessListPage = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Danh Sách Tiến Trình Khám</h1>
-      
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
+      {/* Filter & Search Bar */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor="start-date" className="text-gray-600">Từ ngày:</label>
+          <input
+            id="start-date"
+            type="date"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+            className="border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="end-date" className="text-gray-600">Đến ngày:</label>
+          <input
+            id="end-date"
+            type="date"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+            className="border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <label htmlFor="page-size" className="text-gray-600">Số tiến trình/trang:</label>
+          <select
+            id="page-size"
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="border rounded px-2 py-1"
+          >
+            {[5, 10, 20].map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+        <div className="relative w-full md:w-1/3">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -118,7 +169,6 @@ const MedicalProcessListPage = () => {
           />
         </div>
       </div>
-
       {/* Processes Table */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
@@ -145,8 +195,8 @@ const MedicalProcessListPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProcesses.length > 0 ? (
-              filteredProcesses.map((process) => (
+            {paginatedProcesses.length > 0 ? (
+              paginatedProcesses.map((process) => (
                 <tr key={process._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -160,7 +210,7 @@ const MedicalProcessListPage = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{process.doctorId.fullName}</div>
+                    <div className="text-sm text-gray-900">{process.doctorId?.fullName}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(process.createdAt)}
@@ -192,6 +242,24 @@ const MedicalProcessListPage = () => {
             )}
           </tbody>
         </table>
+      </div>
+      {/* Pagination controls */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 1}
+          className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Trước
+        </button>
+        <span className="font-medium">Trang {page} / {totalPages}</span>
+        <button
+          onClick={() => setPage(page + 1)}
+          disabled={page === totalPages || totalPages === 0}
+          className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Sau
+        </button>
       </div>
     </div>
   );

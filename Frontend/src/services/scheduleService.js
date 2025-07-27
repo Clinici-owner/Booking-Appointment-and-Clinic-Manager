@@ -1,6 +1,6 @@
 export const getAllReceptionists = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/api/schedules/receptionists');
+        const res = await axios.get('https://booking-appointment-be.up.railway.app/api/schedules/receptionists');
         if (!Array.isArray(res.data)) {
             throw new Error('Dữ liệu lễ tân không hợp lệ.');
         }
@@ -10,9 +10,22 @@ export const getAllReceptionists = async () => {
         throw error;
     }
 };
+
+export const getAllNursingStaff = async () => {
+    try {
+        const res = await axios.get('http://localhost:3000/api/schedules/nursing');
+        if (!Array.isArray(res.data)) {
+            throw new Error('Dữ liệu nhân viên y tá không hợp lệ.');
+        }
+        return res.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên y tá:', error);
+        throw error;
+    }
+}
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/schedules';
+const API_URL = 'https://booking-appointment-be.up.railway.app/api/schedules';
 
 export const createSchedule = async (data) => {
     try {
@@ -57,19 +70,25 @@ export const deleteSchedule = async (id) => {
 export const getOwnSchedules = async (userId) => {
     try {
         if (!userId) {
-            throw new Error('Không tìm thấy ID người dùng. Vui lòng đăng nhập lại.');
+            console.warn('Không tìm thấy ID người dùng. Trả về mảng rỗng.');
+            return [];
         }
-        // console.log('Fetching schedules for userId:', userId); 
+
         const res = await axios.get(`${API_URL}/own/${userId}`);
+
         if (!Array.isArray(res.data)) {
-            throw new Error('Dữ liệu trả về không phải là một mảng hoặc có cấu trúc không hợp lệ.');
+            console.warn('Dữ liệu không phải là mảng. Trả về mảng rỗng.');
+            return [];
         }
+
         return res.data;
     } catch (error) {
-        console.error('Lỗi khi lấy lịch trình cá nhân:', error);
-        throw error;
+        const msg = error?.response?.data?.message || error.message || 'Lỗi không xác định';
+        console.error('Lỗi khi lấy lịch trình cá nhân:', msg);
+        return []; 
     }
 };
+
 
 
 // Lấy tất cả lịch trình (logic mới: trả về mảng schedule đã populate userId, room, specialties)
@@ -133,7 +152,7 @@ export const getScheduleByDoctorAndShiftAndDate = async (doctorId, shift, date) 
 };
 
 export const importSchedulesFromExcel = async (file) => {
-    const API_URL = 'http://localhost:3000/api/schedules/import-excel';
+    const API_URL = 'https://booking-appointment-be.up.railway.app/api/schedules/import-excel';
     const formData = new FormData();
     formData.append('file', file);
     try {

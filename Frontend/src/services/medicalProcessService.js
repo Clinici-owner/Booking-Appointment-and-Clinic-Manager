@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/medicalProcess";
+const API_URL = "https://booking-appointment-be.up.railway.app/api/medicalProcess";
 
 export const MedicalProcessService = {
   // Lấy quy trình khám theo appointmentId

@@ -1,21 +1,70 @@
-
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import Banner from "../assets/images/Banner.png";
 
-import {
-  LocationOn,
-  Phone,
-  Email,
-  AccessTime,
-  Facebook,
-  Instagram,
-  Twitter,
-} from "@mui/icons-material";
+import { LocationOn, Phone, Email, AccessTime } from "@mui/icons-material";
+
+import { getOpenSpecialties } from "../services/specialtyService";
+import { healthPackageService } from "../services/healthPackageService";
+import { DoctorService } from "../services/doctorService";
+import { listNews } from "../services/newsService";
+
+import SpecialtiesCard from "../components/SpecialtyCard";
+import HealthPackageList from "../components/HealthPackageList";
+import NewsCard from "../components/NewsCard";
 
 function HomePage() {
   const navigate = useNavigate();
+  const [specialties, setSpecialties] = useState([]);
+  const [healthPackages, setHealthPackages] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [news, setNews] = useState([]);
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const data = await getOpenSpecialties();
+        setSpecialties(data.slice(0, 4));
+      } catch (error) {
+        console.error("Error fetching specialties:", error);
+      }
+    };
+
+    const fetchHealthPackages = async () => {
+      try {
+        const data = await healthPackageService.getAllHealthPackages();
+        setHealthPackages(data.data.slice(0, 3) || []);
+      } catch (error) {
+        console.error("Error fetching health packages:", error);
+      }
+    };
+
+    const fetchDoctors = async () => {
+      try {
+        const data = await DoctorService.getAllDoctors();
+        setDoctors(data.doctors.slice(0, 4) || []);
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+      }
+    };
+
+    const fetchNews = async () => {
+      try {
+        const data = await listNews();
+        console.log("Fetched news:", data);
+        setNews(data.data.slice(0, 3) || []);
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      }
+    };
+    fetchNews();
+    fetchDoctors();
+    fetchSpecialties();
+    fetchHealthPackages();
+  }, []);
+
   return (
     <div>
       <div
@@ -37,18 +86,18 @@ function HomePage() {
             nhất.
           </p>
           <div className="flex space-x-4">
-          <button
-            className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-custom-bluehover2 transition duration-300 hover:cursor-pointer"
-            onClick={() => navigate("/specialties")}
-          >
-            Đặt khám ngay
-          </button>
-          <button
-            className="bg-white text-custom-blue font-semibold px-6 py-2 rounded-xl shadow hover:bg-gray-100 transition duration-300"
-            onClick={() => navigate("/health-packages")}
-          >
-            Xem dịch vụ
-          </button>
+            <button
+              className="bg-custom-blue text-white font-semibold px-6 py-2 rounded-xl shadow hover:bg-custom-bluehover2 transition duration-300 hover:cursor-pointer"
+              onClick={() => navigate("/specialties")}
+            >
+              Đặt khám ngay
+            </button>
+            <button
+              className="bg-white text-custom-blue font-semibold px-6 py-2 rounded-xl shadow hover:bg-gray-100 transition duration-300"
+              onClick={() => navigate("/health-packages")}
+            >
+              Xem dịch vụ
+            </button>
           </div>
         </div>
       </div>
@@ -113,148 +162,79 @@ function HomePage() {
           <div class="container mx-auto px-4">
             <div class="text-center mb-16">
               <h2 class="text-3xl font-bold text-blue-800 mb-4">
-                Dịch vụ y tế
+                Chuyên khoa y tế
               </h2>
               <p class="text-gray-600 max-w-2xl mx-auto">
-                Phúc Hưng Clinic cung cấp đa dạng các dịch vụ y tế chất lượng
-                cao
+                Phúc Hưng Clinic cung cấp đa dạng các chuyên khoa y tế chất
+                lượng cao
               </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-blue-100 p-3 rounded-lg">
-                    <i class="fas fa-heartbeat text-2xl text-blue-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">
-                    Khám tổng quát
-                  </h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Kiểm tra sức khỏe toàn diện, phát hiện sớm các bệnh lý tiềm
-                  ẩn.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-green-100 p-3 rounded-lg">
-                    <i class="fas fa-baby text-2xl text-green-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">Khám nhi</h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Chăm sóc sức khỏe toàn diện cho trẻ em từ sơ sinh đến dưới 16
-                  tuổi.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-purple-100 p-3 rounded-lg">
-                    <i class="fas fa-female text-2xl text-purple-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">Phụ khoa</h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Khám và điều trị các bệnh lý phụ khoa, kế hoạch hóa gia đình.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-yellow-100 p-3 rounded-lg">
-                    <i class="fas fa-male text-2xl text-yellow-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">Nam khoa</h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Khám và điều trị các bệnh lý về sinh sản, tiết niệu ở nam
-                  giới.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-red-100 p-3 rounded-lg">
-                    <i class="fas fa-ear text-2xl text-red-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">
-                    Tai mũi họng
-                  </h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Chẩn đoán và điều trị các bệnh lý về tai, mũi, họng, thanh
-                  quản.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 service-card transition">
-                <div class="flex items-start space-x-4 mb-4">
-                  <div class="bg-indigo-100 p-3 rounded-lg">
-                    <i class="fas fa-tooth text-2xl text-indigo-600"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold text-blue-800">
-                    Răng hàm mặt
-                  </h3>
-                </div>
-                <p class="text-gray-600 mb-4">
-                  Khám và điều trị các vấn đề về răng, hàm, nha chu, chỉnh nha.
-                </p>
-                <a
-                  href="#"
-                  class="text-green-600 font-medium flex items-center"
-                >
-                  Xem chi tiết <i class="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {specialties.map((specialty) => (
+                <SpecialtiesCard
+                  key={specialty._id}
+                  id={specialty._id}
+                  name={specialty.specialtyName}
+                  description={specialty.descspecialty}
+                  logo={specialty.logo}
+                />
+              ))}
             </div>
 
-            <div class="text-center mt-10">
-              <a
-                href="#"
-                class="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
+            <div className="text-center mt-10">
+              <Link
+                to="/specialties"
+                className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
               >
-                Xem tất cả dịch vụ{" "}
-                <i class="fas fa-chevron-right ml-2 text-sm"></i>
-              </a>
+                Xem tất cả chuyên khoa{" "}
+                <i className="fas fa-chevron-right ml-2 text-sm"></i>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Gói khám sức khỏe */}
+        <section className="py-16 bg-white" id="health-packages">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-blue-800 mb-4">
+                Gói khám sức khỏe
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Chúng tôi cung cấp các gói khám sức khỏe toàn diện, phù hợp với
+                nhu cầu của từng đối tượng
+              </p>
+            </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {healthPackages.length === 0 ? (
+                <div className="text-center text-gray-500">
+                  Không có gói khám sức khỏe nào hiện có.
+                </div>
+              ) : (
+                <HealthPackageList
+                  user={user}
+                  healthPackages={healthPackages}
+                  showDeleteButton={false}
+                  showToggleButton={false}
+                  showDetailButton={false} // Ẩn nút chi tiết cho user thường
+                />
+              )}
+            </div>
+            <div className="text-center mt-10">
+              <Link
+                to="/health-packages"
+                className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
+              >
+                Xem tất cả gói khám{" "}
+                <i className="fas fa-chevron-right ml-2 text-sm"></i>
+              </Link>
             </div>
           </div>
         </section>
 
         {/* Đội ngũ bác sĩ */}
-        <section class="py-16 bg-white">
+        <section class="py-16 bg-gray-50">
           <div class="container mx-auto px-4">
             <div class="text-center mb-16">
               <h2 class="text-3xl font-bold text-blue-800 mb-4">
@@ -266,77 +246,28 @@ function HomePage() {
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
-                <img
-                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/HO-THI-HUONG-THAO.png"
-                  alt="Bác sĩ Nguyễn Thị Mai"
-                  class="w-full h-64 object-cover"
-                />
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-blue-800">
-                    BS. Nguyễn Thị Mai
-                  </h3>
-                  <p class="text-green-600 mb-3">Chuyên khoa Nhi</p>
-                  <p class="text-gray-600 text-sm">
-                    Hơn 15 năm kinh nghiệm khám chữa bệnh nhi, từng công tác tại
-                    Bệnh viện Nhi Trung ương.
-                  </p>
+              {doctors.map((doctor) => (
+                <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
+                  <img
+                    src={doctor?.avatar}
+                    alt="Bác sĩ Nguyễn Thị Mai"
+                    class="w-full h-64 object-cover"
+                  />
+                  <div class="p-6">
+                    <h3 class="text-xl font-bold text-blue-800">
+                      {doctor?.fullName || "Chưa xác định"}
+                    </h3>
+                    <p className="text-green-600 mb-3">
+                      Chuyên khoa{" "}
+                      {doctor?.profile?.specialties[0]?.specialtyName ||
+                        "Chưa xác định"}
+                    </p>
+                    <p className="text-gray-600 text-sm line-clamp-3">
+                      <span dangerouslySetInnerHTML={{ __html: doctor?.profile?.description }} />
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
-                <img
-                  src="https://th.bing.com/th/id/OIP.c6pvDTw7il7NpjVj-4_VIQHaHa?w=183&h=184&c=7&r=0&o=7&dpr=2&pid=1.7&rm=3"
-                  alt="Bác sĩ Trần Văn Nam"
-                  class="w-full h-64 object-cover"
-                />
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-blue-800">
-                    BS. Trần Văn Nam
-                  </h3>
-                  <p class="text-green-600 mb-3">Chuyên khoa Tai Mũi Họng</p>
-                  <p class="text-gray-600 text-sm">
-                    Chuyên gia đầu ngành về Tai Mũi Họng, có nhiều năm nghiên
-                    cứu và làm việc tại nước ngoài.
-                  </p>
-                </div>
-              </div>
-
-              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
-                <img
-                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/Avatar-8.png"
-                  alt="Bác sĩ Lê Thị Hương"
-                  class="w-full h-64 object-cover"
-                />
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-blue-800">
-                    BS. Lê Thị Hương
-                  </h3>
-                  <p class="text-green-600 mb-3">Chuyên khoa Phụ sản</p>
-                  <p class="text-gray-600 text-sm">
-                    Nguyên trưởng khoa Phụ sản Bệnh viện Phụ sản Trung ương, với
-                    20+ năm kinh nghiệm.
-                  </p>
-                </div>
-              </div>
-
-              <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
-                <img
-                  src="https://thiennhanhospital.com/wp-content/uploads/2023/02/NGUYEN-VAN-MY.png"
-                  alt="Bác sĩ Phạm Văn Khánh"
-                  class="w-full h-64 object-cover"
-                />
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-blue-800">
-                    BS. Phạm Văn Khánh
-                  </h3>
-                  <p class="text-green-600 mb-3">Chuyên khoa Răng Hàm Mặt</p>
-                  <p class="text-gray-600 text-sm">
-                    Chuyên gia về nha khoa thẩm mỹ và chỉnh nha, tốt nghiệp Đại
-                    học Y Hà Nội.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
 
             <div class="text-center mt-10">
@@ -370,12 +301,12 @@ function HomePage() {
               height={120}
               style={{ width: "120px", height: "120px" }} // React cần viết dưới dạng object
             />
-            <button
-              type="button"
+            <Link
+              to="/specialties"
               className="absolute right-10 top-1/2 -translate-y-1/2 bg-white text-[#3b4ac1] font-semibold rounded-lg px-6 py-3 hover:bg-[#e6e9ff] transition"
             >
               Đặt lịch ngay
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -449,74 +380,27 @@ function HomePage() {
         <section className="py-16 bg-gray-50" id="news">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-3xl font-bold text-custom-blue mb-6 text-center">
-              Tin tức & sự kiện
+              Tin tức & Sự kiện
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Bài viết 1 */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
-                <img
-                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a460786576427-update-21-10-2024.jpg"
-                  alt="Tin tức 1"
-                  className="w-full h-40 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-xl font-semibold text-custom-blue mb-2">
-                  Tiêu đề bài viết 1
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 1. Đây là một bài viết rất hữu ích
-                  về sức khỏe.
-                </p>
-                <a
-                  href="#"
-                  className="text-green-600 font-medium flex items-center"
-                >
-                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              {/* Bài viết 2 */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
-                <img
-                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a437126934236-update-19-12-2022.png"
-                  alt="Tin tức 2"
-                  className="w-full h-40 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-xl font-semibold text-custom-blue mb-2">
-                  Tiêu đề bài viết 2
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 2. Đây là một bài viết rất hữu ích
-                  về sức khỏe.
-                </p>
-                <a
-                  href="#"
-                  className="text-green-600 font-medium flex items-center"
-                >
-                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
-
-              {/* Bài viết 3 */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
-                <img
-                  src="https://www.benhvienphuchung.com.vn/public/upload/thumbs/a1031028614179-update-28-04-2023.jpg"
-                  alt="Tin tức 3"
-                  className="w-full h-40 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-xl font-semibold text-custom-blue mb-2">
-                  Tiêu đề bài viết 3
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Tóm tắt nội dung bài viết 3. Đây là một bài viết rất hữu ích
-                  về sức khỏe.
-                </p>
-                <a
-                  href="#"
-                  className="text-green-600 font-medium flex items-center"
-                >
-                  Đọc thêm <i className="fas fa-chevron-right ml-2 text-sm"></i>
-                </a>
-              </div>
+              {news.map((item) => (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition hover:shadow-lg">
+                  <NewsCard
+                    key={item._id}
+                    news={item}
+                    isAdmin={user?.role === "admin"}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link
+                to="/news"
+                className="text-green-600 hover:text-green-700 font-medium flex items-center justify-center"
+              >
+                Xem tất cả tin tức{" "}
+                <i className="fas fa-chevron-right ml-2 text-sm"></i>
+              </Link>
             </div>
           </div>
         </section>

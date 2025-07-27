@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import socket from '../lib/socket';
 
 import { 
   Add as AddIcon, 
@@ -30,6 +31,7 @@ import { PatientService } from '../services/patientService';
 import { listService } from '../services/medicalService';
 import { MedicalProcessService } from '../services/medicalProcessService';
 import  appointmentService  from '../services/appointmentService';
+import { getPaymentByAppointmentId, updatePayment } from '../services/paymentService';
 
 const CreateMedicalProcessPage = () => {
   // State management with safe initial values
@@ -80,6 +82,36 @@ const CreateMedicalProcessPage = () => {
     
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện xác nhận lịch hẹn
+    socket.on('appointment_confirmed', (confirmedAppointment) => {
+      setAppointmentsToday(prev => {
+        const exists = prev.some(appt => appt._id === confirmedAppointment._id);
+        if (exists) {
+          return prev.map(appt =>
+            appt._id === confirmedAppointment._id ? confirmedAppointment : appt
+          );
+        } else {
+          return [...prev, confirmedAppointment];
+        }
+      });
+    });
+    return () => {
+      socket.off('appointment_confirmed');
+    };
+  }, []);
+
+  useEffect(() => {
+    // Khi danh sách appointmentsToday thay đổi, đồng bộ lại selectedAppointment nếu cần
+    if (selectedAppointment) {
+      const updated = appointmentsToday.find(appt => appt._id === selectedAppointment._id);
+      if (updated && updated !== selectedAppointment) {
+        setSelectedAppointment(updated);
+      }
+    }
+    // eslint-disable-next-line
+  }, [appointmentsToday]);
 
   // Helper functions
   const showSnackbar = (message, severity = 'success') => {
@@ -153,6 +185,23 @@ const CreateMedicalProcessPage = () => {
         doctorId: doctor?._id || '',
         processSteps: processStepIds
       });
+      const paymentData = await getPaymentByAppointmentId(selectedAppointment._id);
+      
+      const paymentUpdateData = {
+        appointmentId: selectedAppointment._id,
+        examinationFee: paymentData.examinationFee || 0,
+        serviceFee: processStepsForm.map(step => ({
+          serviceId: step.serviceId,
+          fee: services.find(service => service._id === step.serviceId)?.paraPrice || 0
+        })),
+        methodExam: paymentData.methodExam || 'banking',
+        methodService: paymentData.methodService || 'none',
+      };
+
+      await updatePayment(paymentData._id, paymentUpdateData);
+
+      await appointmentService.updateAppointmentStatus(selectedAppointment._id, 'in-progress');
+
 
       showSnackbar('Tạo tiến trình khám thành công!');
       resetForm();
@@ -203,7 +252,7 @@ const CreateMedicalProcessPage = () => {
                     Lịch hẹn <span className="text-red-500">*</span>
                   </Typography>
                   <Autocomplete
-                    options={Array.isArray(appointmentsToday) ? appointmentsToday : []}
+                    options={appointmentsToday.filter(appt => appt.status === 'confirmed')}
                     getOptionLabel={(option) => option?.patientId?.fullName || 'Không xác định'}
                     inputValue={appointmentInputValue}
                     value={selectedAppointment}

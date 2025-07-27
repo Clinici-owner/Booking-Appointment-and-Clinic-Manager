@@ -3,14 +3,12 @@ import {
   CssBaseline,
   Drawer,
   List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   ListItemButton,
+  ListItemIcon,
+  ListItemText
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
-import AssignmentIcon from "@mui/icons-material/Assignment";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EmergencyIcon from '@mui/icons-material/Emergency';
@@ -20,23 +18,19 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PeopleIcon from "@mui/icons-material/People";
 import PersonalInjuryIcon from '@mui/icons-material/PersonalInjury';
-import SettingsIcon from "@mui/icons-material/Settings";
 
 const drawerWidth = 240;
 
 const navItems = [
-  { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/dashboard" },
+  { label: "Thống kê", icon: <DashboardIcon />, path: "/admin/statistical" },
   { label: "Quản lý nhân viên", icon: <PeopleIcon />, path: "/admin/staffs" },
   { label: "Quản lý bệnh nhân", icon: <PersonalInjuryIcon />, path: "/admin/patients" },
   { label: "Quản lý chuyên khoa", icon: <EmergencyIcon />, path: "/admin/specialties" },
-  { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedules/add" },
+  { label: "Quản lý gói khám sức khỏe", icon: <MedicalServicesIcon />, path: "/admin/health-packages" },
+  { label: "Quản lý lịch làm việc", icon: <CalendarMonthIcon />, path: "/admin/schedules/manage" },
   { label: "Quản lý lịch hẹn", icon: <EventIcon />, path: "/admin/appointment-admin" },
   { label: "Dịch vụ y tế", icon: <MedicalServicesIcon />, path: "/createMedical" },
-  { label: "Hồ sơ bệnh án", icon: <AssignmentIcon />, path: "/admin/records" },
   { label: "Tạo bài đăng", icon: <NewspaperIcon />, path: "/admin/news" },
-  { label: "Tài chính & thanh toán", icon: <MonetizationOnIcon />, path: "/admin/billing" },
-  { label: "Cài đặt hệ thống", icon: <SettingsIcon />, path: "/admin/settings" },
-  { label: "Quản lý gói khám sức khỏe", icon: <MedicalServicesIcon />, path: "/admin/health-packages" },
 ];
 
 export default function AdminNavSidebar({ children }) {

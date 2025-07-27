@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { getScheduleByDoctorAndShiftAndDate } from "../services/scheduleService";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 function AppointmentManageCard({ appointment, onClick }) {
+  const [schedule, setSchedule] = React.useState(null);
+
   const formatVietnameseDate = (dateStr) => {
     const date = new Date(dateStr);
     const weekdays = [
@@ -17,12 +26,49 @@ function AppointmentManageCard({ appointment, onClick }) {
     } năm ${date.getFullYear()}`;
   };
 
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (appointment && appointment.doctorId && appointment.time) {
+        try {
+          const utcTime = dayjs(appointment.time).utc();
+
+          const hour = utcTime.hour(); // kiểu số: 0 → 23
+          const minute   = utcTime.minute(); // kiểu số: 0 → 59
+
+          const utcDate = new Date(appointment.time);
+          const vnDate = new Date(utcDate.getTime());
+          const formattedDate = vnDate.toISOString().split("T")[0];
+
+          const totalMinutes = hour * 60 + minute;
+
+
+          let shift = "AFTERNOON";
+          if (totalMinutes >= 420 && totalMinutes < 690) shift = "MORNING";
+          else if (totalMinutes >= 690 && totalMinutes < 810) shift = "NOON";
+          const schedule = await getScheduleByDoctorAndShiftAndDate(
+            appointment.doctorId._id,
+            shift,
+            formattedDate
+          );
+          setSchedule(schedule);
+        } catch (error) {
+          console.error("Lỗi khi lấy lịch trình:", error);
+        }
+      }
+    };
+    fetchSchedule();
+  }, [appointment]);
+
   const getStatusStyles = (status) => {
     switch (status) {
       case "pending":
         return "bg-amber-50 text-amber-700 border border-amber-200";
       case "confirmed":
         return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+      case "in-progress":
+        return "bg-blue-50 text-blue-700 border border-blue-200";
+      case "completed":
+        return "bg-green-50 text-green-700 border border-green-200";
       case "cancelled":
         return "bg-red-50 text-red-700 border border-red-200";
       default:
@@ -35,7 +81,7 @@ function AppointmentManageCard({ appointment, onClick }) {
 
   return (
     <div
-      className="bg-white shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl p-6 mb-6 border border-gray-100 cursor-pointer transform hover:-translate-y-1 hover:scale-[1.01] group"
+      className="bg-white shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl p-6 mb-6 border border-gray-100 transform group"
       onClick={() => onClick(appointment)}
     >
       {/* Header */}
@@ -46,21 +92,25 @@ function AppointmentManageCard({ appointment, onClick }) {
           </h3>
         </div>
 
-        {!appointment.hideStatus && (
-        <span
-          className={`text-sm font-semibold px-3 py-1.5 rounded-full ${getStatusStyles(
-            appointment.status
-          )}`}
-        >
-          {appointment.status === "pending"
-            ? "Chờ xác nhận"
-            : appointment.status === "confirmed"
-            ? "Đã xác nhận"
-            : appointment.status === "cancelled"
-            ? "Đã hủy"
-            : "Đã khám xong"}
-        </span>
-  )}
+        <div className="flex flex-col items-center space-x-2">
+          {!appointment.hideStatus && (
+            <span
+              className={`text-sm font-semibold px-3 py-1.5 rounded-full ${getStatusStyles(
+                appointment.status
+              )}`}
+            >
+              {appointment.status === "pending"
+                ? "Chưa tới khám"
+                : appointment.status === "confirmed"
+                ? "Đã tới khám"
+                : appointment.status === "cancelled"
+                ? "Đã hủy"
+                : appointment.status === "in-progress"
+                ? "Đang khám"
+                : "Đã khám xong"}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center space-x-2 mb-4">
@@ -88,7 +138,12 @@ function AppointmentManageCard({ appointment, onClick }) {
           {formatVietnameseDate(appointment.time)}
         </p>
       </div>
-
+      {/* Phòng Khám */}
+      <div className="flex items-center space-x-2 mb-4">
+        <p className="text-gray-700 whitespace-nowrap">
+          <strong>Phòng khám: {schedule?.room.roomNumber}</strong>
+        </p>
+      </div>
       {/* Chuyên khoa */}
       {appointment.specialties?.length > 0 && (
         <div className="flex items-center space-x-2 mb-4">
@@ -125,6 +180,15 @@ function AppointmentManageCard({ appointment, onClick }) {
             </span>
           </p>
         </div>
+      </div>
+      <div className="flex justify-end mt-4">
+        <Link
+          to={`/receptionist/appointment-receptionist/detail/${appointment._id}`}
+          state={{ appointment }} // 👈 state đặt ngoài
+          className="inline-block text-sm font-semibold rounded-full cursor-pointer text-blue-500 p-2 border border-blue-500 hover:text-blue-600 transition-colors duration-200"
+        >
+          Xem chi tiết
+        </Link>
       </div>
     </div>
   );
