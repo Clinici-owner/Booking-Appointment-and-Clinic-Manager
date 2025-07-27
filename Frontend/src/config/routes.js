@@ -63,6 +63,7 @@ const MedicalProcessDetailPage = React.lazy(() => import("../pages/MedicalProces
 const PatientMedicalHistoryListPage = React.lazy(() => import("../pages/PatientMedicalHistoryListPage"));
 const PatientMedicalHistoryDetailPage = React.lazy(() => import("../pages/PatientMedicalHistoryDetailPage"));
 const DoctorAppointmentListPage = React.lazy(() => import("../pages/DoctorAppointmentListPage"));
+const ViewDoctorProfilePage = React.lazy(() => import("../pages/ViewDoctorProfilePage"));
 
 const MyProcessPage = React.lazy(() => import("../pages/MyProcessPage"));
 const ListMedicalStepsTodayByRoomPage = React.lazy(() => import("../pages/ListMedicalStepsTodayByRoomPage"));
@@ -170,6 +171,7 @@ const AppRoute = [
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_LIST, page: PatientMedicalHistoryListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL, page: PatientMedicalHistoryDetailPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
   { path: ROUTE_PATH.DOCTOR_APPOINTMENT_LIST, page: DoctorAppointmentListPage, layout: DoctorLayout, allowedRoles: ["doctor"] },
+  { path: ROUTE_PATH.VIEW_DOCTOR_PROFILE, page: ViewDoctorProfilePage, layout: DoctorLayout, allowedRoles: ["doctor"] },
 
   //Patient
   { path: ROUTE_PATH.PATIENT_MY_PROCESS, page: MyProcessPage, layout: MainLayout , allowedRoles: ["patient"] },

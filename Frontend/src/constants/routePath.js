@@ -60,6 +60,7 @@ export const ROUTE_PATH = {
   DOCTOR_PATIENT_MEDICAL_HISTORY_LIST: '/doctor/patient-medical-histories',
   DOCTOR_PATIENT_MEDICAL_HISTORY_DETAIL: '/doctor/patient-medical-history',
   DOCTOR_APPOINTMENT_LIST: '/doctor/appointment-list',
+  VIEW_DOCTOR_PROFILE: '/doctor/profile/:doctorId',
 
   //News manager
   CREATE_NEWS: '/admin/news',
