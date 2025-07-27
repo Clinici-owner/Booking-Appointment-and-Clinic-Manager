@@ -248,24 +248,26 @@ function HomePage() {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {doctors.map((doctor) => (
                 <div class="bg-white rounded-xl overflow-hidden shadow-md doctor-card transition">
-                <img
-                  src={doctor.avatar}
-                  alt="Bác sĩ Nguyễn Thị Mai"
-                  class="w-full h-64 object-cover"
-                />
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-blue-800">
-                    {doctor.fullName || "Chưa xác định"}
-                  </h3>
-                  <p class="text-green-600 mb-3">Chuyên khoa {doctor.profile.specialties[0].specialtyName || "Chưa xác định"}</p>
-                  <p class="text-gray-600 text-sm">
-                    {doctor.profile.description || "Chưa có mô tả"}
-                  </p>
+                  <img
+                    src={doctor?.avatar}
+                    alt="Bác sĩ Nguyễn Thị Mai"
+                    class="w-full h-64 object-cover"
+                  />
+                  <div class="p-6">
+                    <h3 class="text-xl font-bold text-blue-800">
+                      {doctor?.fullName || "Chưa xác định"}
+                    </h3>
+                    <p className="text-green-600 mb-3">
+                      Chuyên khoa{" "}
+                      {doctor?.profile?.specialties[0]?.specialtyName ||
+                        "Chưa xác định"}
+                    </p>
+                    <p className="text-gray-600 text-sm line-clamp-3">
+                      <span dangerouslySetInnerHTML={{ __html: doctor?.profile?.description }} />
+                    </p>
+                  </div>
                 </div>
-              </div>
               ))}
-
-              
             </div>
 
             <div class="text-center mt-10">
@@ -390,7 +392,6 @@ function HomePage() {
                   />
                 </div>
               ))}
-              
             </div>
             <div className="text-center mt-10">
               <Link
@@ -401,8 +402,8 @@ function HomePage() {
                 <i className="fas fa-chevron-right ml-2 text-sm"></i>
               </Link>
             </div>
-            </div>
-          </section>
+          </div>
+        </section>
 
         {/* Liên hệ */}
         <section className="py-16 bg-white" id="contact">
