@@ -26,7 +26,7 @@ export const uploadCCCDImage = async (file) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await axios.post("http://localhost:3000/api/chat/cccd", formData, {
+  const response = await axios.post("https://booking-appointment-be.up.railway.app/api/chat/cccd", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

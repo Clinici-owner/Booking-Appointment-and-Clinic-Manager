@@ -192,8 +192,8 @@ const AppRoute = [
   { path: ROUTE_PATH.APPOINTMENT_ADMIN, page: AppointmentAdminPage, layout: AdminLayout, allowedRoles: ["admin"]},
 
   //Appointment for receptionist
-  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
-  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST_DETAIL, page: AppointmentDetailReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist"] },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST, page: AppointmentReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist", "admin"] },
+  { path: ROUTE_PATH.APPOINTMENT_RECEPTIONIST_DETAIL, page: AppointmentDetailReceptionistPage, layout: ReceptionistLayout, allowedRoles: ["receptionist", "admin"] },
 
   //Booking from package
 
