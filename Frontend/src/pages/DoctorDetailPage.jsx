@@ -69,7 +69,7 @@ const DoctorDetailPage = () => {
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">Giới thiệu</h2>
             <p className="text-gray-700 bg-gray-50 p-4 rounded-md whitespace-pre-line">
-              {doctor.profile.description || 'Không có mô tả'}
+              <span dangerouslySetInnerHTML={{ __html: doctor.profile.description }} />
             </p>
           </div>
 
