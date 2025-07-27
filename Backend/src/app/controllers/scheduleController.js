@@ -334,6 +334,7 @@ class ScheduleController {
     }
 
     const parsedDate = new Date(date);
+    parsedDate.setHours(0, 0, 0, 0); // Giờ về 0h
     if (isNaN(parsedDate.getTime())) {
       return res.status(400).json({ message: "Giá trị ngày không hợp lệ" });
     }
