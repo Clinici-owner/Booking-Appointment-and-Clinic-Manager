@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { DoctorService } from '../services/doctorService';
@@ -364,7 +364,6 @@ function ScheduleAddPage() {
             })();
             const selectedDates = Array.isArray(modalForm.date) ? modalForm.date : [modalForm.date];
             const userIds = Array.isArray(modalForm.userId) ? modalForm.userId : [modalForm.userId];
-            // Gửi đúng format cho backend: userIds, room, shift, dates
             await createSchedule({
                 userIds,
                 room: currentRoom,
@@ -385,7 +384,7 @@ function ScheduleAddPage() {
     };
 
     function MultiSelectDateDropdown({ days, selected, onChange }) {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const localSelected = Array.isArray(selected) ? selected : (selected ? [selected] : []);
@@ -402,6 +401,7 @@ function ScheduleAddPage() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setOpen(false);
             }
+            
         };
 
         document.addEventListener("mousedown", handleClickOutside);
