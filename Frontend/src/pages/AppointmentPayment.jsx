@@ -176,46 +176,46 @@ function AppointmentPayment() {
 
             if (typeAppointment === "healthPackage") {
 
-              const processStepPromises = healthPackage.service.map(
-                async (service, index) => {
-                  const stepData = {
-                    serviceId: service._id,
-                    note: "",
-                    patientId: appointment.patientId,
-                    isFirstStep: index === 0,
-                  };
-                  const result = await MedicalProcessService.createProcessStep(
-                    stepData
-                  );
-                  console.log("Created step:", result);
-                  return result;
-                }
-              );
+              // const processStepPromises = healthPackage.service.map(
+              //   async (service, index) => {
+              //     const stepData = {
+              //       serviceId: service._id,
+              //       note: "",
+              //       patientId: appointment.patientId,
+              //       isFirstStep: index === 0,
+              //     };
+              //     const result = await MedicalProcessService.createProcessStep(
+              //       stepData
+              //     );
+              //     console.log("Created step:", result);
+              //     return result;
+              //   }
+              // );
 
-              console.log(processStepPromises);
+              // console.log(processStepPromises);
 
-              const createdSteps = await Promise.all(processStepPromises);
-              const processStepIds = createdSteps
-                .map((step) => step?._id)
-                .filter(Boolean);
+              // const createdSteps = await Promise.all(processStepPromises);
+              // const processStepIds = createdSteps
+              //   .map((step) => step?._id)
+              //   .filter(Boolean);
 
-              if (processStepIds.length !== healthPackage.service.length) {
-                throw new Error("Some process steps failed to create");
-              }
+              // if (processStepIds.length !== healthPackage.service.length) {
+              //   throw new Error("Some process steps failed to create");
+              // }
 
-              // Create the main medical process
-              await MedicalProcessService.createMedicalProcess({
-                appointmentId: appointment._id,
-                doctorId: doctor?._id || "",
-                processSteps: processStepIds,
-              });
+              // // Create the main medical process
+              // await MedicalProcessService.createMedicalProcess({
+              //   appointmentId: appointment._id,
+              //   doctorId: doctor?._id || "",
+              //   processSteps: processStepIds,
+              // });
 
               const paymentData = {
               appointmentId: appointment._id,
               examinationFee: specialty.medicalFee,
               serviceFee: healthPackage.service.map((service) => ({
                 serviceId: service._id,
-                fee: service.fee,
+                fee: service.paraPrice || 0,
               })),
               methodExam: "banking",
             };
@@ -323,7 +323,8 @@ function AppointmentPayment() {
             <strong>Chuyên khoa:</strong> {specialty?.specialtyName}
           </p>
           <p>
-            <strong>Mô tả:</strong> {doctor?.description}
+            <strong>Mô tả:</strong> 
+            <span dangerouslySetInnerHTML={{ __html: doctor?.description }} />
           </p>
         </div>
       </div>
