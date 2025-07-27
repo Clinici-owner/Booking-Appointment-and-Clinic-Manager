@@ -14,7 +14,7 @@ class ChatController {
         });
     }
 
-    if (!prompt || typeof prompt !== "strin g") {
+    if (!prompt || typeof prompt !== "string") {
       return res.status(400).json({ error: "Thiếu nội dung prompt." });
     }
 
