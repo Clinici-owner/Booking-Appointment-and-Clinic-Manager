@@ -194,6 +194,7 @@ function AppointmentSpecialtyPage() {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // chuẩn hóa về đầu ngày giờ VN
 
+        console.log("Fetching schedules for specialty:", id, "on date:", today);
         const response = await getSchedulesBySpecialtyAndDate(
           id,
           today.toISOString()
