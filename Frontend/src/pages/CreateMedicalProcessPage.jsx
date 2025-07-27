@@ -160,31 +160,31 @@ const CreateMedicalProcessPage = () => {
 
     try {
       // Create process steps with error handling
-      const processStepPromises = processStepsForm.map((step, idx) => 
-        MedicalProcessService.createProcessStep({
-          serviceId: step.serviceId,
-          notes: step.notes || '',
-          patientId: selectedAppointment.patientId, // vẫn truyền patientId cho bước processStep nếu cần
-          isFirstStep: idx === 0
-        }).catch(error => {
-          console.error('Error creating process step:', error);
-          throw new Error('Failed to create one or more process steps');
-        })
-      );
+      // const processStepPromises = processStepsForm.map((step, idx) => 
+      //   MedicalProcessService.createProcessStep({
+      //     serviceId: step.serviceId,
+      //     notes: step.notes || '',
+      //     patientId: selectedAppointment.patientId, // vẫn truyền patientId cho bước processStep nếu cần
+      //     isFirstStep: idx === 0
+      //   }).catch(error => {
+      //     console.error('Error creating process step:', error);
+      //     throw new Error('Failed to create one or more process steps');
+      //   })
+      // );
 
-      const createdSteps = await Promise.all(processStepPromises);
-      const processStepIds = createdSteps.map(step => step?._id).filter(Boolean);
+      // const createdSteps = await Promise.all(processStepPromises);
+      // const processStepIds = createdSteps.map(step => step?._id).filter(Boolean);
 
-      if (processStepIds.length !== processStepsForm.length) {
-        throw new Error('Some process steps failed to create');
-      }
+      // if (processStepIds.length !== processStepsForm.length) {
+      //   throw new Error('Some process steps failed to create');
+      // }
 
-      // Create the main medical process
-      await MedicalProcessService.createMedicalProcess({
-        appointmentId: selectedAppointment._id,
-        doctorId: doctor?._id || '',
-        processSteps: processStepIds
-      });
+      // // Create the main medical process
+      // await MedicalProcessService.createMedicalProcess({
+      //   appointmentId: selectedAppointment._id,
+      //   doctorId: doctor?._id || '',
+      //   processSteps: processStepIds
+      // });
       const paymentData = await getPaymentByAppointmentId(selectedAppointment._id);
       
       const paymentUpdateData = {
