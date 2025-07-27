@@ -133,7 +133,7 @@ const DoctorListPage = () => {
               {/* ---------- OVERLAY (hover) ---------- */}
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 px-4 text-center opacity-0 transition duration-300 group-hover:opacity-100">
                 <p className="mb-2 text-lg font-semibold text-white">
-                  {d.profile?.yearsOfExperience || 0} years experience
+                  {d.profile?.yearsOfExperience || 0} Năm Kinh Nghiệm
                 </p>
                 <p className="mb-4 line-clamp-3 text-sm text-gray-100">
                   {d.profile?.description || "Professional doctor"}
@@ -145,7 +145,7 @@ const DoctorListPage = () => {
                     goDetail(d._id);
                   }}
                 >
-                  View Profile
+                  Xem Hồ Sơ 
                 </button>
               </div>
             </div>
