@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { DoctorService } from '../services/doctorService';
@@ -385,84 +385,112 @@ function ScheduleAddPage() {
     };
 
     function MultiSelectDateDropdown({ days, selected, onChange }) {
-        const [open, setOpen] = useState(false);
-        // Đảm bảo localSelected luôn là mảng
-        const localSelected = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+    const [open, setOpen] = useState(true);
+    const dropdownRef = useRef(null);
 
-        const handleToggle = () => setOpen(v => !v);
-        const handleBlur = (e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+    const localSelected = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+
+    const handleToggle = () => setOpen(prev => !prev);
+
+    const handleRemoveDate = (date) => {
+        const newSelected = localSelected.filter(d => d !== date);
+        onChange(newSelected);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpen(false);
+            }
         };
 
-        const handleRemoveDate = (date) => {
-            const newSelected = localSelected.filter(d => d !== date);
-            onChange(newSelected);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
         };
+    }, []);
 
-        return (
-            <div className="relative" tabIndex={0} onBlur={handleBlur}>
-                {/* Render selected dates OUTSIDE the trigger button */}
-                <div className="flex flex-wrap gap-1 mb-1">
-                    {localSelected.map(date => (
-                        <span
-                            key={date}
-                            className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white hover:scale-105 hover:z-10"
+    return (
+        <div className="relative" ref={dropdownRef}>
+            {/* Ngày đã chọn */}
+            <div className="flex flex-wrap gap-1 mb-1">
+                {localSelected.map(date => (
+                    <span
+                        key={date}
+                        className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs mr-1 mb-1 inline-flex items-center font-bold transition-all duration-150 hover:bg-blue-600 hover:text-white hover:scale-105 hover:z-10"
+                    >
+                        {new Date(date).toLocaleDateString('vi-VN', {
+                            day: '2-digit', month: '2-digit', year: 'numeric'
+                        })}
+                        <button
+                            type="button"
+                            className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
+                            style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
+                            aria-label={`Xóa ngày ${date}`}
+                            onClick={e => {
+                                e.stopPropagation();
+                                handleRemoveDate(date);
+                            }}
                         >
-                            {new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                            <button
-                                type="button"
-                                className="ml-1 text-gray-700 hover:text-red-600 focus:outline-none font-bold"
-                                style={{ fontSize: '22px', lineHeight: 1, padding: 0, fontWeight: 900 }}
-                                aria-label={`Xóa ngày ${date}`}
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    handleRemoveDate(date);
-                                }}
-                            >
-                                ×
-                            </button>
-                        </span>
-                    ))}
-                </div>
-                <button
-                    type="button"
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px] relative"
-                    onClick={handleToggle}
-                >
-                    {localSelected.length > 0
-                        ? localSelected.map(date => new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })).join(', ')
-                        : <span className="text-gray-400">Chọn ngày</span>}
-                    <span className="pointer-events-none flex items-center absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6" /></svg>
+                            ×
+                        </button>
                     </span>
-                </button>
-                {open && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
-                        {days.map(d => (
+                ))}
+            </div>
+
+            {/* Nút toggle dropdown */}
+            <button
+                type="button"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-wrap min-h-[40px] relative"
+                onClick={handleToggle}
+            >
+                {localSelected.length > 0
+                    ? localSelected
+                        .map(date =>
+                            new Date(date).toLocaleDateString('vi-VN', {
+                                day: '2-digit', month: '2-digit', year: 'numeric'
+                            })
+                        ).join(', ')
+                    : <span className="text-gray-400">Chọn ngày</span>}
+                <span className="pointer-events-none flex items-center absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="#555" strokeWidth="2" d="M6 9l6 6 6-6" />
+                    </svg>
+                </span>
+            </button>
+
+            {/* Dropdown ngày */}
+            {open && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-56 overflow-y-auto animate-fade-in">
+                    {days.map(d => {
+                        const dateValue = addOneDayToDateString(d.date);
+                        return (
                             <label key={d.date} className="flex items-center px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm">
                                 <input
                                     type="checkbox"
                                     className="mr-2 accent-blue-600"
-                                    checked={localSelected.includes(addOneDayToDateString(d.date))}
+                                    checked={localSelected.includes(dateValue)}
                                     onChange={e => {
                                         let newSelected = [...localSelected];
                                         if (e.target.checked) {
-                                            if (!newSelected.includes(addOneDayToDateString(d.date))) newSelected.push(addOneDayToDateString(d.date));
+                                            if (!newSelected.includes(dateValue)) newSelected.push(dateValue);
                                         } else {
-                                            newSelected = newSelected.filter(date => date !== addOneDayToDateString(d.date));
+                                            newSelected = newSelected.filter(date => date !== dateValue);
                                         }
                                         onChange(newSelected);
                                     }}
                                 />
-                                {/* Hiển thị ngày đã cộng thêm 1 ngày */}
-                                {new Date(addOneDayToDateString(d.date)).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                {new Date(dateValue).toLocaleDateString('vi-VN', {
+                                    day: '2-digit', month: '2-digit', year: 'numeric'
+                                })}
                             </label>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-    }
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
 
 
 
@@ -477,6 +505,7 @@ function ScheduleAddPage() {
     const [roomError, setRoomError] = useState(null);
     const [doctors, setDoctors] = useState([]);
     const [receptionists, setReceptionists] = useState([]);
+    const [nursing, setNursing] = useState([]);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
     const [doctorError, setDoctorError] = useState(null);
     
@@ -544,6 +573,19 @@ function ScheduleAddPage() {
         };
         fetchReceptionists();
     }, []);
+
+    useEffect(() => {
+        const fetchNursing = async () => {
+            try {
+                const { getAllNursingStaff } = await import('../services/scheduleService');
+                const users = await getAllNursingStaff();
+                setNursing(users);
+            } catch {
+                setNursing([]);
+            }
+        };
+        fetchNursing();
+    }, [])
 
     if (fetchError || roomError || doctorError) {
         return (
@@ -1027,29 +1069,15 @@ function ScheduleAddPage() {
                                     />
                                     <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Điều dưỡng</label>
                                     <MultiSelectDropdown
-                                        users={doctors.filter(u => u.role === 'nursing')}
+                                        users={nursing}
                                         selected={modalForm.userId}
                                         onChange={newSelected =>
                                             modalForm._id
                                                 ? setModalForm(prev => ({ ...prev, userId: newSelected.slice(-1) }))
                                                 : setModalForm(prev => ({ ...prev, userId: newSelected }))
                                         }
-                                        placeholder="Chọn điều dưỡng"
-                                        bookedUserIds={(() => {
-                                            const currentRoom = modalForm.room;
-                                            const currentDate = Array.isArray(modalForm.date) ? modalForm.date[0] : modalForm.date;
-                                            const currentShift = modalForm.shift || formData.shift;
-                                            let booked = [];
-                                            if (currentRoom && currentShift && currentDate) {
-                                                booked = serverSchedules.filter(s =>
-                                                    (s.room?._id === currentRoom || s.room === currentRoom || s.room?.roomNumber === currentRoom)
-                                                    && new Date(s.date).toISOString().slice(0, 10) === new Date(currentDate).toISOString().slice(0, 10)
-                                                    && s.shift === currentShift
-                                                    && (!modalForm._id || s._id !== modalForm._id)
-                                                ).map(s => (s.userId?._id || s.userId)).filter(Boolean);
-                                            }
-                                            return booked;
-                                        })()}
+                                        placeholder="Chọn lễ tân"
+                                        bookedUserIds={[]}
                                         editMode={!!modalForm._id}
                                     />
                                     <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Lễ tân</label>

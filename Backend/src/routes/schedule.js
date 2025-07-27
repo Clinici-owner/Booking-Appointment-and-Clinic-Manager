@@ -6,6 +6,7 @@ const upload = multer();
 
 router.get('/all', scheduleController.getAllSchedules);
 // Route lấy tất cả lễ tân
+router.get('/nursing', scheduleController.getAllNursing);
 router.get('/receptionists', scheduleController.getAllReceptionists);
 router.post('/', scheduleController.createSchedule);
 router.get('/schedule-by-specialty/:specialtyId', scheduleController.getSchedulesBySpecialtyAndDate);

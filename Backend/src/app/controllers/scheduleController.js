@@ -16,6 +16,18 @@ class ScheduleController {
       res.status(500).json({ error: error.message });
     }
   }
+
+ async getAllNursing(req, res) {
+  try {
+    const nursingStaff = await User.find({ role: 'nursing' });
+    res.status(200).json(nursingStaff);
+  } catch (error) {
+    console.error("Lỗi getAllNursing:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
   
   async getAllSchedules(req, res) {
     try {

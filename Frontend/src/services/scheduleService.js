@@ -10,6 +10,19 @@ export const getAllReceptionists = async () => {
         throw error;
     }
 };
+
+export const getAllNursingStaff = async () => {
+    try {
+        const res = await axios.get('http://localhost:3000/api/schedules/nursing');
+        if (!Array.isArray(res.data)) {
+            throw new Error('Dữ liệu nhân viên y tá không hợp lệ.');
+        }
+        return res.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách nhân viên y tá:', error);
+        throw error;
+    }
+}
 import axios from 'axios';
 
 const API_URL = 'https://booking-appointment-be.up.railway.app/api/schedules';
