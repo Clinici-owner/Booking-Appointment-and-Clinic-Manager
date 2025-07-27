@@ -136,7 +136,7 @@ const DoctorListPage = () => {
                   {d.profile?.yearsOfExperience || 0} years experience
                 </p>
                 <p className="mb-4 line-clamp-3 text-sm text-gray-100">
-                  {d.profile?.description || "Professional doctor"}
+                  <span dangerouslySetInnerHTML={{ __html: d.profile?.description }} />
                 </p>
                 <button
                   className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

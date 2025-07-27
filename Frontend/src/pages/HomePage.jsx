@@ -263,7 +263,7 @@ function HomePage() {
                         "Chưa xác định"}
                     </p>
                     <p className="text-gray-600 text-sm line-clamp-3">
-                      {doctor?.profile?.description || "Chưa có mô tả"}
+                      <span dangerouslySetInnerHTML={{ __html: doctor?.profile?.description }} />
                     </p>
                   </div>
                 </div>
