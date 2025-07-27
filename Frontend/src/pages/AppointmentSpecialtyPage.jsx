@@ -30,7 +30,7 @@ function AppointmentSpecialtyPage() {
   const [symptoms, setSymptoms] = useState("");
 
   const location = useLocation();
-  
+
   const typeAppointment = location.state?.typeAppointment || "specialty";
   const packageId = location.state?.healthPackageId || null;
 
@@ -85,8 +85,6 @@ function AppointmentSpecialtyPage() {
     const [endHour, endMinute] = end.split(":").map(Number);
     const formatted = new Date(scheduleDate).toISOString().split("T")[0];
 
-        
-
     while (hour < endHour || (hour === endHour && minute < endMinute)) {
       const startTime = `${hour.toString().padStart(2, "0")}:${minute
         .toString()
@@ -95,9 +93,9 @@ function AppointmentSpecialtyPage() {
       // Check nếu thời gian này đã được đặt rồi
       const isBooked = list.some(
         (item) =>
-          (item.doctorId === doctorId &&
-            item.dateAppointment === formatted &&
-            item.timeAppointment === startTime)
+          item.doctorId === doctorId &&
+          item.dateAppointment === formatted &&
+          item.timeAppointment === startTime
       );
 
       if (!isBooked) {
@@ -194,21 +192,20 @@ function AppointmentSpecialtyPage() {
     const fetchSchedules = async () => {
       try {
         const today = new Date();
-        console.log("Today:", today);
-        
-        today.setHours(0, 0, 0, 0); // chuẩn hóa giờ về đầu ngày
-        const response = await getSchedulesBySpecialtyAndDate(id, today.toISOString());
+        today.setHours(0, 0, 0, 0); // chuẩn hóa về đầu ngày giờ VN
 
-        console.log("Schedules response:", response);
-        
+        const response = await getSchedulesBySpecialtyAndDate(
+          id,
+          today.toISOString()
+        );
         setSchedules(response);
-      } catch (err) {
-        console.error("Lỗi khi lấy danh sách lịch:", err);
+      } catch (error) {
+        console.error("Lỗi khi lấy lịch trình:", error);
       }
     };
 
     if (id) {
-      fetchData(); 
+      fetchData();
       fetchDoctors();
       fetchSchedules();
     }
@@ -372,7 +369,6 @@ function AppointmentSpecialtyPage() {
                             <CheckIcon className="w-5 h-5" />
                           </div>
                         )}
-                        
 
                         {/* Avatar hình tròn */}
                         <img
