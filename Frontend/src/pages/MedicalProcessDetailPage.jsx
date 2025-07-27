@@ -117,7 +117,9 @@ const MedicalProcessDetailPage = () => {
     const statusInfo = getStatusInfo(process.status);
 
     // Kiểm tra tất cả các bước đã hoàn thành
-    const allStepsCompleted = process.processSteps.every(step => step.isCompleted);
+    const allStepsCompleted = Array.isArray(process.processSteps) && process.processSteps.length > 0
+        ? process.processSteps.every(step => step && step.isCompleted)
+        : false;
 
 
     // Hàm lưu finalResult
@@ -167,20 +169,24 @@ const MedicalProcessDetailPage = () => {
                     <div className="border rounded-lg p-4">
                         <h2 className="text-lg font-medium text-gray-800 mb-3">Thông tin bệnh nhân</h2>
                         <div className="flex items-center">
+                        {process.appointmentId?.patientId?.avatar ? (
                             <img
-                                src={process.appointmentId?.patientId?.avatar}
-                                alt={process.appointmentId?.patientId?.fullName}
+                                src={process.appointmentId.patientId.avatar}
+                                alt={process.appointmentId.patientId.fullName || 'avatar'}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
                             />
+                        ) : (
+                            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                N/A
+                            </div>
+                        )}
                             <div className="ml-4">
-                                <h3
-                                    className="text-lg font-semibold text-gray-800 "
-                                >
-                                    {process.appointmentId?.patientId?.fullName}
+                                <h3 className="text-lg font-semibold text-gray-800 ">
+                                    {process.appointmentId?.patientId?.fullName || 'Không rõ tên'}
                                 </h3>
-                                <p className="text-sm text-gray-600">{process.appointmentId?.patientId?.email}</p>
+                                <p className="text-sm text-gray-600">{process.appointmentId?.patientId?.email || 'Không rõ email'}</p>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    Giới tính: {process.appointmentId?.patientId?.gender ? 'Nam' : 'Nữ'}
+                                    Giới tính: {process.appointmentId?.patientId?.gender === true ? 'Nam' : process.appointmentId?.patientId?.gender === false ? 'Nữ' : 'Không rõ'}
                                 </p>
                             </div>
                         </div>
@@ -190,20 +196,24 @@ const MedicalProcessDetailPage = () => {
                     <div className="border rounded-lg p-4">
                         <h2 className="text-lg font-medium text-gray-800 mb-3">Thông tin bác sĩ</h2>
                         <div className="flex items-center">
+                        {process.doctorId?.avatar ? (
                             <img
                                 src={process.doctorId.avatar}
-                                alt={process.doctorId.fullName}
+                                alt={process.doctorId.fullName || 'avatar'}
                                 className="w-16 h-16 rounded-full object-cover cursor-pointer"
                             />
+                        ) : (
+                            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                N/A
+                            </div>
+                        )}
                             <div className="ml-4">
-                                <h3
-                                    className="text-lg font-semibold text-gray-800"
-                                >
-                                    {process.doctorId.fullName}
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                    {process.doctorId?.fullName || 'Không rõ tên'}
                                 </h3>
-                                <p className="text-sm text-gray-600">{process.doctorId.email}</p>
+                                <p className="text-sm text-gray-600">{process.doctorId?.email || 'Không rõ email'}</p>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    Số điện thoại: {process.doctorId.phone}
+                                    Số điện thoại: {process.doctorId?.phone || 'Không rõ' }
                                 </p>
                             </div>
                         </div>
@@ -214,24 +224,25 @@ const MedicalProcessDetailPage = () => {
                 <div className="px-6 py-4">
                     <h2 className="text-lg font-medium text-gray-800 mb-4">Các bước thực hiện</h2>
                     <div className="space-y-4">
-                        {process.processSteps.map((step, index) => {
+                        {Array.isArray(process.processSteps) && process.processSteps.length > 0 ? process.processSteps.map((step, index) => {
+                            if (!step || !step.serviceId || !step.serviceId.room) return null;
                             // Tìm medicalHistory có processStep._id trùng với step._id
                             const relatedHistory = medicalHistories.find(h => h.processStep && h.processStep._id === step._id);
                             return (
                                 <div
-                                    key={step._id}
+                                    key={step._id || index}
                                     className={`border rounded-lg p-4 ${step.isCompleted ? 'bg-green-50' : 'bg-white'} shadow-sm hover:shadow-md transition-shadow duration-200`}
                                 >
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h3 className="font-medium text-gray-800">
-                                                Bước {index + 1}: {step.serviceId.paraclinalName}
+                                                Bước {index + 1}: {step.serviceId?.paraclinalName || 'Không rõ tên dịch vụ'}
                                             </h3>
                                             <p className="text-sm text-gray-600 mt-1">
-                                                Phòng: {step.serviceId.room.roomNumber} - {step.serviceId.room.roomName}
+                                                Phòng: {step.serviceId?.room?.roomNumber || 'N/A'} - {step.serviceId?.room?.roomName || 'N/A'}
                                             </p>
                                             <p className="text-sm text-gray-600">
-                                                Giá: {step.serviceId.paraPrice.toLocaleString()} VND
+                                                Giá: {step.serviceId?.paraPrice ? step.serviceId.paraPrice.toLocaleString() : 'N/A'} VND
                                             </p>
                                             {step.notes && (
                                                 <div className="mt-2">
@@ -240,24 +251,26 @@ const MedicalProcessDetailPage = () => {
                                                 </div>
                                             )}
                                             {/* Hiển thị kết quả nếu có */}
-                                            {relatedHistory && relatedHistory.resultFiles && relatedHistory.resultFiles.length > 0 && (
+                                            {relatedHistory && Array.isArray(relatedHistory.resultFiles) && relatedHistory.resultFiles.length > 0 && (
                                                 <div className="mt-4">
                                                     <p className="text-sm font-medium text-gray-700 mb-2">Kết quả:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {relatedHistory.resultFiles.map(file => (
-                                                            <a
-                                                                key={file._id}
-                                                                href={file.file_path}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="block"
-                                                            >
-                                                                <img
-                                                                    src={file.file_path}
-                                                                    alt="Kết quả xét nghiệm"
-                                                                    className="w-32 h-32 object-cover rounded border hover:shadow-lg transition-shadow duration-200"
-                                                                />
-                                                            </a>
+                                                            file && file.file_path ? (
+                                                                <a
+                                                                    key={file._id || file.file_path}
+                                                                    href={file.file_path}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block"
+                                                                >
+                                                                    <img
+                                                                        src={file.file_path}
+                                                                        alt="Kết quả xét nghiệm"
+                                                                        className="w-32 h-32 object-cover rounded border hover:shadow-lg transition-shadow duration-200"
+                                                                    />
+                                                                </a>
+                                                            ) : null
                                                         ))}
                                                     </div>
                                                 </div>
@@ -270,11 +283,11 @@ const MedicalProcessDetailPage = () => {
                                         </div>
                                     </div>
                                     <div className="mt-2 text-xs text-gray-500">
-                                        Cập nhật lần cuối: {formatDate(step.updatedAt)}
+                                        Cập nhật lần cuối: {step.updatedAt ? formatDate(step.updatedAt) : 'Không rõ'}
                                     </div>
                                 </div>
                             );
-                        })}
+                        }) : <div className="text-gray-500">Không có bước thực hiện nào.</div>}
                     </div>
                 </div>
 
