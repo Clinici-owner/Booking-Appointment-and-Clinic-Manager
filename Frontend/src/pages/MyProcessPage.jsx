@@ -107,7 +107,7 @@ const MyProcessPage = () => {
             >
               {step.serviceName}
               <Typography variant="caption" display="block">
-                Phòng {step.roomNumber} 
+                Phòng {step.roomNumber}
               </Typography>
               <Typography variant="caption" display="block" color="text.secondary">
                 {step.isCompleted ? "Đã hoàn thành" : "Chưa hoàn thành"}
