@@ -100,22 +100,19 @@ const DoctorDetailPage = () => {
           </div>
 
           {/* Certificates */}
-          {doctor.profile.certificates.length > 0 && (
+          {doctor.profile.certificateId.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">Chứng chỉ</h2>
-              <ul className="list-disc pl-6 text-gray-700 space-y-2">
-                {doctor.profile.certificates.map(cert => (
+              <ul className="list-disc pl-6 text-gray-700 space-y-2 list-none">
+                {doctor.profile.certificateId.map(cert => (
                   <li key={cert._id}>
                     {cert.type}{' '}
-                    {cert.url && (
-                      <a
-                        href={cert.url}
+                    {cert.file_path && (
+                      <img
+                        src={cert.file_path}
                         className="text-blue-600 underline hover:text-blue-800"
                         target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        (Xem)
-                      </a>
+                      />
                     )}
                   </li>
                 ))}
