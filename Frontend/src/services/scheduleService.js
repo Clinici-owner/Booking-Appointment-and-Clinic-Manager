@@ -13,7 +13,7 @@ export const getAllReceptionists = async () => {
 
 export const getAllNursingStaff = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/api/schedules/nursing');
+        const res = await axios.get('https://booking-appointment-be.up.railway.app/api/schedules/nursing');
         if (!Array.isArray(res.data)) {
             throw new Error('Dữ liệu nhân viên y tá không hợp lệ.');
         }
