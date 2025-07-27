@@ -128,18 +128,29 @@ export const getSchedulesForRoomAndDay = async (roomId, day) => {
         throw error;
     }
 };
-
-export const getSchedulesBySpecialtyAndDate = async (specialtyId, date) => {
+export const getSchedulesBySpecialtyAndDate = async (specialtyId, rawDate = new Date()) => {
   try {
+    // 🔧 Chuẩn hóa ngày về đầu ngày giờ VN (GMT+7)
+    const localDate = new Date(rawDate);
+    localDate.setHours(0, 0, 0, 0);
+
+    // 👉 Cộng bù +7h để tránh toISOString() làm lệch giờ
+    const adjusted = new Date(localDate.getTime() + 7 * 60 * 60 * 1000);
+    const adjustedISOString = adjusted.toISOString(); // Chuẩn UTC tương ứng 00:00 giờ VN
+
+    console.log("Service: Fetching schedules for specialty:", specialtyId, "on VN date:", adjustedISOString);
+
     const res = await axios.get(`${API_URL}/schedule-by-specialty/${specialtyId}`, {
-      params: { date }
+      params: { date: adjustedISOString }
     });
+
     return res.data;
   } catch (error) {
-    console.error('Lỗi khi lấy lịch trình theo chuyên khoa và ngày:', error);
+    console.error("Lỗi khi lấy lịch trình theo chuyên khoa và ngày:", error);
     throw error;
   }
 };
+
 
 export const getScheduleByDoctorAndShiftAndDate = async (doctorId, shift, date) => {
     try {
