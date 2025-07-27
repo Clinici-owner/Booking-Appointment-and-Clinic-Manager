@@ -1,65 +1,86 @@
-import { useState, useEffect, useRef } from "react"
-import { UserService } from "../services/userService"
+import { useState, useEffect, useRef } from "react";
+import { UserService } from "../services/userService";
 
 function UserProfilePage() {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const hasInitialized = useRef(false)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const hasInitialized = useRef(false);
+
+  // Hàm xác định label và giá trị mã định danh theo role
+  const getRoleIdentifier = (user) => {
+    if (!user) return { label: "Mã", value: "" };
+    
+    switch(user.role) {
+      case 'doctor':
+        return { label: "Mã Bác Sĩ", value: user.cidNumber || "Chưa cập nhật" };
+      case 'technician':
+        return { label: "Mã Kỹ Thuật Viên", value: user.cidNumber || "Chưa cập nhật" };
+      case 'receptionist':
+        return { label: "Mã Tiếp Tân", value: user.cidNumber || "Chưa cập nhật" };
+      case 'nursing':
+        return { label: "Mã Y Tá", value: user.cidNumber || "Chưa cập nhật" };
+      case 'admin':
+        return { label: "Mã Quản Trị", value: user.cidNumber || "Chưa cập nhật" };
+      default:
+        return { label: "Mã Bệnh Nhân", value: user.cidNumber || "Chưa cập nhật" };
+    }
+  };
 
   const fetchUserProfile = async () => {
-
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
-      const storedUser = sessionStorage.getItem("user")
-      let currentUser = null
+      const storedUser = sessionStorage.getItem("user");
+      let currentUser = null;
 
       if (storedUser) {
         try {
-          currentUser = JSON.parse(storedUser)
+          currentUser = JSON.parse(storedUser);
         } catch (parseError) {
-          console.error("Dữ liệu session không hợp lệ:", storedUser, parseError)
-          setError("Dữ liệu session không hợp lệ")
-          setLoading(false)
-          return
+          console.error("Dữ liệu session không hợp lệ:", storedUser, parseError);
+          setError("Dữ liệu session không hợp lệ");
+          setLoading(false);
+          return;
         }
       }
 
       if (!currentUser || !currentUser._id) {
-        setError("Không tìm thấy thông tin người dùng trong session hoặc thiếu id")
-        setLoading(false)
-        return
+        setError("Không tìm thấy thông tin người dùng trong session hoặc thiếu id");
+        setLoading(false);
+        return;
       }
 
-      const result = await UserService.getUserProfileByUserID(currentUser)
+      const result = await UserService.getUserProfileByUserID(currentUser);
 
       if (result.success) {
-        setUser(result.data.user)
+        setUser(result.data.user);
       } else {
-        setError(result.message || "Không thể lấy thông tin người dùng")
+        setError(result.message || "Không thể lấy thông tin người dùng");
       }
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleEditProfile = () => {
-    window.location.href = "/user-profile/update"
-  }
+    window.location.href = "/user-profile/update";
+  };
+
   const handleChangePassword = () => {
-    window.location.href = "/user-profile/update-password"
-  }
+    window.location.href = "/user-profile/update-password";
+  };
 
   useEffect(() => {
     if (!hasInitialized.current) {
-      hasInitialized.current = true
-      fetchUserProfile()
+      hasInitialized.current = true;
+      fetchUserProfile();
     }
-  }, [])
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -68,7 +89,7 @@ function UserProfilePage() {
           <p className="text-gray-600">Đang tải thông tin...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -95,7 +116,7 @@ function UserProfilePage() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -105,8 +126,10 @@ function UserProfilePage() {
           <p className="text-gray-600">Không tìm thấy thông tin người dùng</p>
         </div>
       </div>
-    )
+    );
   }
+
+  const roleIdentifier = getRoleIdentifier(user);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -146,11 +169,13 @@ function UserProfilePage() {
                   </span>
                 </div>
 
-                {/* CCCD Field in Header */}
+                {/* Dynamic Identifier Field based on Role */}
                 <div className="flex items-center space-x-3">
-                  <label className="text-sm font-medium text-white whitespace-nowrap">Mã Bệnh Nhân:</label>
+                  <label className="text-sm font-medium text-white whitespace-nowrap">
+                    {roleIdentifier.label}:
+                  </label>
                   <div className="px-4 py-2 bg-white bg-opacity-90 text-gray-900 rounded-lg min-w-0 flex-1">
-                    {user.cidNumber || "Chưa cập nhật"}
+                    {roleIdentifier.value}
                   </div>
                 </div>
               </div>
@@ -300,7 +325,7 @@ function UserProfilePage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
               />
             </svg>
             <span>Thay Đổi Mật Khẩu</span>
@@ -308,7 +333,7 @@ function UserProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default UserProfilePage
+export default UserProfilePage;
