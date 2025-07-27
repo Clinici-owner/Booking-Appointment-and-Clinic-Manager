@@ -268,9 +268,9 @@ class ScheduleController {
           .json({ message: "Bạn không có quyền truy cập." });
       }
 
-      const now = new Date();
-      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+      const moment = require('moment-timezone');
+    const startOfDay = moment().tz('Asia/Ho_Chi_Minh').startOf('day').toDate();
+    const endOfDay = moment().tz('Asia/Ho_Chi_Minh').endOf('day').toDate();
 
       const todaySchedule = await Schedule.findOne({
         userId: userId,
