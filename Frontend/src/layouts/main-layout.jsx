@@ -140,7 +140,7 @@ function MainLayout({ children }) {
   return (
     <div>
       <Header />
-      <div className="pt-26">{children}</div>
+      <div className="">{children}</div>
       <Footer />
       <ScrollToTopButton />
       <ChatToggleButton onClick={handleToggleChat} />
