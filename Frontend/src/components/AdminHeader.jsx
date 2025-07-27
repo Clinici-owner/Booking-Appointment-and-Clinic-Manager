@@ -8,6 +8,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import AssignmentIndOutlinedIcon from "@mui/icons-material/AssignmentIndOutlined";
 
 import LogoMini from "../assets/images/LogoMini.png"; // Đảm bảo đường dẫn đúng đến logo
 
@@ -64,6 +65,19 @@ function AdminHeader() {
                             {userData.fullName || userData.email}
                           </span>
                         </div>
+                      </a>
+                    </MenuItem>
+                  </div>
+                  <div className="py-1">
+                    <MenuItem>
+                      <a
+                        href="/user-profile"
+                        className="group block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                      >
+                        <div className="inline-block mr-2 transition-transform duration-300 group-hover:animate-slide-profile">
+                          <AssignmentIndOutlinedIcon />
+                        </div>
+                        Hồ sơ cá nhân
                       </a>
                     </MenuItem>
                   </div>
