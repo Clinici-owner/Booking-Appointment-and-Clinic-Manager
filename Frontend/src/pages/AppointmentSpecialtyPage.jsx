@@ -194,9 +194,13 @@ function AppointmentSpecialtyPage() {
     const fetchSchedules = async () => {
       try {
         const today = new Date();
+        console.log("Today:", today);
+        
         today.setHours(0, 0, 0, 0); // chuẩn hóa giờ về đầu ngày
         const response = await getSchedulesBySpecialtyAndDate(id, today.toISOString());
 
+        console.log("Schedules response:", response);
+        
         setSchedules(response);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách lịch:", err);
