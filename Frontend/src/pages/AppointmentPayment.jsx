@@ -38,8 +38,9 @@ function AppointmentPayment() {
   const [schedule, setSchedule] = useState({});
   const [qrUrl, setQrUrl] = useState("");
   const [orderCode, setOrderCode] = useState("");
+  const user1 = JSON.parse(sessionStorage.getItem("user")) || {};
   const [appointmentData, setAppointmentData] = useState({
-    patientId: JSON.parse(sessionStorage.getItem("user"))?._id || "",
+    patientId: user?._id || "",
     doctorId: doctorId || "",
     time: "",
     specialties: specialtyId ? [specialtyId] : [],
@@ -235,7 +236,11 @@ function AppointmentPayment() {
               if (countdown === 0) {
                 clearInterval(countdownInterval);
                 toast.dismiss(id);
-                window.location.href = "/";
+                if (user1?.role === "patient") {
+                  window.location.href = "/appointment-patient";
+                } else {
+                  window.location.href = "/receptionist/appointment-receptionist";
+                }
               }
             }, 1000);
           } catch (error) {
