@@ -193,13 +193,10 @@ function AppointmentSpecialtyPage() {
     };
     const fetchSchedules = async () => {
       try {
-      const date = new Date();
-      console.log("Current date:", date);
-      
-      const response = await getSchedulesBySpecialtyAndDate(
-          id,
-          date
-        );
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // chuẩn hóa giờ về đầu ngày
+        const response = await getSchedulesBySpecialtyAndDate(id, today.toISOString());
+
         setSchedules(response);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách lịch:", err);

@@ -315,9 +315,8 @@ class ScheduleController {
     try {
       const { specialtyId } = req.params;
       const { date } = req.query;
-      
       const schedules = await Schedule.find({
-        date: { $gt: date },
+        date: { $gt: new Date(date) }
       })
         .populate("userId")
         .populate("room");
