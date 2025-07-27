@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_URL =
-  "http://localhost:3000/api/doctorProfile";
+  "https://booking-appointment-be.up.railway.app/api/doctorProfile";
 
 export const DoctorService = {
   getDoctorProfileById: async (doctorId) => {
