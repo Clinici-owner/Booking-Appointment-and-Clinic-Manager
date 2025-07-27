@@ -700,10 +700,10 @@ function AppointmentBookingPage() {
                             }`}
                           >
                             {schedule.shift === "MORNING"
-                              ? "Buổi sáng (7:00 - 10:30)"
+                              ? "Buổi sáng (7:15 - 10:45)"
                               : schedule.shift === "NOON"
-                              ? "Buổi trưa (11:30 - 13:00)"
-                              : "Buổi chiều (13:30 - 16:30)"}
+                              ? "Buổi trưa (11:45 - 13:15)"
+                              : "Buổi chiều (13:45 - 16:45)"}
                           </span>
                         </div>
                         <button
@@ -719,15 +719,15 @@ function AppointmentBookingPage() {
                           <div className="grid grid-cols-4 gap-3 mt-4">
                             {generateTimeRanges(
                               schedule.shift === "MORNING"
-                                ? "07:00"
+                                ? "07:15"
                                 : schedule.shift === "NOON"
-                                ? "11:30"
-                                : "13:30",
+                                ? "11:45"
+                                : "13:45",
                               schedule.shift === "MORNING"
-                                ? "10:30"
+                                ? "10:45"
                                 : schedule.shift === "NOON"
-                                ? "13:00"
-                                : "16:30",
+                                ? "13:15"
+                                : "16:45",
                               30,
                               schedule.userId._id,
                               schedule.date,
